@@ -65,7 +65,7 @@ internal fun EmptyState(modifier: Modifier, isUsingSharedKey: Boolean, onNavigat
     val isInspectionMode = LocalInspectionMode.current
 
     Column(
-        modifier = modifier.padding(horizontal = 16.dp),
+        modifier = modifier,
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -112,6 +112,7 @@ internal fun EmptyState(modifier: Modifier, isUsingSharedKey: Boolean, onNavigat
             }
             Text(
                 annotatedString,
+                modifier = Modifier.padding(horizontal = 16.dp),
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onBackground,
@@ -119,7 +120,7 @@ internal fun EmptyState(modifier: Modifier, isUsingSharedKey: Boolean, onNavigat
         }
         Spacer(Modifier.height(24.dp))
         LazyRow(
-            contentPadding = PaddingValues(horizontal = 4.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             items(topics) { topic ->
