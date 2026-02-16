@@ -27,6 +27,7 @@ import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.get
+import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
@@ -132,10 +133,12 @@ class Requests(private val appSettings: AppSettings) {
     suspend fun freeChat(
         messages: List<OpenAICompatibleChatRequestDto.Message>,
         tools: List<Tool>,
+        customHeaders: Map<String, String> = emptyMap(),
     ): Result<OpenAICompatibleChatResponseDto> = try {
         val response: HttpResponse =
             defaultClient.post(Service.Free.chatUrl) {
                 contentType(ContentType.Application.Json)
+                customHeaders.forEach { (k, v) -> header(k, v) }
                 setBody(
                     OpenAICompatibleChatRequestDto(
                         messages = messages,

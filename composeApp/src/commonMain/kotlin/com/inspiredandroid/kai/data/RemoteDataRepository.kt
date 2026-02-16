@@ -371,8 +371,9 @@ class RemoteDataRepository(
         service: Service,
         messages: List<com.inspiredandroid.kai.network.dtos.openaicompatible.OpenAICompatibleChatRequestDto.Message>,
         tools: List<Tool>,
+        customHeaders: Map<String, String> = emptyMap(),
     ): Result<OpenAICompatibleChatResponseDto> = when (service) {
-        Service.Free -> requests.freeChat(messages = messages, tools = tools)
+        Service.Free -> requests.freeChat(messages = messages, tools = tools, customHeaders = customHeaders)
 
         Service.Groq -> requests.groqChat(messages = messages, tools = tools)
 
@@ -717,7 +718,7 @@ class RemoteDataRepository(
                     content = prompt,
                 ),
             )
-            val response = sendOpenAICompatibleRequest(service, messages, emptyList()).getOrThrow()
+            val response = sendOpenAICompatibleRequest(service, messages, emptyList(), customHeaders = mapOf("X-Request-Source" to "explore")).getOrThrow()
             response.choices.firstOrNull()?.message?.content ?: ""
         }
     }
