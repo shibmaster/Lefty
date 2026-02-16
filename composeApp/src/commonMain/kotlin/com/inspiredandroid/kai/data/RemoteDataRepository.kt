@@ -282,14 +282,14 @@ class RemoteDataRepository(
         val baseUrl = appSettings.getBaseUrl(Service.OpenAICompatible)
         val response = requests.getOpenAICompatibleModels(baseUrl).getOrThrow()
         val selectedModelId = appSettings.getSelectedModelId(Service.OpenAICompatible)
-        val models = response.models
-            .sortedBy { it.name }
+        val models = response.data
+            .sortedBy { it.id }
             .map {
                 SettingsModel(
-                    id = it.name,
-                    subtitle = it.details?.family ?: "",
-                    description = it.details?.parameter_size,
-                    isSelected = it.name == selectedModelId,
+                    id = it.id,
+                    subtitle = it.owned_by ?: "",
+                    description = null,
+                    isSelected = it.id == selectedModelId,
                 )
             }
         modelsByService[Service.OpenAICompatible]?.update { models }

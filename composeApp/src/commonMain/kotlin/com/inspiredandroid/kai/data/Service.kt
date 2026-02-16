@@ -92,7 +92,7 @@ sealed class Service(
         defaultModel = null,
         settingsKeyPrefix = "openai-compatible",
         chatUrl = "/v1/chat/completions",
-        modelsUrl = "/api/tags",
+        modelsUrl = "/v1/models",
     )
 
     companion object {

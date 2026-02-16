@@ -11,7 +11,6 @@ import com.inspiredandroid.kai.network.dtos.gemini.GeminiChatResponseDto
 import com.inspiredandroid.kai.network.dtos.gemini.GeminiModelsResponseDto
 import com.inspiredandroid.kai.network.dtos.gemini.GeminiTool
 import com.inspiredandroid.kai.network.dtos.gemini.PropertySchema
-import com.inspiredandroid.kai.network.dtos.openai.OpenAICompatibleModelsResponseDto
 import com.inspiredandroid.kai.network.dtos.openaicompatible.OpenAICompatibleChatRequestDto
 import com.inspiredandroid.kai.network.dtos.openaicompatible.OpenAICompatibleChatResponseDto
 import com.inspiredandroid.kai.network.dtos.openaicompatible.OpenAICompatibleModelResponseDto
@@ -470,7 +469,7 @@ class Requests(private val appSettings: AppSettings) {
         Result.failure(OpenAICompatibleConnectionException())
     }
 
-    suspend fun getOpenAICompatibleModels(baseUrl: String): Result<OpenAICompatibleModelsResponseDto> = try {
+    suspend fun getOpenAICompatibleModels(baseUrl: String): Result<OpenAICompatibleModelResponseDto> = try {
         val apiKey = appSettings.getApiKey(Service.OpenAICompatible)
         val response: HttpResponse =
             defaultClient.get("$baseUrl${Service.OpenAICompatible.modelsUrl}") {
