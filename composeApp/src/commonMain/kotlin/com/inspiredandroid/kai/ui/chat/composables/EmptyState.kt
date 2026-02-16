@@ -51,13 +51,15 @@ private data class ExploreTopic(
     val title: String,
     val emoji: String,
     val color: Color,
+    val promptTitle: String? = null,
 )
 
 private val topics = listOf(
     ExploreTopic("People", "\uD83D\uDC64", Color(0xFFE57373)),
     ExploreTopic("Sport", "\u26BD", Color(0xFF81C784)),
-    ExploreTopic("Countries", "\uD83C\uDF0D", Color(0xFF64B5F6)),
     ExploreTopic("Technology", "\uD83D\uDCBB", Color(0xFFFFB74D)),
+    ExploreTopic("Countries", "\uD83C\uDF0D", Color(0xFF64B5F6)),
+    ExploreTopic("Space",  "\uD83D\uDE80", Color(0xFFBA68C8), "Space Exploration")
 )
 
 @Composable
@@ -126,7 +128,9 @@ internal fun EmptyState(modifier: Modifier, isUsingSharedKey: Boolean, onNavigat
             items(topics) { topic ->
                 TopicCard(
                     topic = topic,
-                    onClick = { onNavigateToExplore(topic.title) },
+                    onClick = {
+                        onNavigateToExplore(topic.promptTitle ?: topic.title)
+                    }
                 )
             }
         }
