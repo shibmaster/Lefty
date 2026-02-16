@@ -29,6 +29,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
@@ -62,6 +63,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
@@ -419,8 +421,11 @@ private fun ServiceSettings(
     connectionStatus: ConnectionStatus,
     testTag: String? = null,
 ) {
+    var apiKeyFocused by remember { mutableStateOf(false) }
     OutlinedTextField(
-        modifier = Modifier.fillMaxWidth().let { if (testTag != null) it.testTag(testTag) else it },
+        modifier = Modifier.fillMaxWidth()
+            .let { if (testTag != null) it.testTag(testTag) else it }
+            .onFocusChanged { apiKeyFocused = it.isFocused },
         value = apiKey,
         onValueChange = onChangeApiKey,
         label = {
@@ -430,6 +435,22 @@ private fun ServiceSettings(
             )
         },
         colors = outlineTextFieldColors(),
+        trailingIcon = if (apiKeyFocused && apiKey.isNotEmpty()) {
+            {
+                IconButton(
+                    onClick = { onChangeApiKey("") },
+                    modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Clear,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        } else {
+            null
+        },
     )
 
     Spacer(Modifier.height(8.dp))
@@ -476,8 +497,9 @@ private fun OpenAICompatibleSettings(
     onSelectModel: (String) -> Unit,
     connectionStatus: ConnectionStatus,
 ) {
+    var baseUrlFocused by remember { mutableStateOf(false) }
     OutlinedTextField(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().onFocusChanged { baseUrlFocused = it.isFocused },
         value = baseUrl,
         onValueChange = onChangeBaseUrl,
         label = {
@@ -488,12 +510,29 @@ private fun OpenAICompatibleSettings(
         },
         colors = outlineTextFieldColors(),
         singleLine = true,
+        trailingIcon = if (baseUrlFocused && baseUrl.isNotEmpty()) {
+            {
+                IconButton(
+                    onClick = { onChangeBaseUrl("") },
+                    modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Clear,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        } else {
+            null
+        },
     )
 
     Spacer(Modifier.height(8.dp))
 
+    var apiKeyFocused by remember { mutableStateOf(false) }
     OutlinedTextField(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().onFocusChanged { apiKeyFocused = it.isFocused },
         value = apiKey,
         onValueChange = onChangeApiKey,
         label = {
@@ -504,6 +543,22 @@ private fun OpenAICompatibleSettings(
         },
         colors = outlineTextFieldColors(),
         singleLine = true,
+        trailingIcon = if (apiKeyFocused && apiKey.isNotEmpty()) {
+            {
+                IconButton(
+                    onClick = { onChangeApiKey("") },
+                    modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Clear,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        } else {
+            null
+        },
     )
 
     Spacer(Modifier.height(8.dp))
