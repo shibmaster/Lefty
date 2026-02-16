@@ -58,6 +58,23 @@ fun ExploreScreen(
         viewModel.loadTopic(topic)
     }
 
+    ExploreScreenContent(
+        uiState = uiState,
+        topic = topic,
+        onNavigateBack = onNavigateBack,
+        onNavigateToDetail = onNavigateToDetail,
+        onRetry = { viewModel.retry() },
+    )
+}
+
+@Composable
+fun ExploreScreenContent(
+    uiState: ExploreUiState,
+    topic: String,
+    onNavigateBack: () -> Unit = {},
+    onNavigateToDetail: (String) -> Unit = {},
+    onRetry: () -> Unit = {},
+) {
     Column(
         Modifier
             .fillMaxSize()
@@ -101,7 +118,7 @@ fun ExploreScreen(
                             color = MaterialTheme.colorScheme.error,
                             style = MaterialTheme.typography.bodyMedium,
                         )
-                        TextButton(onClick = { viewModel.retry() }) {
+                        TextButton(onClick = onRetry) {
                             Text(stringResource(Res.string.explore_retry))
                         }
                     }

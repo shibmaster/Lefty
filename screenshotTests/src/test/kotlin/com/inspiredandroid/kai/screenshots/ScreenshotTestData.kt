@@ -5,6 +5,8 @@ import com.inspiredandroid.kai.getPlatformToolDefinitions
 import com.inspiredandroid.kai.ui.chat.ChatActions
 import com.inspiredandroid.kai.ui.chat.ChatUiState
 import com.inspiredandroid.kai.ui.chat.History
+import com.inspiredandroid.kai.ui.explore.ExploreItem
+import com.inspiredandroid.kai.ui.explore.ExploreUiState
 import com.inspiredandroid.kai.ui.settings.ConnectionStatus
 import com.inspiredandroid.kai.ui.settings.SettingsTab
 import com.inspiredandroid.kai.ui.settings.SettingsUiState
@@ -127,5 +129,42 @@ JavaScript
     val settingsTools = SettingsUiState(
         currentTab = SettingsTab.Tools,
         tools = getPlatformToolDefinitions(),
+    )
+
+    val exploreSpace = ExploreUiState(
+        items = listOf(
+            ExploreItem(
+                title = "Mars",
+                description = "The Red Planet, fourth from the Sun and a prime target for human exploration.",
+            ),
+            ExploreItem(
+                title = "Black Holes",
+                description = "Regions of spacetime where gravity is so strong nothing can escape.",
+            ),
+            ExploreItem(
+                title = "Apollo 11",
+                description = "The first crewed mission to land on the Moon in 1969, carrying three astronauts.",
+            ),
+            ExploreItem(
+                title = "Saturn's Rings",
+                description = "Spectacular ice and rock rings encircling the gas giant Saturn.",
+            ),
+            ExploreItem(
+                title = "Voyager Program",
+                description = "Twin spacecraft launched in 1977, now in interstellar space.",
+            ),
+            ExploreItem(
+                title = "Milky Way",
+                description = "Our home galaxy containing over 100 billion stars and countless planets.",
+            ),
+            ExploreItem(
+                title = "Solar Eclipses",
+                description = "When the Moon passes between the Sun and Earth, casting a shadow.",
+            ),
+            ExploreItem(
+                title = "Neutron Stars",
+                description = "Ultra-dense remnants of massive stars packed into a tiny sphere.",
+            ),
+        ),
     )
 }

@@ -12,6 +12,7 @@ import com.inspiredandroid.kai.ui.DarkColorScheme
 import com.inspiredandroid.kai.ui.LightColorScheme
 import com.inspiredandroid.kai.ui.Theme
 import com.inspiredandroid.kai.ui.chat.ChatScreenContent
+import com.inspiredandroid.kai.ui.explore.ExploreScreenContent
 import com.inspiredandroid.kai.ui.settings.SettingsScreenContent
 import nl.marc_apps.tts.TextToSpeechInstance
 import nl.marc_apps.tts.experimental.ExperimentalVoiceApi
@@ -98,6 +99,16 @@ class ScreenshotTest {
     fun settingsTools_light() {
         paparazzi.snap(LightColorScheme) {
             SettingsScreenContent(uiState = ScreenshotTestData.settingsTools)
+        }
+    }
+
+    @Test
+    fun exploreSpace_dark() {
+        paparazzi.snap(DarkColorScheme) {
+            ExploreScreenContent(
+                uiState = ScreenshotTestData.exploreSpace,
+                topic = "Space Exploration",
+            )
         }
     }
 }

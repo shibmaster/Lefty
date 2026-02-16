@@ -16,6 +16,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Computer
+import androidx.compose.material.icons.filled.Group
+import androidx.compose.material.icons.filled.Public
+import androidx.compose.material.icons.filled.RocketLaunch
+import androidx.compose.material.icons.filled.SportsSoccer
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalInspectionMode
@@ -36,7 +44,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import io.github.alexzhirkevich.compottie.Compottie
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
@@ -49,17 +56,17 @@ import org.jetbrains.compose.resources.vectorResource
 
 private data class ExploreTopic(
     val title: String,
-    val emoji: String,
+    val icon: ImageVector,
     val color: Color,
     val promptTitle: String? = null,
 )
 
 private val topics = listOf(
-    ExploreTopic("People", "\uD83D\uDC64", Color(0xFFE57373)),
-    ExploreTopic("Sport", "\u26BD", Color(0xFF81C784)),
-    ExploreTopic("Technology", "\uD83D\uDCBB", Color(0xFFFFB74D)),
-    ExploreTopic("Countries", "\uD83C\uDF0D", Color(0xFF64B5F6)),
-    ExploreTopic("Space", "\uD83D\uDE80", Color(0xFFBA68C8), "Space Exploration"),
+    ExploreTopic("People", Icons.Default.Group, Color(0xFFE57373)),
+    ExploreTopic("Sport", Icons.Default.SportsSoccer, Color(0xFF81C784)),
+    ExploreTopic("Technology", Icons.Default.Computer, Color(0xFFFFB74D)),
+    ExploreTopic("Countries", Icons.Default.Public, Color(0xFF64B5F6)),
+    ExploreTopic("Space", Icons.Default.RocketLaunch, Color(0xFFBA68C8), "Space Exploration"),
 )
 
 @Composable
@@ -156,9 +163,11 @@ private fun TopicCard(topic: ExploreTopic, onClick: () -> Unit) {
                 .background(topic.color.copy(alpha = 0.3f)),
             contentAlignment = Alignment.Center,
         ) {
-            Text(
-                text = topic.emoji,
-                fontSize = 24.sp,
+            Icon(
+                imageVector = topic.icon,
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
+                tint = topic.color,
             )
         }
         Spacer(Modifier.height(8.dp))
