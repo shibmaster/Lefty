@@ -104,15 +104,29 @@ internal fun extractJson(response: String): String {
 private fun sanitizeJsonQuotes(json: String): String = buildString(json.length) {
     var i = 0
     while (i < json.length) {
-        if (json[i] != '"') { append(json[i++]); continue }
+        if (json[i] != '"') {
+            append(json[i++])
+            continue
+        }
         append(json[i++]) // opening "
         while (i < json.length) {
             val c = json[i]
-            if (c == '\\') { append(json[i++]); if (i < json.length) append(json[i++]); continue }
-            if (c != '"') { append(json[i++]); continue }
+            if (c == '\\') {
+                append(json[i++])
+                if (i < json.length) append(json[i++])
+                continue
+            }
+            if (c != '"') {
+                append(json[i++])
+                continue
+            }
             val next = json.substring(i + 1).trimStart().firstOrNull()
-            if (next == null || next in ",]}:") { append(json[i++]); break }
-            append("\\\""); i++
+            if (next == null || next in ",]}:") {
+                append(json[i++])
+                break
+            }
+            append("\\\"")
+            i++
         }
     }
 }
