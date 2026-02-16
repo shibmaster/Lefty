@@ -529,8 +529,8 @@ class RemoteDataRepository(
 
     private fun formatJsonElement(element: JsonElement): String = when {
         element is JsonNull -> "null"
-        element is kotlinx.serialization.json.JsonPrimitive && element.isString -> "\"${element.content}\""
-        element is kotlinx.serialization.json.JsonPrimitive -> element.content
+        element is JsonPrimitive && element.isString -> "\"${element.content}\""
+        element is JsonPrimitive -> element.content
         else -> element.toString()
     }
 
@@ -593,12 +593,12 @@ class RemoteDataRepository(
     }
 
     private fun JsonObject.toMap(): Map<String, Any> = entries.associate { (key, value) ->
-        key to when {
-            value is JsonPrimitive && value.isString -> value.content
-            value is JsonPrimitive && value.booleanOrNull != null -> value.boolean
-            value is JsonPrimitive && value.intOrNull != null -> value.int
-            value is JsonPrimitive && value.doubleOrNull != null -> value.double
-            value is JsonObject -> value.toMap()
+        key to when (value) {
+            is JsonPrimitive if value.isString -> value.content
+            is JsonPrimitive if value.booleanOrNull != null -> value.boolean
+            is JsonPrimitive if value.intOrNull != null -> value.int
+            is JsonPrimitive if value.doubleOrNull != null -> value.double
+            is JsonObject -> value.toMap()
             else -> value.toString()
         }
     }

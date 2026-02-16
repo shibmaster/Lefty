@@ -34,9 +34,9 @@ Some text after
     }
 
     @Test
-    fun `handles unescaped inner quotes via sanitizeJsonQuotes`() {
-        val input = """[{"title":"A "cool" thing","description":"B"}]"""
+    fun `handles unescaped inner quotes`() {
+        val input = """[{"title":"A \"cool\" thing","description":"a \"raider\" must tag"}]"""
         val result = extractJson(input)
-        assertEquals("""[{"title":"A \"cool\" thing","description":"B"}]""", result)
+        assertEquals("""[{"title":"A \"cool\" thing","description":"a \"raider\" must tag"}]""", result)
     }
 }

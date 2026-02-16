@@ -86,75 +86,33 @@ Return ONLY the JSON array, no markdown, no explanation."""
 
 /**
  * Extracts JSON content from an LLM response that may be wrapped in markdown code fences.
- * Also sanitizes unescaped quotes within JSON string values that LLMs sometimes produce.
  */
 internal fun extractJson(response: String): String {
-    // Try to extract content between code fences first
     val fenceRegex = Regex("""```(?:json)?\s*\n?([\s\S]*?)\n?\s*```""")
-    val match = fenceRegex.find(response)
-    val raw = if (match != null) {
-        match.groupValues[1].trim()
-    } else {
-        // Fallback: find the first [ or { and match to the last ] or }
-        val start = response.indexOfFirst { it == '[' || it == '{' }
-        val end = response.indexOfLast { it == ']' || it == '}' }
-        if (start != -1 && end != -1 && end > start) {
-            response.substring(start, end + 1)
-        } else {
-            response.trim()
-        }
-    }
-    return sanitizeJsonQuotes(raw)
+    fenceRegex.find(response)?.let { return sanitizeJsonQuotes(it.groupValues[1].trim()) }
+
+    val start = response.indexOfFirst { it == '[' || it == '{' }
+    val end = response.indexOfLast { it == ']' || it == '}' }
+    if (start != -1 && end > start) return sanitizeJsonQuotes(response.substring(start, end + 1))
+
+    return response.trim()
 }
 
 /**
- * Fixes unescaped double quotes inside JSON string values.
- * LLMs sometimes produce: "description": "a "raider" must tag"
- * This walks the string character-by-character to detect and escape inner quotes.
+ * Fixes unescaped double quotes inside JSON string values that LLMs sometimes produce.
  */
-private fun sanitizeJsonQuotes(json: String): String {
-    val sb = StringBuilder(json.length)
+private fun sanitizeJsonQuotes(json: String): String = buildString(json.length) {
     var i = 0
     while (i < json.length) {
-        val c = json[i]
-        if (c == '"') {
-            // Found opening quote of a JSON string value – scan for the matching close
-            sb.append('"')
-            i++
-            // Collect string contents, fixing unescaped quotes
-            while (i < json.length) {
-                val sc = json[i]
-                if (sc == '\\') {
-                    // Already escaped sequence – pass through both chars
-                    sb.append(sc)
-                    i++
-                    if (i < json.length) {
-                        sb.append(json[i])
-                        i++
-                    }
-                } else if (sc == '"') {
-                    // Is this the real closing quote or an unescaped inner quote?
-                    // Look ahead: a real closing quote is followed by , ] } : or whitespace then one of those
-                    val after = json.substring(i + 1).trimStart()
-                    if (after.isEmpty() || after[0] in ",]}:") {
-                        // Real closing quote
-                        sb.append('"')
-                        i++
-                        break
-                    } else {
-                        // Unescaped inner quote – escape it
-                        sb.append("\\\"")
-                        i++
-                    }
-                } else {
-                    sb.append(sc)
-                    i++
-                }
-            }
-        } else {
-            sb.append(c)
-            i++
+        if (json[i] != '"') { append(json[i++]); continue }
+        append(json[i++]) // opening "
+        while (i < json.length) {
+            val c = json[i]
+            if (c == '\\') { append(json[i++]); if (i < json.length) append(json[i++]); continue }
+            if (c != '"') { append(json[i++]); continue }
+            val next = json.substring(i + 1).trimStart().firstOrNull()
+            if (next == null || next in ",]}:") { append(json[i++]); break }
+            append("\\\""); i++
         }
     }
-    return sb.toString()
 }
