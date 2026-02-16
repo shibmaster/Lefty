@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -19,6 +20,7 @@ import com.mikepenz.markdown.compose.components.markdownComponents
 import com.mikepenz.markdown.compose.elements.MarkdownHighlightedCodeBlock
 import com.mikepenz.markdown.compose.elements.MarkdownHighlightedCodeFence
 import com.mikepenz.markdown.m3.Markdown
+import com.mikepenz.markdown.m3.markdownTypography
 import com.mikepenz.markdown.model.rememberMarkdownState
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.bot_message_copy_content_description
@@ -49,6 +51,7 @@ internal fun BotMessage(
             codeBlock = highlightedCodeBlock,
             codeFence = highlightedCodeFence,
         ),
+        typography = smallerMarkdownTypography(),
         modifier = Modifier.fillMaxWidth()
             .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 8.dp),
     )
@@ -103,6 +106,16 @@ internal fun BotMessage(
         Spacer(Modifier.weight(1f))
     }
 }
+
+@Composable
+fun smallerMarkdownTypography() = markdownTypography(
+    h1 = MaterialTheme.typography.headlineSmall,
+    h2 = MaterialTheme.typography.titleLarge,
+    h3 = MaterialTheme.typography.titleMedium,
+    h4 = MaterialTheme.typography.titleSmall,
+    h5 = MaterialTheme.typography.bodyLarge,
+    h6 = MaterialTheme.typography.bodyMedium,
+)
 
 val highlightedCodeFence: MarkdownComponent = {
     MarkdownHighlightedCodeFence(content = it.content, node = it.node, style = it.typography.code, showHeader = true)

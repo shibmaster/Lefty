@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import com.inspiredandroid.kai.BackIcon
 import com.inspiredandroid.kai.ui.chat.composables.highlightedCodeBlock
 import com.inspiredandroid.kai.ui.chat.composables.highlightedCodeFence
+import com.inspiredandroid.kai.ui.chat.composables.smallerMarkdownTypography
 import com.mikepenz.markdown.coil3.Coil3ImageTransformerImpl
 import com.mikepenz.markdown.compose.components.markdownComponents
 import com.mikepenz.markdown.m3.Markdown
@@ -124,6 +125,7 @@ fun ExploreDetailScreen(
                             codeBlock = highlightedCodeBlock,
                             codeFence = highlightedCodeFence,
                         ),
+                        typography = smallerMarkdownTypography(),
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp),
