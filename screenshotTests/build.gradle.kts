@@ -108,9 +108,10 @@ tasks.register("generateStoreScreenshots") {
         val fastlaneDir = rootProject.file("fastlane/metadata/android")
 
         val regex = Regex("""StoreScreenshotTest_\w+\[([^\]]+)\]_store_[a-zA-Z-]+_(\d+(?:_\w+)?)\.png""")
-        val snapshots = snapshotsDir.listFiles()?.filter {
-            it.name.contains("StoreScreenshotTest_") && it.name.contains("_store_") && it.extension == "png"
-        } ?: emptyList()
+        val snapshots =
+            snapshotsDir.listFiles()?.filter {
+                it.name.contains("StoreScreenshotTest_") && it.name.contains("_store_") && it.extension == "png"
+            } ?: emptyList()
 
         if (snapshots.isEmpty()) {
             println("No store screenshots found.")
