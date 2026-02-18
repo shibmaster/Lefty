@@ -74,4 +74,18 @@
     <string name="settings_tools_none_available">Hakuna zana zinazopatikana kwenye jukwaa hili.</string>
     <string name="settings_tab_services">Huduma</string>
     <string name="settings_tab_tools">Zana</string>
+    <string name="explore_retry">Jaribu tena</string>
+    <string name="explore_related_topics">Mada zinazohusiana</string>
+    <string name="history_just_now">Sasa hivi</string>
+    <string name="history_minutes_ago">dakika %1$d zilizopita</string>
+    <string name="history_hours_ago">saa %1$d zilizopita</string>
+    <string name="history_days_ago">siku %1$d zilizopita</string>
+    <string name="history_weeks_ago">wiki %1$d zilizopita</string>
+    <string name="tool_executing_content_description">Zana inatekelezwa</string>
+    <string name="tool_running">Inatekeleza %1$s…</string>
+    <string name="tool_completed_content_description">Zana imekamilika</string>
+    <string name="tool_completed">%1$s imekamilika</string>
+    <string name="privacy_agree_prefix">Kwa kutumia huduma, unakubali </string>
+    <string name="privacy_policy">Sera ya Faragha</string>
+    <string name="new_conversation">Mazungumzo mapya</string>
 </resources>

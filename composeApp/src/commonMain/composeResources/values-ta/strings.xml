@@ -74,4 +74,18 @@
     <string name="settings_tools_none_available">இந்த தளத்தில் கருவிகள் எதுவும் கிடைக்கவில்லை.</string>
     <string name="settings_tab_services">சேவைகள்</string>
     <string name="settings_tab_tools">கருவிகள்</string>
+    <string name="explore_retry">மீண்டும் முயற்சிக்கவும்</string>
+    <string name="explore_related_topics">தொடர்புடைய தலைப்புகள்</string>
+    <string name="history_just_now">இப்போது</string>
+    <string name="history_minutes_ago">%1$d நி முன்</string>
+    <string name="history_hours_ago">%1$d ம முன்</string>
+    <string name="history_days_ago">%1$d நா முன்</string>
+    <string name="history_weeks_ago">%1$d வா முன்</string>
+    <string name="tool_executing_content_description">கருவி இயங்குகிறது</string>
+    <string name="tool_running">%1$s இயங்குகிறது…</string>
+    <string name="tool_completed_content_description">கருவி முடிந்தது</string>
+    <string name="tool_completed">%1$s முடிந்தது</string>
+    <string name="privacy_agree_prefix">சேவையைப் பயன்படுத்துவதன் மூலம், நீங்கள் ஒப்புக்கொள்கிறீர்கள் </string>
+    <string name="privacy_policy">தனியுரிமைக் கொள்கை</string>
+    <string name="new_conversation">புதிய உரையாடல்</string>
 </resources>

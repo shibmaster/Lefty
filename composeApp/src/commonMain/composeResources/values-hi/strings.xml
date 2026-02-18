@@ -74,4 +74,18 @@
     <string name="settings_tools_none_available">इस प्लेटफॉर्म पर कोई उपकरण उपलब्ध नहीं है।</string>
     <string name="settings_tab_services">सेवाएं</string>
     <string name="settings_tab_tools">उपकरण</string>
+    <string name="explore_retry">पुनः प्रयास करें</string>
+    <string name="explore_related_topics">संबंधित विषय</string>
+    <string name="history_just_now">अभी अभी</string>
+    <string name="history_minutes_ago">%1$d मि पहले</string>
+    <string name="history_hours_ago">%1$d घं पहले</string>
+    <string name="history_days_ago">%1$d दि पहले</string>
+    <string name="history_weeks_ago">%1$d स पहले</string>
+    <string name="tool_executing_content_description">टूल चल रहा है</string>
+    <string name="tool_running">%1$s चल रहा है…</string>
+    <string name="tool_completed_content_description">टूल पूर्ण</string>
+    <string name="tool_completed">%1$s पूर्ण</string>
+    <string name="privacy_agree_prefix">सेवा का उपयोग करके, आप सहमत होते हैं </string>
+    <string name="privacy_policy">गोपनीयता नीति</string>
+    <string name="new_conversation">नई बातचीत</string>
 </resources>

@@ -74,4 +74,18 @@
     <string name="settings_tools_none_available">ไม่มีเครื่องมือที่พร้อมใช้งานบนแพลตฟอร์มนี้</string>
     <string name="settings_tab_services">บริการ</string>
     <string name="settings_tab_tools">เครื่องมือ</string>
+    <string name="explore_retry">ลองอีกครั้ง</string>
+    <string name="explore_related_topics">หัวข้อที่เกี่ยวข้อง</string>
+    <string name="history_just_now">เมื่อกี้</string>
+    <string name="history_minutes_ago">%1$d นาทีที่แล้ว</string>
+    <string name="history_hours_ago">%1$d ชม.ที่แล้ว</string>
+    <string name="history_days_ago">%1$d วันที่แล้ว</string>
+    <string name="history_weeks_ago">%1$d สัปดาห์ที่แล้ว</string>
+    <string name="tool_executing_content_description">เครื่องมือกำลังทำงาน</string>
+    <string name="tool_running">กำลังเรียกใช้ %1$s…</string>
+    <string name="tool_completed_content_description">เครื่องมือเสร็จสิ้น</string>
+    <string name="tool_completed">%1$s เสร็จสิ้น</string>
+    <string name="privacy_agree_prefix">การใช้บริการถือว่าคุณยอมรับ</string>
+    <string name="privacy_policy">นโยบายความเป็นส่วนตัว</string>
+    <string name="new_conversation">บทสนทนาใหม่</string>
 </resources>

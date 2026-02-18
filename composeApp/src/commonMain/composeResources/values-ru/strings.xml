@@ -74,4 +74,18 @@
     <string name="settings_tools_none_available">На этой платформе нет доступных инструментов.</string>
     <string name="settings_tab_services">Сервисы</string>
     <string name="settings_tab_tools">Инструменты</string>
+    <string name="explore_retry">Повторить</string>
+    <string name="explore_related_topics">Похожие темы</string>
+    <string name="history_just_now">Только что</string>
+    <string name="history_minutes_ago">%1$d мин назад</string>
+    <string name="history_hours_ago">%1$d ч назад</string>
+    <string name="history_days_ago">%1$d дн назад</string>
+    <string name="history_weeks_ago">%1$d нед назад</string>
+    <string name="tool_executing_content_description">Инструмент выполняется</string>
+    <string name="tool_running">Выполнение %1$s…</string>
+    <string name="tool_completed_content_description">Инструмент завершён</string>
+    <string name="tool_completed">%1$s завершён</string>
+    <string name="privacy_agree_prefix">Используя сервис, вы соглашаетесь с </string>
+    <string name="privacy_policy">Политикой конфиденциальности</string>
+    <string name="new_conversation">Новый разговор</string>
 </resources>

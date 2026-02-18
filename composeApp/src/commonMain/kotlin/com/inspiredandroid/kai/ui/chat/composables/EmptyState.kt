@@ -50,6 +50,8 @@ import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import io.github.alexzhirkevich.compottie.rememberLottiePainter
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.logo
+import kai.composeapp.generated.resources.privacy_agree_prefix
+import kai.composeapp.generated.resources.privacy_policy
 import kai.composeapp.generated.resources.welcome_message
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -109,12 +111,14 @@ internal fun EmptyState(modifier: Modifier, isUsingSharedKey: Boolean, onNavigat
         )
         if (isUsingSharedKey) {
             val linkColor = MaterialTheme.colorScheme.primary
-            val annotatedString = remember {
+            val prefixText = stringResource(Res.string.privacy_agree_prefix)
+            val policyText = stringResource(Res.string.privacy_policy)
+            val annotatedString = remember(prefixText, policyText, linkColor) {
                 buildAnnotatedString {
-                    append("By using the service, you agree to the ")
+                    append(prefixText)
                     withLink(LinkAnnotation.Url(url = "https://schubert-simon.de/privacy/kai.txt")) {
                         withStyle(style = SpanStyle(color = linkColor)) {
-                            append("Privacy Policy")
+                            append(policyText)
                         }
                     }
                 }

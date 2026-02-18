@@ -74,4 +74,18 @@
     <string name="settings_tools_none_available">このプラットフォームでは利用可能なツールがありません。</string>
     <string name="settings_tab_services">サービス</string>
     <string name="settings_tab_tools">ツール</string>
+    <string name="explore_retry">再試行</string>
+    <string name="explore_related_topics">関連トピック</string>
+    <string name="history_just_now">たった今</string>
+    <string name="history_minutes_ago">%1$d分前</string>
+    <string name="history_hours_ago">%1$d時間前</string>
+    <string name="history_days_ago">%1$d日前</string>
+    <string name="history_weeks_ago">%1$d週間前</string>
+    <string name="tool_executing_content_description">ツール実行中</string>
+    <string name="tool_running">%1$sを実行中…</string>
+    <string name="tool_completed_content_description">ツール完了</string>
+    <string name="tool_completed">%1$s完了</string>
+    <string name="privacy_agree_prefix">サービスを利用することで、</string>
+    <string name="privacy_policy">プライバシーポリシー</string>
+    <string name="new_conversation">新しい会話</string>
 </resources>

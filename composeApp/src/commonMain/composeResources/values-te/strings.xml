@@ -74,4 +74,18 @@
     <string name="settings_tools_none_available">ఈ ప్లాట్‌ఫారమ్‌లో టూల్స్ అందుబాటులో లేవు.</string>
     <string name="settings_tab_services">సేవలు</string>
     <string name="settings_tab_tools">టూల్స్</string>
+    <string name="explore_retry">మళ్ళీ ప్రయత్నించండి</string>
+    <string name="explore_related_topics">సంబంధిత అంశాలు</string>
+    <string name="history_just_now">ఇప్పుడే</string>
+    <string name="history_minutes_ago">%1$d ని క్రితం</string>
+    <string name="history_hours_ago">%1$d గం క్రితం</string>
+    <string name="history_days_ago">%1$d రో క్రితం</string>
+    <string name="history_weeks_ago">%1$d వా క్రితం</string>
+    <string name="tool_executing_content_description">సాధనం నడుస్తోంది</string>
+    <string name="tool_running">%1$s నడుస్తోంది…</string>
+    <string name="tool_completed_content_description">సాధనం పూర్తి</string>
+    <string name="tool_completed">%1$s పూర్తి</string>
+    <string name="privacy_agree_prefix">సేవను ఉపయోగించడం ద్వారా, మీరు అంగీకరిస్తారు </string>
+    <string name="privacy_policy">గోప్యతా విధానం</string>
+    <string name="new_conversation">కొత్త సంభాషణ</string>
 </resources>

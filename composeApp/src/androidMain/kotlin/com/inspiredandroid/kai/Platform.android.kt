@@ -12,6 +12,11 @@ import com.inspiredandroid.kai.network.tools.ParameterSchema
 import com.inspiredandroid.kai.network.tools.Tool
 import com.inspiredandroid.kai.network.tools.ToolInfo
 import com.inspiredandroid.kai.network.tools.ToolSchema
+import kai.composeapp.generated.resources.Res
+import kai.composeapp.generated.resources.tool_create_calendar_event_description
+import kai.composeapp.generated.resources.tool_create_calendar_event_name
+import kai.composeapp.generated.resources.tool_send_notification_description
+import kai.composeapp.generated.resources.tool_send_notification_name
 import com.inspiredandroid.kai.tools.CalendarPermissionController
 import com.inspiredandroid.kai.tools.CalendarRepository
 import com.inspiredandroid.kai.tools.CalendarResult
@@ -86,11 +91,15 @@ actual fun getPlatformToolDefinitions(): List<ToolInfo> = listOf(
         id = "send_notification",
         name = "Send Notification",
         description = "Send a push notification to the device",
+        nameRes = Res.string.tool_send_notification_name,
+        descriptionRes = Res.string.tool_send_notification_description,
     ),
     ToolInfo(
         id = "create_calendar_event",
         name = "Create Calendar Event",
         description = "Create a calendar event on the user's device",
+        nameRes = Res.string.tool_create_calendar_event_name,
+        descriptionRes = Res.string.tool_create_calendar_event_description,
     ),
 )
 

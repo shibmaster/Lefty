@@ -26,6 +26,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.dp
+import kai.composeapp.generated.resources.Res
+import kai.composeapp.generated.resources.tool_completed
+import kai.composeapp.generated.resources.tool_completed_content_description
+import kai.composeapp.generated.resources.tool_executing_content_description
+import kai.composeapp.generated.resources.tool_running
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun ToolExecutingMessage(
@@ -58,12 +64,12 @@ internal fun ToolExecutingMessage(
             Icon(
                 modifier = Modifier.size(20.dp).rotate(rotation),
                 imageVector = Icons.Default.Build,
-                contentDescription = "Tool executing",
+                contentDescription = stringResource(Res.string.tool_executing_content_description),
                 tint = MaterialTheme.colorScheme.onPrimaryContainer,
             )
             Spacer(Modifier.width(8.dp))
             Text(
-                text = "Running $toolName...",
+                text = stringResource(Res.string.tool_running, toolName),
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                 style = MaterialTheme.typography.bodyMedium,
             )
@@ -93,12 +99,12 @@ internal fun ToolResultMessage(
             Icon(
                 modifier = Modifier.size(20.dp),
                 imageVector = Icons.Default.Check,
-                contentDescription = "Tool completed",
+                contentDescription = stringResource(Res.string.tool_completed_content_description),
                 tint = MaterialTheme.colorScheme.onSecondaryContainer,
             )
             Spacer(Modifier.width(8.dp))
             Text(
-                text = "$toolName completed",
+                text = stringResource(Res.string.tool_completed, toolName),
                 color = MaterialTheme.colorScheme.onSecondaryContainer,
                 style = MaterialTheme.typography.bodyMedium,
             )

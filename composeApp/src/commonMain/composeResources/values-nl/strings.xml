@@ -74,4 +74,18 @@
     <string name="settings_tools_none_available">Geen hulpmiddelen beschikbaar op dit platform.</string>
     <string name="settings_tab_services">Diensten</string>
     <string name="settings_tab_tools">Hulpmiddelen</string>
+    <string name="explore_retry">Opnieuw proberen</string>
+    <string name="explore_related_topics">Gerelateerde onderwerpen</string>
+    <string name="history_just_now">Zojuist</string>
+    <string name="history_minutes_ago">%1$d min geleden</string>
+    <string name="history_hours_ago">%1$d uur geleden</string>
+    <string name="history_days_ago">%1$d d geleden</string>
+    <string name="history_weeks_ago">%1$d w geleden</string>
+    <string name="tool_executing_content_description">Tool wordt uitgevoerd</string>
+    <string name="tool_running">%1$s wordt uitgevoerd…</string>
+    <string name="tool_completed_content_description">Tool voltooid</string>
+    <string name="tool_completed">%1$s voltooid</string>
+    <string name="privacy_agree_prefix">Door de service te gebruiken, gaat u akkoord met het </string>
+    <string name="privacy_policy">Privacybeleid</string>
+    <string name="new_conversation">Nieuw gesprek</string>
 </resources>

@@ -5,6 +5,11 @@ import com.inspiredandroid.kai.httpClient
 import com.inspiredandroid.kai.network.tools.Tool
 import com.inspiredandroid.kai.network.tools.ToolInfo
 import com.inspiredandroid.kai.network.tools.ToolSchema
+import kai.composeapp.generated.resources.Res
+import kai.composeapp.generated.resources.tool_get_local_time_description
+import kai.composeapp.generated.resources.tool_get_local_time_name
+import kai.composeapp.generated.resources.tool_get_location_description
+import kai.composeapp.generated.resources.tool_get_location_name
 import io.ktor.client.call.body
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -88,6 +93,8 @@ object CommonTools {
         id = "get_location_from_ip",
         name = "Get Location",
         description = "Get estimated location from IP address",
+        nameRes = Res.string.tool_get_location_name,
+        descriptionRes = Res.string.tool_get_location_description,
     )
 
     val localTimeTool = object : Tool {
@@ -131,6 +138,8 @@ object CommonTools {
         id = "get_local_time",
         name = "Get Local Time",
         description = "Get the current local date and time for interpreting relative dates",
+        nameRes = Res.string.tool_get_local_time_name,
+        descriptionRes = Res.string.tool_get_local_time_description,
     )
 
     val commonToolDefinitions = listOf(localTimeToolInfo, ipLocationToolInfo)

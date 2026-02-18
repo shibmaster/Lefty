@@ -74,4 +74,18 @@
     <string name="settings_tools_none_available">এই প্ল্যাটফর্মে কোনো টুল উপলব্ধ নেই।</string>
     <string name="settings_tab_services">সেবাসমূহ</string>
     <string name="settings_tab_tools">টুলস</string>
+    <string name="explore_retry">পুনরায় চেষ্টা করুন</string>
+    <string name="explore_related_topics">সম্পর্কিত বিষয়</string>
+    <string name="history_just_now">এইমাত্র</string>
+    <string name="history_minutes_ago">%1$d মি আগে</string>
+    <string name="history_hours_ago">%1$d ঘ আগে</string>
+    <string name="history_days_ago">%1$d দি আগে</string>
+    <string name="history_weeks_ago">%1$d স আগে</string>
+    <string name="tool_executing_content_description">টুল চলছে</string>
+    <string name="tool_running">%1$s চলছে…</string>
+    <string name="tool_completed_content_description">টুল সম্পন্ন</string>
+    <string name="tool_completed">%1$s সম্পন্ন</string>
+    <string name="privacy_agree_prefix">পরিষেবা ব্যবহার করে, আপনি সম্মত হচ্ছেন </string>
+    <string name="privacy_policy">গোপনীয়তা নীতি</string>
+    <string name="new_conversation">নতুন কথোপকথন</string>
 </resources>

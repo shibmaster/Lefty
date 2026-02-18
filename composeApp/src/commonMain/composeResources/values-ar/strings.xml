@@ -74,4 +74,18 @@
     <string name="settings_tools_none_available">لا توجد أدوات متاحة على هذه المنصة.</string>
     <string name="settings_tab_services">الخدمات</string>
     <string name="settings_tab_tools">الأدوات</string>
+    <string name="explore_retry">إعادة المحاولة</string>
+    <string name="explore_related_topics">مواضيع ذات صلة</string>
+    <string name="history_just_now">الآن</string>
+    <string name="history_minutes_ago">قبل %1$d د</string>
+    <string name="history_hours_ago">قبل %1$d س</string>
+    <string name="history_days_ago">قبل %1$d ي</string>
+    <string name="history_weeks_ago">قبل %1$d أ</string>
+    <string name="tool_executing_content_description">الأداة قيد التنفيذ</string>
+    <string name="tool_running">جارٍ تشغيل %1$s…</string>
+    <string name="tool_completed_content_description">اكتملت الأداة</string>
+    <string name="tool_completed">اكتمل %1$s</string>
+    <string name="privacy_agree_prefix">باستخدام الخدمة، فإنك توافق على </string>
+    <string name="privacy_policy">سياسة الخصوصية</string>
+    <string name="new_conversation">محادثة جديدة</string>
 </resources>

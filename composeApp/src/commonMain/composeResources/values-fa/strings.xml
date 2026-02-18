@@ -74,4 +74,18 @@
     <string name="settings_tools_none_available">هیچ ابزاری در این پلتفرم موجود نیست.</string>
     <string name="settings_tab_services">سرویس‌ها</string>
     <string name="settings_tab_tools">ابزارها</string>
+    <string name="explore_retry">تلاش مجدد</string>
+    <string name="explore_related_topics">موضوعات مرتبط</string>
+    <string name="history_just_now">همین الان</string>
+    <string name="history_minutes_ago">%1$d دقیقه پیش</string>
+    <string name="history_hours_ago">%1$d ساعت پیش</string>
+    <string name="history_days_ago">%1$d روز پیش</string>
+    <string name="history_weeks_ago">%1$d هفته پیش</string>
+    <string name="tool_executing_content_description">ابزار در حال اجرا</string>
+    <string name="tool_running">در حال اجرای %1$s…</string>
+    <string name="tool_completed_content_description">ابزار تکمیل شد</string>
+    <string name="tool_completed">%1$s تکمیل شد</string>
+    <string name="privacy_agree_prefix">با استفاده از سرویس، شما با </string>
+    <string name="privacy_policy">سیاست حفظ حریم خصوصی</string>
+    <string name="new_conversation">مکالمه جدید</string>
 </resources>

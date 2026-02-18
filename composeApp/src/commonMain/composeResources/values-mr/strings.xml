@@ -74,4 +74,18 @@
     <string name="settings_tools_none_available">या प्लॅटफॉर्मवर कोणतीही साधने उपलब्ध नाहीत.</string>
     <string name="settings_tab_services">सेवा</string>
     <string name="settings_tab_tools">साधने</string>
+    <string name="explore_retry">पुन्हा प्रयत्न करा</string>
+    <string name="explore_related_topics">संबंधित विषय</string>
+    <string name="history_just_now">आत्ताच</string>
+    <string name="history_minutes_ago">%1$d मि पूर्वी</string>
+    <string name="history_hours_ago">%1$d तां पूर्वी</string>
+    <string name="history_days_ago">%1$d दि पूर्वी</string>
+    <string name="history_weeks_ago">%1$d आ पूर्वी</string>
+    <string name="tool_executing_content_description">साधन चालू आहे</string>
+    <string name="tool_running">%1$s चालू आहे…</string>
+    <string name="tool_completed_content_description">साधन पूर्ण</string>
+    <string name="tool_completed">%1$s पूर्ण</string>
+    <string name="privacy_agree_prefix">सेवा वापरून, तुम्ही सहमत आहात </string>
+    <string name="privacy_policy">गोपनीयता धोरण</string>
+    <string name="new_conversation">नवीन संभाषण</string>
 </resources>

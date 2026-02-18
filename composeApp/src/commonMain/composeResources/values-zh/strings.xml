@@ -74,4 +74,18 @@
     <string name="settings_tools_none_available">此平台上没有可用的工具。</string>
     <string name="settings_tab_services">服务</string>
     <string name="settings_tab_tools">工具</string>
+    <string name="explore_retry">重试</string>
+    <string name="explore_related_topics">相关主题</string>
+    <string name="history_just_now">刚刚</string>
+    <string name="history_minutes_ago">%1$d分钟前</string>
+    <string name="history_hours_ago">%1$d小时前</string>
+    <string name="history_days_ago">%1$d天前</string>
+    <string name="history_weeks_ago">%1$d周前</string>
+    <string name="tool_executing_content_description">工具执行中</string>
+    <string name="tool_running">正在运行%1$s…</string>
+    <string name="tool_completed_content_description">工具已完成</string>
+    <string name="tool_completed">%1$s已完成</string>
+    <string name="privacy_agree_prefix">使用本服务即表示您同意</string>
+    <string name="privacy_policy">隐私政策</string>
+    <string name="new_conversation">新对话</string>
 </resources>

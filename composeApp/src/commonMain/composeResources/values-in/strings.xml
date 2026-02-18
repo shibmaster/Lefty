@@ -74,4 +74,18 @@
     <string name="settings_tools_none_available">Tidak ada alat yang tersedia di platform ini.</string>
     <string name="settings_tab_services">Layanan</string>
     <string name="settings_tab_tools">Alat</string>
+    <string name="explore_retry">Coba lagi</string>
+    <string name="explore_related_topics">Topik terkait</string>
+    <string name="history_just_now">Baru saja</string>
+    <string name="history_minutes_ago">%1$d mnt lalu</string>
+    <string name="history_hours_ago">%1$d jam lalu</string>
+    <string name="history_days_ago">%1$d hr lalu</string>
+    <string name="history_weeks_ago">%1$d mgg lalu</string>
+    <string name="tool_executing_content_description">Alat sedang berjalan</string>
+    <string name="tool_running">Menjalankan %1$s…</string>
+    <string name="tool_completed_content_description">Alat selesai</string>
+    <string name="tool_completed">%1$s selesai</string>
+    <string name="privacy_agree_prefix">Dengan menggunakan layanan, Anda menyetujui </string>
+    <string name="privacy_policy">Kebijakan Privasi</string>
+    <string name="new_conversation">Percakapan baru</string>
 </resources>

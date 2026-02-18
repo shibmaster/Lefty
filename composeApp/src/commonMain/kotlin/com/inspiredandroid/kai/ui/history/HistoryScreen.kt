@@ -34,11 +34,16 @@ import androidx.compose.ui.unit.dp
 import com.inspiredandroid.kai.BackIcon
 import com.inspiredandroid.kai.data.Conversation
 import kai.composeapp.generated.resources.Res
+import kai.composeapp.generated.resources.history_days_ago
 import kai.composeapp.generated.resources.history_delete_all
 import kai.composeapp.generated.resources.history_delete_all_confirm
 import kai.composeapp.generated.resources.history_delete_all_message
 import kai.composeapp.generated.resources.history_empty
+import kai.composeapp.generated.resources.history_hours_ago
+import kai.composeapp.generated.resources.history_just_now
+import kai.composeapp.generated.resources.history_minutes_ago
 import kai.composeapp.generated.resources.history_title
+import kai.composeapp.generated.resources.history_weeks_ago
 import kai.composeapp.generated.resources.ic_delete_forever
 import kai.composeapp.generated.resources.no
 import kai.composeapp.generated.resources.yes
@@ -258,6 +263,7 @@ private fun ConversationCard(
     }
 }
 
+@Composable
 private fun formatDate(timestamp: Long): String {
     // Simple date formatting - shows relative time or date
     val now = Clock.System.now().toEpochMilliseconds()
@@ -269,11 +275,11 @@ private fun formatDate(timestamp: Long): String {
     val days = hours / 24
 
     return when {
-        minutes < 1 -> "Just now"
-        minutes < 60 -> "${minutes}m ago"
-        hours < 24 -> "${hours}h ago"
-        days < 7 -> "${days}d ago"
-        else -> "${days / 7}w ago"
+        minutes < 1 -> stringResource(Res.string.history_just_now)
+        minutes < 60 -> stringResource(Res.string.history_minutes_ago, minutes.toInt())
+        hours < 24 -> stringResource(Res.string.history_hours_ago, hours.toInt())
+        days < 7 -> stringResource(Res.string.history_days_ago, days.toInt())
+        else -> stringResource(Res.string.history_weeks_ago, (days / 7).toInt())
     }
 }
 

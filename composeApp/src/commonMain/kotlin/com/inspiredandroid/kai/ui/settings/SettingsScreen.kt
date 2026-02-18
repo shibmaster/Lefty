@@ -878,12 +878,12 @@ private fun ToolItem(
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = tool.name,
+                text = tool.nameRes?.let { stringResource(it) } ?: tool.name,
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onBackground,
             )
             Text(
-                text = tool.description,
+                text = tool.descriptionRes?.let { stringResource(it) } ?: tool.description,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

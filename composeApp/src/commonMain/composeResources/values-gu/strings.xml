@@ -74,4 +74,18 @@
     <string name="settings_tools_none_available">આ પ્લેટફોર્મ પર કોઈ ટૂલ્સ ઉપલબ્ધ નથી.</string>
     <string name="settings_tab_services">સેવાઓ</string>
     <string name="settings_tab_tools">ટૂલ્સ</string>
+    <string name="explore_retry">ફરી પ્રયાસ કરો</string>
+    <string name="explore_related_topics">સંબંધિત વિષયો</string>
+    <string name="history_just_now">હમણાં જ</string>
+    <string name="history_minutes_ago">%1$d મિ પહેલાં</string>
+    <string name="history_hours_ago">%1$d ક પહેલાં</string>
+    <string name="history_days_ago">%1$d દિ પહેલાં</string>
+    <string name="history_weeks_ago">%1$d અ પહેલાં</string>
+    <string name="tool_executing_content_description">ટૂલ ચાલી રહ્યું છે</string>
+    <string name="tool_running">%1$s ચાલી રહ્યું છે…</string>
+    <string name="tool_completed_content_description">ટૂલ પૂર્ણ</string>
+    <string name="tool_completed">%1$s પૂર્ણ</string>
+    <string name="privacy_agree_prefix">સેવાનો ઉપયોગ કરીને, તમે સંમત થાઓ છો </string>
+    <string name="privacy_policy">ગોપનીયતા નીતિ</string>
+    <string name="new_conversation">નવી વાતચીત</string>
 </resources>

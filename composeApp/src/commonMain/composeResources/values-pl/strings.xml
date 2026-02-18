@@ -74,4 +74,18 @@
     <string name="settings_tools_none_available">Brak dostępnych narzędzi na tej platformie.</string>
     <string name="settings_tab_services">Usługi</string>
     <string name="settings_tab_tools">Narzędzia</string>
+    <string name="explore_retry">Ponów</string>
+    <string name="explore_related_topics">Powiązane tematy</string>
+    <string name="history_just_now">Właśnie teraz</string>
+    <string name="history_minutes_ago">%1$d min temu</string>
+    <string name="history_hours_ago">%1$d godz. temu</string>
+    <string name="history_days_ago">%1$d dn. temu</string>
+    <string name="history_weeks_ago">%1$d tyg. temu</string>
+    <string name="tool_executing_content_description">Narzędzie w trakcie</string>
+    <string name="tool_running">Uruchamianie %1$s…</string>
+    <string name="tool_completed_content_description">Narzędzie ukończone</string>
+    <string name="tool_completed">%1$s ukończone</string>
+    <string name="privacy_agree_prefix">Korzystając z usługi, zgadzasz się z </string>
+    <string name="privacy_policy">Polityką prywatności</string>
+    <string name="new_conversation">Nowa rozmowa</string>
 </resources>

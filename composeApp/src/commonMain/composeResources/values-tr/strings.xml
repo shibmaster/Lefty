@@ -74,4 +74,18 @@
     <string name="settings_tools_none_available">Bu platformda kullanılabilir araç yok.</string>
     <string name="settings_tab_services">Hizmetler</string>
     <string name="settings_tab_tools">Araçlar</string>
+    <string name="explore_retry">Tekrar dene</string>
+    <string name="explore_related_topics">İlgili konular</string>
+    <string name="history_just_now">Az önce</string>
+    <string name="history_minutes_ago">%1$d dk önce</string>
+    <string name="history_hours_ago">%1$d sa önce</string>
+    <string name="history_days_ago">%1$d gün önce</string>
+    <string name="history_weeks_ago">%1$d hf önce</string>
+    <string name="tool_executing_content_description">Araç çalışıyor</string>
+    <string name="tool_running">%1$s çalıştırılıyor…</string>
+    <string name="tool_completed_content_description">Araç tamamlandı</string>
+    <string name="tool_completed">%1$s tamamlandı</string>
+    <string name="privacy_agree_prefix">Hizmeti kullanarak </string>
+    <string name="privacy_policy">Gizlilik Politikası</string>
+    <string name="new_conversation">Yeni sohbet</string>
 </resources>

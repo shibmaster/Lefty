@@ -5,6 +5,9 @@ package com.inspiredandroid.kai.data
 import coil3.annotation.InternalCoilApi
 import coil3.util.MimeTypeMap
 import com.inspiredandroid.kai.getAvailableTools
+import kai.composeapp.generated.resources.Res
+import kai.composeapp.generated.resources.new_conversation
+import org.jetbrains.compose.resources.getString
 import com.inspiredandroid.kai.getPlatformToolDefinitions
 import com.inspiredandroid.kai.network.Requests
 import com.inspiredandroid.kai.network.dtos.gemini.GeminiChatResponseDto
@@ -614,7 +617,7 @@ class RemoteDataRepository(
         }
 
         val firstUserMessage = history.firstOrNull { it.role == History.Role.USER }
-        val title = firstUserMessage?.content?.take(50) ?: "New conversation"
+        val title = firstUserMessage?.content?.take(50) ?: getString(Res.string.new_conversation)
 
         val existingConversation = savedConversations.value.find { it.id == conversationId }
 
@@ -730,7 +733,10 @@ class RemoteDataRepository(
      * Gets the human-readable display name for a tool given its ID.
      * Falls back to the ID if not found.
      */
-    private fun getToolDisplayName(toolId: String): String = getPlatformToolDefinitions().find { it.id == toolId }?.name ?: toolId
+    private suspend fun getToolDisplayName(toolId: String): String {
+        val toolInfo = getPlatformToolDefinitions().find { it.id == toolId } ?: return toolId
+        return toolInfo.nameRes?.let { getString(it) } ?: toolInfo.name
+    }
 
     override fun setToolEnabled(toolId: String, enabled: Boolean) {
         appSettings.setToolEnabled(toolId, enabled)

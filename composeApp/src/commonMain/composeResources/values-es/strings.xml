@@ -74,4 +74,18 @@
     <string name="settings_tools_none_available">No hay herramientas disponibles en esta plataforma.</string>
     <string name="settings_tab_services">Servicios</string>
     <string name="settings_tab_tools">Herramientas</string>
+    <string name="explore_retry">Reintentar</string>
+    <string name="explore_related_topics">Temas relacionados</string>
+    <string name="history_just_now">Ahora mismo</string>
+    <string name="history_minutes_ago">hace %1$d min</string>
+    <string name="history_hours_ago">hace %1$d h</string>
+    <string name="history_days_ago">hace %1$d d</string>
+    <string name="history_weeks_ago">hace %1$d sem</string>
+    <string name="tool_executing_content_description">Herramienta ejecutándose</string>
+    <string name="tool_running">Ejecutando %1$s…</string>
+    <string name="tool_completed_content_description">Herramienta completada</string>
+    <string name="tool_completed">%1$s completado</string>
+    <string name="privacy_agree_prefix">Al usar el servicio, aceptas la </string>
+    <string name="privacy_policy">Política de privacidad</string>
+    <string name="new_conversation">Nueva conversación</string>
 </resources>
