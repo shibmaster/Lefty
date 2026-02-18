@@ -92,16 +92,6 @@ actual fun getPlatformToolDefinitions(): List<ToolInfo> = listOf(
         name = "Create Calendar Event",
         description = "Create a calendar event on the user's device",
     ),
-    ToolInfo(
-        id = "get_recent_sms",
-        name = "Check Recent SMS",
-        description = "Get recent SMS conversations with the last few messages from each",
-    ),
-    ToolInfo(
-        id = "send_sms",
-        name = "Send SMS",
-        description = "Reply to an existing SMS conversation",
-    ),
 )
 
 actual fun getAvailableTools(): List<Tool> {
