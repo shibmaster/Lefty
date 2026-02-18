@@ -5,9 +5,6 @@ package com.inspiredandroid.kai.data
 import coil3.annotation.InternalCoilApi
 import coil3.util.MimeTypeMap
 import com.inspiredandroid.kai.getAvailableTools
-import kai.composeapp.generated.resources.Res
-import kai.composeapp.generated.resources.new_conversation
-import org.jetbrains.compose.resources.getString
 import com.inspiredandroid.kai.getPlatformToolDefinitions
 import com.inspiredandroid.kai.network.Requests
 import com.inspiredandroid.kai.network.dtos.gemini.GeminiChatResponseDto
@@ -23,6 +20,8 @@ import com.inspiredandroid.kai.ui.settings.SettingsModel
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.extension
 import io.github.vinceglb.filekit.readBytes
+import kai.composeapp.generated.resources.Res
+import kai.composeapp.generated.resources.new_conversation
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -40,6 +39,7 @@ import kotlinx.serialization.json.int
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import org.jetbrains.compose.resources.getString
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.time.Clock
