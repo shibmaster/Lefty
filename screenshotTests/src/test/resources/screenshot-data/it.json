@@ -1,0 +1,23 @@
+{
+  "chatWithMessages": {
+    "userMessage": "fornisci un elenco dei veicoli semoventi più grandi mai costruiti",
+    "assistantMessage": "Ecco un elenco dei **veicoli semoventi più grandi mai costruiti** (concentrandosi su macchine terrestri mobili/semoventi di enormi dimensioni, classificate approssimativamente in base a una combinazione di dimensioni fisiche, lunghezza, peso e riconoscimento storico/fama):\n\n- **Overburden Conveyor Bridge F60**  \n  Il più grande per dimensioni fisiche complessive / lunghezza. Lunghezza: ~502 m, Altezza: ~80 m, Peso: ~13.600 tonnellate. Costruito nella Germania Est (1988–1991) per la rimozione dello strato di copertura nelle miniere di lignite; si muove molto lentamente su rotaie.\n\n- **Bagger 293** (escavatore a ruota di tazze)  \n  Veicolo terrestre più pesante mai costruito (~14.200–14.196 tonnellate). Altezza: ~96 m, Lunghezza: ~225 m. Costruito nel 1995 da TAKRAF; detentore del record Guinness come escavatore terrestre più grande/pesante; rimuove fino a ~240.000 tonnellate di materiale al giorno.\n\n- **Bagger 288** (escavatore a ruota di tazze)  \n  Precedente detentore del record di veicolo terrestre più pesante. Altezza: ~96 m, Lunghezza: ~220 m, Peso: ~13.500 tonnellate. Costruito nel 1978 da Krupp/TAKRAF; famoso per il suo trasferimento di 22 km attraversando strade, fiumi e autostrade.\n\n- **NASA Crawler-Transporter** (CT-1 e CT-2)  \n  Veicolo terrestre semovente più pesante (record Guinness dopo gli aggiornamenti). Peso: ~2.721–3.016 tonnellate, Dimensioni: 40 m × 35 m. Costruito nel 1965; trasporta razzi/veicoli spaziali al Kennedy Space Center (velocità massima ~1–2 mph).\n\n- **BelAZ-75710** (camion da miniera)  \n  Camion più grande per capacità di carico (~450 tonnellate). Peso a vuoto: ~360 tonnellate, Lunghezza: ~20,6 m. Camion da trasporto ultra-classe moderno; uno dei più grandi veicoli semoventi su ruote.\n\n- **LeTourneau L-2350** (pala caricatrice gommata / pala frontale)  \n  Più grande escavatore/caricatore secondo i record Guinness. Enorme capacità della benna; diametro pneumatici ~4 m. Utilizzato nell'industria mineraria pesante; una delle più grandi pale caricatrici gommate.\n\nAltre notevoli enormi macchine semoventi includono:\n- Big Muskie (pala da scavo storica, ~13.500 tonnellate, smantellata)\n- Marion 6360 (\"The Captain\", pala da scavo gigante, ~12.700 tonnellate, demolita)\n- Varie frese meccaniche giganti per gallerie (ad es., modelli Herrenknecht fino a ~17–20 m di diametro delle frese, sebbene spesso non completamente semoventi allo stesso modo)\n\nNota: \"Più grande\" dipende dalla metrica—lunghezza (F60), peso (Bagger 293), mobilità semovente (NASA Crawler) o carico utile (BelAZ). Si tratta principalmente di veicoli terrestri industriali/minerari/da trasporto piuttosto che navi, aerei o treni."
+  },
+  "chatWithCodeExample": {
+    "userMessage": "mostrami delle belle one-liner per kotlin, swift, c, python, js",
+    "codeIntro": "Ecco alcune brevi e belle one-liner in ogni linguaggio (edizione 2025 😄):"
+  },
+  "exploreSpace": {
+    "topic": "Esplorazione Spaziale",
+    "items": [
+      {"title": "Marte", "description": "Il Pianeta Rosso, quarto dal Sole e obiettivo primario per l'esplorazione umana."},
+      {"title": "Buchi Neri", "description": "Regioni dello spaziotempo in cui la gravità è così forte che nulla può sfuggire."},
+      {"title": "Apollo 11", "description": "La prima missione con equipaggio ad atterrare sulla Luna nel 1969, con tre astronauti a bordo."},
+      {"title": "Anelli di Saturno", "description": "Spettacolari anelli di ghiaccio e roccia che circondano il gigante gassoso Saturno."},
+      {"title": "Programma Voyager", "description": "Due sonde gemelle lanciate nel 1977, ora nello spazio interstellare."},
+      {"title": "Via Lattea", "description": "La nostra galassia che contiene oltre 100 miliardi di stelle e innumerevoli pianeti."},
+      {"title": "Eclissi Solari", "description": "Quando la Luna passa tra il Sole e la Terra, proiettando un'ombra."},
+      {"title": "Stelle di Neutroni", "description": "Resti ultra-densi di stelle massicce compressi in una minuscola sfera."}
+    ]
+  }
+}

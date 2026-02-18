@@ -88,4 +88,9 @@
     <string name="privacy_agree_prefix">Bằng cách sử dụng dịch vụ, bạn đồng ý với </string>
     <string name="privacy_policy">Chính sách quyền riêng tư</string>
     <string name="new_conversation">Cuộc trò chuyện mới</string>
+    <string name="topic_people">Con người</string>
+    <string name="topic_sport">Thể thao</string>
+    <string name="topic_technology">Công nghệ</string>
+    <string name="topic_countries">Quốc gia</string>
+    <string name="topic_space">Vũ trụ</string>
 </resources>

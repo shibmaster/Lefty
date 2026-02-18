@@ -10,6 +10,11 @@ import com.inspiredandroid.kai.ui.explore.ExploreUiState
 import com.inspiredandroid.kai.ui.settings.ConnectionStatus
 import com.inspiredandroid.kai.ui.settings.SettingsTab
 import com.inspiredandroid.kai.ui.settings.SettingsUiState
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
 object ScreenshotTestData {
 
@@ -72,19 +77,8 @@ object ScreenshotTestData {
         hasSavedConversations = true,
     )
 
-    val chatWithCodeExample = ChatUiState(
-        actions = noOpChatActions,
-        history = listOf(
-            History(
-                id = "1",
-                role = History.Role.USER,
-                content = "show me beautiful one liners for kotlin, swift, c, python, js",
-            ),
-            History(
-                id = "2",
-                role = History.Role.ASSISTANT,
-                content = """Here are some short, beautiful one-liners in each language (2025 edition 😄):
-                    
+    private val codeBlocks = """
+
 Kotlin
 
 ```kotlin
@@ -94,13 +88,13 @@ val fibs = generateSequence(0 to 1) { it.second to it.first + it.second }.map { 
 Swift
 
 ```swift
-let fizzBuzz = (1...100).map { $0 % 15 == 0 ? "FizzBuzz" : $0 % 3 == 0 ? "Fizz" : $0 % 5 == 0 ? "Buzz" : "\($0)" }
+let fizzBuzz = (1...100).map { ${'$'}0 % 15 == 0 ? "FizzBuzz" : ${'$'}0 % 3 == 0 ? "Fizz" : ${'$'}0 % 5 == 0 ? "Buzz" : "\(${'$'}0)" }
 ```
 
 C
 
 ```c
-for(int i=1;i<101;)printf(i%3?"":"Fizz"),printf(i%5?"":"Buzz")||printf("%d",i),puts(""),i++);
+for(int i=1;i<101;)printf(i%3?"":"Fizz"),printf(i%5?"":"Buzz")||printf("%d",i),puts(""),i++;
 ```
 
 Python
@@ -113,7 +107,20 @@ JavaScript
 
 ```javascript
 [...Array(100)].map((_,i)=>console.log((++i%3?'':'Fizz')+(i%5?'':'Buzz')||i))
-```""",
+```"""
+
+    val chatWithCodeExample = ChatUiState(
+        actions = noOpChatActions,
+        history = listOf(
+            History(
+                id = "1",
+                role = History.Role.USER,
+                content = "show me beautiful one liners for kotlin, swift, c, python, js",
+            ),
+            History(
+                id = "2",
+                role = History.Role.ASSISTANT,
+                content = "Here are some short, beautiful one-liners in each language (2025 edition 😄):" + codeBlocks,
             ),
         ),
         hasSavedConversations = true,
@@ -167,4 +174,69 @@ JavaScript
             ),
         ),
     )
+
+    // --- Localized data loading for StoreScreenshotTest ---
+
+    private fun loadJson(locale: String): JsonObject {
+        val stream = ScreenshotTestData::class.java.getResourceAsStream("/screenshot-data/$locale.json")
+            ?: error("Missing screenshot data for locale: $locale")
+        val text = stream.bufferedReader().use { it.readText() }
+        return Json.parseToJsonElement(text).jsonObject
+    }
+
+    fun localizedChatWithMessages(locale: String): ChatUiState {
+        val json = loadJson(locale)
+        val chat = json["chatWithMessages"]!!.jsonObject
+        return ChatUiState(
+            actions = noOpChatActions,
+            history = listOf(
+                History(
+                    id = "1",
+                    role = History.Role.USER,
+                    content = chat["userMessage"]!!.jsonPrimitive.content,
+                ),
+                History(
+                    id = "2",
+                    role = History.Role.ASSISTANT,
+                    content = chat["assistantMessage"]!!.jsonPrimitive.content,
+                ),
+            ),
+            hasSavedConversations = true,
+        )
+    }
+
+    fun localizedChatWithCodeExample(locale: String): ChatUiState {
+        val json = loadJson(locale)
+        val chat = json["chatWithCodeExample"]!!.jsonObject
+        return ChatUiState(
+            actions = noOpChatActions,
+            history = listOf(
+                History(
+                    id = "1",
+                    role = History.Role.USER,
+                    content = chat["userMessage"]!!.jsonPrimitive.content,
+                ),
+                History(
+                    id = "2",
+                    role = History.Role.ASSISTANT,
+                    content = chat["codeIntro"]!!.jsonPrimitive.content + codeBlocks,
+                ),
+            ),
+            hasSavedConversations = true,
+        )
+    }
+
+    fun localizedExploreSpace(locale: String): Pair<String, ExploreUiState> {
+        val json = loadJson(locale)
+        val explore = json["exploreSpace"]!!.jsonObject
+        val topic = explore["topic"]!!.jsonPrimitive.content
+        val items = explore["items"]!!.jsonArray.map { item ->
+            val obj = item.jsonObject
+            ExploreItem(
+                title = obj["title"]!!.jsonPrimitive.content,
+                description = obj["description"]!!.jsonPrimitive.content,
+            )
+        }
+        return topic to ExploreUiState(items = items)
+    }
 }

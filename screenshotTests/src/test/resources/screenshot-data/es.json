@@ -1,0 +1,23 @@
+{
+  "chatWithMessages": {
+    "userMessage": "proporciona una lista de los vehículos móviles más grandes jamás construidos",
+    "assistantMessage": "Aquí tienes una lista de los **vehículos móviles más grandes jamás construidos** (centrada en máquinas terrestres masivas móviles/autopropulsadas, clasificadas aproximadamente por una combinación de tamaño físico, longitud, peso y reconocimiento histórico/fama):\n\n- **Overburden Conveyor Bridge F60**  \n  El más grande por dimensiones físicas generales / longitud. Longitud: ~502 m, Altura: ~80 m, Peso: ~13.600 toneladas. Construido en Alemania Oriental (1988–1991) para la remoción de material de cobertura en minería de lignito; se mueve muy lentamente sobre rieles.\n\n- **Bagger 293** (excavadora de rueda de cangilones)  \n  El vehículo terrestre más pesado jamás construido (~14.200–14.196 toneladas). Altura: ~96 m, Longitud: ~225 m. Construido en 1995 por TAKRAF; poseedor del récord Guinness como la excavadora terrestre más grande/pesada; remueve hasta ~240.000 toneladas de material por día.\n\n- **Bagger 288** (excavadora de rueda de cangilones)  \n  Anteriormente poseedor del récord del vehículo terrestre más pesado. Altura: ~96 m, Longitud: ~220 m, Peso: ~13.500 toneladas. Construido en 1978 por Krupp/TAKRAF; famoso por su reubicación de 22 km cruzando carreteras, ríos y autopistas.\n\n- **NASA Crawler-Transporter** (CT-1 y CT-2)  \n  El vehículo terrestre autopropulsado más pesado (récord Guinness tras mejoras). Peso: ~2.721–3.016 toneladas, Dimensiones: 40 m × 35 m. Construido en 1965; transporta cohetes/naves espaciales en el Centro Espacial Kennedy (velocidad máxima ~1–2 mph).\n\n- **BelAZ-75710** (camión minero de volteo)  \n  El camión más grande por capacidad de carga útil (~450 toneladas). Peso en vacío: ~360 toneladas, Longitud: ~20,6 m. Camión de acarreo ultraclase moderno; uno de los vehículos móviles con ruedas más grandes.\n\n- **LeTourneau L-2350** (cargador de ruedas / cargador frontal)  \n  La excavadora/cargadora más grande según los récords Guinness. Enorme capacidad del cucharón; diámetro de neumático ~4 m. Utilizado en minería pesada; uno de los cargadores de ruedas más grandes.\n\nOtras máquinas móviles enormes notables incluyen:\n- Big Muskie (pala de extracción histórica, ~13.500 toneladas, desmantelada)\n- Marion 6360 (\"The Captain\", pala de extracción gigante, ~12.700 toneladas, desguazada)\n- Varias tuneladoras gigantes (por ejemplo, modelos Herrenknecht de hasta ~17–20 m de diámetro de corte, aunque a menudo no son completamente autopropulsadas de la misma manera)\n\nNota: \"Más grande\" depende de la métrica: longitud (F60), peso (Bagger 293), movilidad autopropulsada (NASA Crawler) o carga útil (BelAZ). Estos son principalmente vehículos terrestres industriales/de minería/transporte en lugar de barcos, aeronaves o trenes."
+  },
+  "chatWithCodeExample": {
+    "userMessage": "muéstrame one-liners bonitos para kotlin, swift, c, python, js",
+    "codeIntro": "Aquí tienes algunos one-liners cortos y bonitos en cada lenguaje (edición 2025 😄):"
+  },
+  "exploreSpace": {
+    "topic": "Exploración Espacial",
+    "items": [
+      {"title": "Marte", "description": "El Planeta Rojo, cuarto desde el Sol y un objetivo principal para la exploración humana."},
+      {"title": "Agujeros Negros", "description": "Regiones del espaciotiempo donde la gravedad es tan fuerte que nada puede escapar."},
+      {"title": "Apollo 11", "description": "La primera misión tripulada en aterrizar en la Luna en 1969, con tres astronautas a bordo."},
+      {"title": "Anillos de Saturno", "description": "Espectaculares anillos de hielo y roca que rodean al gigante gaseoso Saturno."},
+      {"title": "Programa Voyager", "description": "Dos naves espaciales gemelas lanzadas en 1977, ahora en el espacio interestelar."},
+      {"title": "Vía Láctea", "description": "Nuestra galaxia natal que contiene más de 100 mil millones de estrellas e innumerables planetas."},
+      {"title": "Eclipses Solares", "description": "Cuando la Luna pasa entre el Sol y la Tierra, proyectando una sombra."},
+      {"title": "Estrellas de Neutrones", "description": "Restos ultradensos de estrellas masivas comprimidos en una pequeña esfera."}
+    ]
+  }
+}

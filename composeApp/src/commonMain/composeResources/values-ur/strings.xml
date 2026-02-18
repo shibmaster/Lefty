@@ -88,4 +88,9 @@
     <string name="privacy_agree_prefix">سروس استعمال کرکے، آپ اتفاق کرتے ہیں </string>
     <string name="privacy_policy">رازداری کی پالیسی</string>
     <string name="new_conversation">نئی گفتگو</string>
+    <string name="topic_people">لوگ</string>
+    <string name="topic_sport">کھیل</string>
+    <string name="topic_technology">ٹیکنالوجی</string>
+    <string name="topic_countries">ممالک</string>
+    <string name="topic_space">خلا</string>
 </resources>

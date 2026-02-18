@@ -1,0 +1,23 @@
+{
+  "chatWithMessages": {
+    "userMessage": "erstelle eine Liste der größten jemals gebauten fahrenden Fahrzeuge",
+    "assistantMessage": "Hier ist eine Liste der **größten jemals gebauten fahrenden Fahrzeuge** (mit Fokus auf massive mobile/selbstfahrende Landmaschinen, grob geordnet nach einer Kombination aus physischer Größe, Länge, Gewicht und historischer Bekanntheit):\n\n- **Overburden Conveyor Bridge F60**  \n  Größte nach Gesamtabmessungen / Länge. Länge: ~502 m, Höhe: ~80 m, Gewicht: ~13.600 Tonnen. Gebaut in der DDR (1988–1991) zur Abraumbeseitigung im Braunkohlebergbau; bewegt sich sehr langsam auf Schienen.\n\n- **Bagger 293** (Schaufelradbagger)  \n  Schwerstes jemals gebautes Landfahrzeug (~14.200–14.196 Tonnen). Höhe: ~96 m, Länge: ~225 m. Gebaut 1995 von TAKRAF; Guinness-Rekordhalter für den größten/schwersten terrestrischen Bagger; entfernt bis zu ~240.000 Tonnen Material pro Tag.\n\n- **Bagger 288** (Schaufelradbagger)  \n  Zuvor Rekordhalter für das schwerste Landfahrzeug. Höhe: ~96 m, Länge: ~220 m, Gewicht: ~13.500 Tonnen. Gebaut 1978 von Krupp/TAKRAF; berühmt für seine 22 km lange Umsetzung über Straßen, Flüsse und Autobahnen.\n\n- **NASA Crawler-Transporter** (CT-1 und CT-2)  \n  Schwerstes selbstangetriebenes Landfahrzeug (Guinness-Rekord nach Upgrades). Gewicht: ~2.721–3.016 Tonnen, Abmessungen: 40 m × 35 m. Gebaut 1965; transportiert Raketen/Raumfahrzeuge im Kennedy Space Center (Höchstgeschwindigkeit ~1–2 mph).\n\n- **BelAZ-75710** (Muldenkipper für den Bergbau)  \n  Größter LKW nach Nutzlastkapazität (~450 Tonnen). Leergewicht: ~360 Tonnen, Länge: ~20,6 m. Moderner Ultra-Class-Muldenkipper; eines der größten fahrenden Radfahrzeuge.\n\n- **LeTourneau L-2350** (Radlader / Frontlader)  \n  Größter Erdbeweger/Lader laut Guinness-Rekorden. Massive Schaufelkapazität; Reifendurchmesser ~4 m. Wird im Schwerstbergbau eingesetzt; einer der größten Radlader.\n\nWeitere bemerkenswerte riesige fahrende Maschinen sind:\n- Big Muskie (historische Abraumschaufel, ~13.500 Tonnen, demontiert)\n- Marion 6360 (\"The Captain\", riesige Abraumschaufel, ~12.700 Tonnen, verschrottet)\n- Verschiedene riesige Tunnelbohrmaschinen (z.B. Herrenknecht-Modelle mit bis zu ~17–20 m Schneidkopfdurchmesser, obwohl diese oft nicht vollständig selbstfahrend im selben Sinne sind)\n\nHinweis: \"Größte\" hängt von der Messgröße ab — Länge (F60), Gewicht (Bagger 293), Selbstantrieb (NASA Crawler) oder Nutzlast (BelAZ). Dies sind in erster Linie landbasierte Industrie-/Bergbau-/Transportfahrzeuge und keine Schiffe, Flugzeuge oder Züge."
+  },
+  "chatWithCodeExample": {
+    "userMessage": "zeig mir schöne Einzeiler für Kotlin, Swift, C, Python, JS",
+    "codeIntro": "Hier sind einige kurze, schöne Einzeiler in jeder Sprache (2025er Ausgabe 😄):"
+  },
+  "exploreSpace": {
+    "topic": "Weltraumforschung",
+    "items": [
+      {"title": "Mars", "description": "Der Rote Planet, vierter von der Sonne und ein Hauptziel der bemannten Erforschung."},
+      {"title": "Schwarze Löcher", "description": "Regionen der Raumzeit, in denen die Gravitation so stark ist, dass nichts entkommen kann."},
+      {"title": "Apollo 11", "description": "Die erste bemannte Mission, die 1969 auf dem Mond landete, mit drei Astronauten an Bord."},
+      {"title": "Saturnringe", "description": "Spektakuläre Eis- und Gesteinsringe, die den Gasriesen Saturn umgeben."},
+      {"title": "Voyager-Programm", "description": "Zwei Zwillings-Raumsonden, die 1977 gestartet wurden und sich jetzt im interstellaren Raum befinden."},
+      {"title": "Milchstraße", "description": "Unsere Heimatgalaxie mit über 100 Milliarden Sternen und unzähligen Planeten."},
+      {"title": "Sonnenfinsternisse", "description": "Wenn der Mond zwischen Sonne und Erde hindurchzieht und einen Schatten wirft."},
+      {"title": "Neutronensterne", "description": "Ultradichte Überreste massereicher Sterne, zusammengepresst in einer winzigen Kugel."}
+    ]
+  }
+}

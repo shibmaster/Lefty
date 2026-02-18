@@ -88,4 +88,9 @@
     <string name="privacy_agree_prefix">ਸੇਵਾ ਦੀ ਵਰਤੋਂ ਕਰਕੇ, ਤੁਸੀਂ ਸਹਿਮਤ ਹੋ </string>
     <string name="privacy_policy">ਗੋਪਨੀਯਤਾ ਨੀਤੀ</string>
     <string name="new_conversation">ਨਵੀਂ ਗੱਲਬਾਤ</string>
+    <string name="topic_people">ਲੋਕ</string>
+    <string name="topic_sport">ਖੇਡ</string>
+    <string name="topic_technology">ਤਕਨਾਲੋਜੀ</string>
+    <string name="topic_countries">ਦੇਸ਼</string>
+    <string name="topic_space">ਪੁਲਾੜ</string>
 </resources>

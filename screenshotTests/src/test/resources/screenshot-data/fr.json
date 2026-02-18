@@ -1,0 +1,23 @@
+{
+  "chatWithMessages": {
+    "userMessage": "fournis une liste des plus grands véhicules mobiles jamais construits",
+    "assistantMessage": "Voici une liste des **plus grands véhicules mobiles jamais construits** (axée sur les machines terrestres massives mobiles/automotrices, classées approximativement par une combinaison de taille physique, longueur, poids et reconnaissance historique/notoriété) :\n\n- **Overburden Conveyor Bridge F60**  \n  Le plus grand par ses dimensions physiques globales / longueur. Longueur : ~502 m, Hauteur : ~80 m, Poids : ~13 600 tonnes. Construit en Allemagne de l'Est (1988–1991) pour l'enlèvement des morts-terrains dans l'exploitation du lignite ; se déplace très lentement sur rails.\n\n- **Bagger 293** (excavatrice à roue à godets)  \n  Le véhicule terrestre le plus lourd jamais construit (~14 200–14 196 tonnes). Hauteur : ~96 m, Longueur : ~225 m. Construit en 1995 par TAKRAF ; détenteur du record Guinness de la plus grande/lourde excavatrice terrestre ; enlève jusqu'à ~240 000 tonnes de matériaux par jour.\n\n- **Bagger 288** (excavatrice à roue à godets)  \n  Anciennement détenteur du record du véhicule terrestre le plus lourd. Hauteur : ~96 m, Longueur : ~220 m, Poids : ~13 500 tonnes. Construit en 1978 par Krupp/TAKRAF ; célèbre pour son déplacement de 22 km traversant routes, rivières et autoroutes.\n\n- **NASA Crawler-Transporter** (CT-1 et CT-2)  \n  Le véhicule terrestre automoteur le plus lourd (record Guinness après améliorations). Poids : ~2 721–3 016 tonnes, Dimensions : 40 m × 35 m. Construit en 1965 ; transporte des fusées/engins spatiaux au Centre spatial Kennedy (vitesse max ~1–2 mph).\n\n- **BelAZ-75710** (camion-benne minier)  \n  Le plus grand camion par capacité de charge utile (~450 tonnes). Poids à vide : ~360 tonnes, Longueur : ~20,6 m. Camion de transport ultra-classe moderne ; l'un des plus grands véhicules à roues mobiles.\n\n- **LeTourneau L-2350** (chargeuse sur pneus / chargeuse frontale)  \n  Le plus grand engin de terrassement/chargeuse selon les records Guinness. Énorme capacité du godet ; diamètre des pneus ~4 m. Utilisé dans l'exploitation minière lourde ; l'une des plus grandes chargeuses sur pneus.\n\nAutres machines mobiles énormes notables :\n- Big Muskie (pelle à décapage historique, ~13 500 tonnes, démantelée)\n- Marion 6360 (\"The Captain\", pelle à décapage géante, ~12 700 tonnes, mise au rebut)\n- Diverses machines de forage de tunnels géantes (par ex., modèles Herrenknecht jusqu'à ~17–20 m de diamètre de coupe, bien que souvent pas entièrement automotrices de la même manière)\n\nNote : « Plus grand » dépend du critère — longueur (F60), poids (Bagger 293), mobilité automotrice (NASA Crawler) ou charge utile (BelAZ). Ce sont principalement des véhicules terrestres industriels/miniers/de transport plutôt que des navires, aéronefs ou trains."
+  },
+  "chatWithCodeExample": {
+    "userMessage": "montre-moi de beaux one-liners pour kotlin, swift, c, python, js",
+    "codeIntro": "Voici quelques one-liners courts et élégants dans chaque langage (édition 2025 😄) :"
+  },
+  "exploreSpace": {
+    "topic": "Exploration Spatiale",
+    "items": [
+      {"title": "Mars", "description": "La planète rouge, quatrième à partir du Soleil et cible principale de l'exploration humaine."},
+      {"title": "Trous Noirs", "description": "Régions de l'espace-temps où la gravité est si forte que rien ne peut s'échapper."},
+      {"title": "Apollo 11", "description": "La première mission habitée à se poser sur la Lune en 1969, transportant trois astronautes."},
+      {"title": "Anneaux de Saturne", "description": "Spectaculaires anneaux de glace et de roche encerclant la géante gazeuse Saturne."},
+      {"title": "Programme Voyager", "description": "Deux sondes spatiales jumelles lancées en 1977, désormais dans l'espace interstellaire."},
+      {"title": "Voie Lactée", "description": "Notre galaxie abritant plus de 100 milliards d'étoiles et d'innombrables planètes."},
+      {"title": "Éclipses Solaires", "description": "Lorsque la Lune passe entre le Soleil et la Terre, projetant une ombre."},
+      {"title": "Étoiles à Neutrons", "description": "Vestiges ultra-denses d'étoiles massives comprimés dans une minuscule sphère."}
+    ]
+  }
+}

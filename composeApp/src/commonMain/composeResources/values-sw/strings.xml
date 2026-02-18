@@ -88,4 +88,9 @@
     <string name="privacy_agree_prefix">Kwa kutumia huduma, unakubali </string>
     <string name="privacy_policy">Sera ya Faragha</string>
     <string name="new_conversation">Mazungumzo mapya</string>
+    <string name="topic_people">Watu</string>
+    <string name="topic_sport">Michezo</string>
+    <string name="topic_technology">Teknolojia</string>
+    <string name="topic_countries">Nchi</string>
+    <string name="topic_space">Anga</string>
 </resources>

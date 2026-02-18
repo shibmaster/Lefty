@@ -88,4 +88,9 @@
     <string name="privacy_agree_prefix">サービスを利用することで、</string>
     <string name="privacy_policy">プライバシーポリシー</string>
     <string name="new_conversation">新しい会話</string>
+    <string name="topic_people">人物</string>
+    <string name="topic_sport">スポーツ</string>
+    <string name="topic_technology">テクノロジー</string>
+    <string name="topic_countries">国</string>
+    <string name="topic_space">宇宙</string>
 </resources>

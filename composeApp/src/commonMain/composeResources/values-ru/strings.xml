@@ -88,4 +88,9 @@
     <string name="privacy_agree_prefix">Используя сервис, вы соглашаетесь с </string>
     <string name="privacy_policy">Политикой конфиденциальности</string>
     <string name="new_conversation">Новый разговор</string>
+    <string name="topic_people">Люди</string>
+    <string name="topic_sport">Спорт</string>
+    <string name="topic_technology">Технологии</string>
+    <string name="topic_countries">Страны</string>
+    <string name="topic_space">Космос</string>
 </resources>

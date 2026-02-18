@@ -1,0 +1,23 @@
+{
+  "chatWithMessages": {
+    "userMessage": "geef een lijst van de grootste ooit gebouwde bewegende voertuigen",
+    "assistantMessage": "Hier is een lijst van de **grootste ooit gebouwde bewegende voertuigen** (gericht op enorme mobiele/zelfaangedreven landmachines, ruwweg gerangschikt op een combinatie van fysieke afmetingen, lengte, gewicht en historische bekendheid):\n\n- **Overburden Conveyor Bridge F60**  \n  Grootste qua totale fysieke afmetingen / lengte. Lengte: ~502 m, Hoogte: ~80 m, Gewicht: ~13.600 ton. Gebouwd in Oost-Duitsland (1988–1991) voor het verwijderen van deklaag bij bruinkoolwinning; beweegt zeer langzaam over rails.\n\n- **Bagger 293** (emmerwielgraafmachine)  \n  Zwaarste landvoertuig ooit gebouwd (~14.200–14.196 ton). Hoogte: ~96 m, Lengte: ~225 m. Gebouwd in 1995 door TAKRAF; Guinness-recordhouder voor grootste/zwaarste graafmachine op land; verwijdert tot ~240.000 ton materiaal per dag.\n\n- **Bagger 288** (emmerwielgraafmachine)  \n  Voormalig recordhouder zwaarste landvoertuig. Hoogte: ~96 m, Lengte: ~220 m, Gewicht: ~13.500 ton. Gebouwd in 1978 door Krupp/TAKRAF; beroemd om zijn verplaatsing van 22 km over wegen, rivieren en snelwegen.\n\n- **NASA Crawler-Transporter** (CT-1 en CT-2)  \n  Zwaarste zelfaangedreven landvoertuig (Guinness-record na upgrades). Gewicht: ~2.721–3.016 ton, Afmetingen: 40 m × 35 m. Gebouwd in 1965; transporteert raketten/ruimtevaartuigen bij Kennedy Space Center (max. snelheid ~1–2 mph).\n\n- **BelAZ-75710** (mijnbouwkiepwagen)  \n  Grootste vrachtwagen qua laadvermogen (~450 ton). Leeggewicht: ~360 ton, Lengte: ~20,6 m. Moderne ultraklasse transportwagen; een van de grootste wielbewogen voertuigen.\n\n- **LeTourneau L-2350** (wiellader / frontlader)  \n  Grootste grondverzetmachine/lader volgens Guinness-records. Enorme bakinhoud; banddiameter ~4 m. Gebruikt in zware mijnbouw; een van de grootste wielladers.\n\nAndere opmerkelijke enorme bewegende machines zijn:\n- Big Muskie (historische afgraafschop, ~13.500 ton, ontmanteld)\n- Marion 6360 (\"The Captain\", reusachtige afgraafschop, ~12.700 ton, gesloopt)\n- Diverse reusachtige tunnelboormachines (bijv. Herrenknecht-modellen met tot ~17–20 m diameter boorkoppen, hoewel vaak niet volledig zelfaangedreven op dezelfde manier)\n\nOpmerking: \"Grootste\" hangt af van de maatstaf—lengte (F60), gewicht (Bagger 293), zelfaangedreven mobiliteit (NASA Crawler), of laadvermogen (BelAZ). Dit zijn voornamelijk landgebonden industriële/mijnbouw-/transportvoertuigen in plaats van schepen, vliegtuigen of treinen."
+  },
+  "chatWithCodeExample": {
+    "userMessage": "laat me mooie oneliners zien voor kotlin, swift, c, python, js",
+    "codeIntro": "Hier zijn enkele korte, mooie oneliners in elke taal (2025-editie 😄):"
+  },
+  "exploreSpace": {
+    "topic": "Ruimteverkenning",
+    "items": [
+      {"title": "Mars", "description": "De Rode Planeet, vierde vanaf de Zon en een belangrijk doel voor menselijke verkenning."},
+      {"title": "Zwarte gaten", "description": "Gebieden in de ruimtetijd waar de zwaartekracht zo sterk is dat niets kan ontsnappen."},
+      {"title": "Apollo 11", "description": "De eerste bemande missie die in 1969 op de Maan landde, met drie astronauten aan boord."},
+      {"title": "Ringen van Saturnus", "description": "Spectaculaire ijs- en rotsringen rond de gasreus Saturnus."},
+      {"title": "Voyager-programma", "description": "Twee ruimtevaartuigen gelanceerd in 1977, nu in de interstellaire ruimte."},
+      {"title": "Melkweg", "description": "Ons thuissterrenstelsel met meer dan 100 miljard sterren en ontelbare planeten."},
+      {"title": "Zonsverduisteringen", "description": "Wanneer de Maan tussen de Zon en de Aarde door beweegt en een schaduw werpt."},
+      {"title": "Neutronensterren", "description": "Ultradichte overblijfselen van zware sterren, samengeperst in een kleine bol."}
+    ]
+  }
+}

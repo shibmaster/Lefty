@@ -88,4 +88,9 @@
     <string name="privacy_agree_prefix">సేవను ఉపయోగించడం ద్వారా, మీరు అంగీకరిస్తారు </string>
     <string name="privacy_policy">గోప్యతా విధానం</string>
     <string name="new_conversation">కొత్త సంభాషణ</string>
+    <string name="topic_people">వ్యక్తులు</string>
+    <string name="topic_sport">క్రీడ</string>
+    <string name="topic_technology">సాంకేతికత</string>
+    <string name="topic_countries">దేశాలు</string>
+    <string name="topic_space">అంతరిక్షం</string>
 </resources>

@@ -88,4 +88,9 @@
     <string name="privacy_agree_prefix">পরিষেবা ব্যবহার করে, আপনি সম্মত হচ্ছেন </string>
     <string name="privacy_policy">গোপনীয়তা নীতি</string>
     <string name="new_conversation">নতুন কথোপকথন</string>
+    <string name="topic_people">জনগণ</string>
+    <string name="topic_sport">খেলাধুলা</string>
+    <string name="topic_technology">প্রযুক্তি</string>
+    <string name="topic_countries">দেশসমূহ</string>
+    <string name="topic_space">মহাকাশ</string>
 </resources>

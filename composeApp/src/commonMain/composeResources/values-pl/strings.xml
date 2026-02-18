@@ -88,4 +88,9 @@
     <string name="privacy_agree_prefix">Korzystając z usługi, zgadzasz się z </string>
     <string name="privacy_policy">Polityką prywatności</string>
     <string name="new_conversation">Nowa rozmowa</string>
+    <string name="topic_people">Ludzie</string>
+    <string name="topic_sport">Sport</string>
+    <string name="topic_technology">Technologia</string>
+    <string name="topic_countries">Kraje</string>
+    <string name="topic_space">Kosmos</string>
 </resources>

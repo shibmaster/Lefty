@@ -88,4 +88,9 @@
     <string name="privacy_agree_prefix">使用本服務即表示您同意</string>
     <string name="privacy_policy">隱私權政策</string>
     <string name="new_conversation">新對話</string>
+    <string name="topic_people">人物</string>
+    <string name="topic_sport">體育</string>
+    <string name="topic_technology">科技</string>
+    <string name="topic_countries">國家</string>
+    <string name="topic_space">太空</string>
 </resources>

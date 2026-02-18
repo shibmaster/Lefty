@@ -47,6 +47,7 @@ dependencies {
     testImplementation(libs.filekit.core)
     implementation(libs.tts)
     implementation(libs.tts.compose)
+    testImplementation(libs.kotlinx.serialization.json)
     testImplementation("androidx.compose.material3:material3")
     testImplementation("org.jetbrains.compose.components:components-resources:${libs.versions.compose.multiplatform.get()}")
 }

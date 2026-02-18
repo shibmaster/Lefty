@@ -88,4 +88,9 @@
     <string name="privacy_agree_prefix">Door de service te gebruiken, gaat u akkoord met het </string>
     <string name="privacy_policy">Privacybeleid</string>
     <string name="new_conversation">Nieuw gesprek</string>
+    <string name="topic_people">Mensen</string>
+    <string name="topic_sport">Sport</string>
+    <string name="topic_technology">Technologie</string>
+    <string name="topic_countries">Landen</string>
+    <string name="topic_space">Ruimte</string>
 </resources>

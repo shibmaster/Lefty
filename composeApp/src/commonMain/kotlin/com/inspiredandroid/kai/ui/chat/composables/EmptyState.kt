@@ -52,6 +52,11 @@ import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.logo
 import kai.composeapp.generated.resources.privacy_agree_prefix
 import kai.composeapp.generated.resources.privacy_policy
+import kai.composeapp.generated.resources.topic_countries
+import kai.composeapp.generated.resources.topic_people
+import kai.composeapp.generated.resources.topic_space
+import kai.composeapp.generated.resources.topic_sport
+import kai.composeapp.generated.resources.topic_technology
 import kai.composeapp.generated.resources.welcome_message
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -63,17 +68,16 @@ private data class ExploreTopic(
     val promptTitle: String? = null,
 )
 
-private val topics = listOf(
-    ExploreTopic("People", Icons.Default.Group, Color(0xFFE57373)),
-    ExploreTopic("Sport", Icons.Default.SportsSoccer, Color(0xFF81C784)),
-    ExploreTopic("Technology", Icons.Default.Computer, Color(0xFFFFB74D)),
-    ExploreTopic("Countries", Icons.Default.Public, Color(0xFF64B5F6)),
-    ExploreTopic("Space", Icons.Default.RocketLaunch, Color(0xFFBA68C8), "Space Exploration"),
-)
-
 @Composable
 internal fun EmptyState(modifier: Modifier, isUsingSharedKey: Boolean, onNavigateToExplore: (String) -> Unit = {}) {
     val isInspectionMode = LocalInspectionMode.current
+    val topics = listOf(
+        ExploreTopic(stringResource(Res.string.topic_people), Icons.Default.Group, Color(0xFFE57373), "People"),
+        ExploreTopic(stringResource(Res.string.topic_sport), Icons.Default.SportsSoccer, Color(0xFF81C784), "Sport"),
+        ExploreTopic(stringResource(Res.string.topic_technology), Icons.Default.Computer, Color(0xFFFFB74D), "Technology"),
+        ExploreTopic(stringResource(Res.string.topic_countries), Icons.Default.Public, Color(0xFF64B5F6), "Countries"),
+        ExploreTopic(stringResource(Res.string.topic_space), Icons.Default.RocketLaunch, Color(0xFFBA68C8), "Space Exploration"),
+    )
 
     Column(
         modifier = modifier,

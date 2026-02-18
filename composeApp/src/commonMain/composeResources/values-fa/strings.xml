@@ -88,4 +88,9 @@
     <string name="privacy_agree_prefix">با استفاده از سرویس، شما با </string>
     <string name="privacy_policy">سیاست حفظ حریم خصوصی</string>
     <string name="new_conversation">مکالمه جدید</string>
+    <string name="topic_people">افراد</string>
+    <string name="topic_sport">ورزش</string>
+    <string name="topic_technology">فناوری</string>
+    <string name="topic_countries">کشورها</string>
+    <string name="topic_space">فضا</string>
 </resources>

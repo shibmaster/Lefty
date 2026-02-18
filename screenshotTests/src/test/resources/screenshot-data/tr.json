@@ -1,0 +1,23 @@
+{
+  "chatWithMessages": {
+    "userMessage": "şimdiye kadar yapılmış en büyük hareketli araçların bir listesini ver",
+    "assistantMessage": "İşte **şimdiye kadar yapılmış en büyük hareketli araçların** bir listesi (devasa mobil/kendinden tahrikli kara makinelerine odaklanarak, kabaca fiziksel boyut, uzunluk, ağırlık ve tarihsel tanınırlık kombinasyonuna göre sıralanmıştır):\n\n- **Overburden Conveyor Bridge F60**  \n  Genel fiziksel boyutlar / uzunluk açısından en büyük. Uzunluk: ~502 m, Yükseklik: ~80 m, Ağırlık: ~13.600 ton. Doğu Almanya'da (1988–1991) linyit madenciliğinde örtü tabakası kaldırma için inşa edilmiştir; raylar üzerinde çok yavaş hareket eder.\n\n- **Bagger 293** (kepçeli döner ekskavatör)  \n  Şimdiye kadar yapılmış en ağır kara aracı (~14.200–14.196 ton). Yükseklik: ~96 m, Uzunluk: ~225 m. 1995'te TAKRAF tarafından inşa edilmiştir; en büyük/en ağır karasal ekskavatör olarak Guinness rekoru sahibi; günde ~240.000 tona kadar malzeme kaldırır.\n\n- **Bagger 288** (kepçeli döner ekskavatör)  \n  Daha önce en ağır kara aracı rekorunun sahibiydi. Yükseklik: ~96 m, Uzunluk: ~220 m, Ağırlık: ~13.500 ton. 1978'de Krupp/TAKRAF tarafından inşa edilmiştir; yolları, nehirleri ve otoyolları geçen 22 km'lik yer değiştirmesiyle ünlüdür.\n\n- **NASA Crawler-Transporter** (CT-1 ve CT-2)  \n  En ağır kendinden tahrikli kara aracı (yükseltmelerden sonra Guinness rekoru). Ağırlık: ~2.721–3.016 ton, Boyutlar: 40 m × 35 m. 1965'te inşa edilmiştir; Kennedy Uzay Merkezi'nde roketleri/uzay araçlarını taşır (maks. hız ~1–2 mph).\n\n- **BelAZ-75710** (maden damperli kamyon)  \n  Yük kapasitesine göre en büyük kamyon (~450 ton). Boş ağırlık: ~360 ton, Uzunluk: ~20,6 m. Modern ultra sınıf nakliye kamyonu; en büyük tekerlekli hareketli araçlardan biri.\n\n- **LeTourneau L-2350** (tekerlekli yükleyici / önden yükleyici)  \n  Guinness rekorlarına göre en büyük toprak taşıyıcı/yükleyici. Devasa kepçe kapasitesi; lastik çapı ~4 m. Ağır madencilikte kullanılır; en büyük tekerlekli yükleyicilerden biri.\n\nDiğer dikkat çekici devasa hareketli makineler:\n- Big Muskie (tarihi sıyırma küreği, ~13.500 ton, söküldü)\n- Marion 6360 (\"The Captain\", dev sıyırma küreği, ~12.700 ton, hurdaya çıkarıldı)\n- Çeşitli dev tünel açma makineleri (ör. ~17–20 m çapa kadar kesici kafaları olan Herrenknecht modelleri, ancak çoğu zaman aynı şekilde tam olarak kendinden tahrikli değildir)\n\nNot: \"En büyük\" ölçüte bağlıdır — uzunluk (F60), ağırlık (Bagger 293), kendinden tahrikli hareketlilik (NASA Crawler) veya yük kapasitesi (BelAZ). Bunlar ağırlıklı olarak gemiler, uçaklar veya trenler değil, kara tabanlı endüstriyel/madencilik/nakliye araçlarıdır."
+  },
+  "chatWithCodeExample": {
+    "userMessage": "kotlin, swift, c, python, js için güzel tek satırlık kodlar göster",
+    "codeIntro": "İşte her dilde kısa ve güzel tek satırlık kodlar (2025 sürümü 😄):"
+  },
+  "exploreSpace": {
+    "topic": "Uzay Keşfi",
+    "items": [
+      {"title": "Mars", "description": "Kızıl Gezegen, Güneş'ten dördüncü sırada ve insanlı keşif için başlıca hedef."},
+      {"title": "Kara Delikler", "description": "Yerçekiminin o kadar güçlü olduğu uzay-zaman bölgeleri ki hiçbir şey kaçamaz."},
+      {"title": "Apollo 11", "description": "1969'da Ay'a inen, üç astronot taşıyan ilk mürettebatlı görev."},
+      {"title": "Satürn'ün Halkaları", "description": "Gaz devi Satürn'ü çevreleyen muhteşem buz ve kaya halkaları."},
+      {"title": "Voyager Programı", "description": "1977'de fırlatılan ikiz uzay aracı, şu anda yıldızlararası uzayda."},
+      {"title": "Samanyolu", "description": "100 milyardan fazla yıldız ve sayısız gezegen barındıran ana galaksimiz."},
+      {"title": "Güneş Tutulmaları", "description": "Ay, Güneş ile Dünya arasından geçerek bir gölge oluşturduğunda gerçekleşir."},
+      {"title": "Nötron Yıldızları", "description": "Büyük kütleli yıldızların küçücük bir küreye sıkıştırılmış ultra yoğun kalıntıları."}
+    ]
+  }
+}

@@ -88,4 +88,9 @@
     <string name="privacy_agree_prefix">서비스를 사용함으로써 </string>
     <string name="privacy_policy">개인정보 처리방침</string>
     <string name="new_conversation">새 대화</string>
+    <string name="topic_people">사람</string>
+    <string name="topic_sport">스포츠</string>
+    <string name="topic_technology">기술</string>
+    <string name="topic_countries">국가</string>
+    <string name="topic_space">우주</string>
 </resources>

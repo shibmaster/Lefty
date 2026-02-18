@@ -88,4 +88,9 @@
     <string name="privacy_agree_prefix">Hizmeti kullanarak </string>
     <string name="privacy_policy">Gizlilik Politikası</string>
     <string name="new_conversation">Yeni sohbet</string>
+    <string name="topic_people">İnsanlar</string>
+    <string name="topic_sport">Spor</string>
+    <string name="topic_technology">Teknoloji</string>
+    <string name="topic_countries">Ülkeler</string>
+    <string name="topic_space">Uzay</string>
 </resources>

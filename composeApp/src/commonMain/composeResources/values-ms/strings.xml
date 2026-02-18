@@ -88,4 +88,9 @@
     <string name="privacy_agree_prefix">Dengan menggunakan perkhidmatan, anda bersetuju dengan </string>
     <string name="privacy_policy">Dasar Privasi</string>
     <string name="new_conversation">Perbualan baharu</string>
+    <string name="topic_people">Orang</string>
+    <string name="topic_sport">Sukan</string>
+    <string name="topic_technology">Teknologi</string>
+    <string name="topic_countries">Negara</string>
+    <string name="topic_space">Angkasa</string>
 </resources>

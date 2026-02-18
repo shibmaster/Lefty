@@ -88,4 +88,9 @@
     <string name="privacy_agree_prefix">સેવાનો ઉપયોગ કરીને, તમે સંમત થાઓ છો </string>
     <string name="privacy_policy">ગોપનીયતા નીતિ</string>
     <string name="new_conversation">નવી વાતચીત</string>
+    <string name="topic_people">લોકો</string>
+    <string name="topic_sport">રમતગમત</string>
+    <string name="topic_technology">ટેકનોલોજી</string>
+    <string name="topic_countries">દેશો</string>
+    <string name="topic_space">અવકાશ</string>
 </resources>

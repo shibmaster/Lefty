@@ -1,0 +1,23 @@
+{
+  "chatWithMessages": {
+    "userMessage": "forneça uma lista dos maiores veículos móveis já construídos",
+    "assistantMessage": "Aqui está uma lista dos **maiores veículos móveis já construídos** (com foco em enormes máquinas terrestres móveis/autopropulsadas, classificadas aproximadamente por uma combinação de dimensões físicas, comprimento, peso e reconhecimento histórico):\n\n- **Overburden Conveyor Bridge F60**  \n  Maior em dimensões físicas gerais / comprimento. Comprimento: ~502 m, Altura: ~80 m, Peso: ~13.600 toneladas. Construída na Alemanha Oriental (1988–1991) para remoção de estéril em mineração de linhito; move-se muito lentamente sobre trilhos.\n\n- **Bagger 293** (escavadeira de roda de caçambas)  \n  Veículo terrestre mais pesado já construído (~14.200–14.196 toneladas). Altura: ~96 m, Comprimento: ~225 m. Construída em 1995 pela TAKRAF; detentora do recorde do Guinness como maior/mais pesada escavadeira terrestre; remove até ~240.000 toneladas de material por dia.\n\n- **Bagger 288** (escavadeira de roda de caçambas)  \n  Antiga detentora do recorde de veículo terrestre mais pesado. Altura: ~96 m, Comprimento: ~220 m, Peso: ~13.500 toneladas. Construída em 1978 pela Krupp/TAKRAF; famosa por sua realocação de 22 km cruzando estradas, rios e rodovias.\n\n- **NASA Crawler-Transporter** (CT-1 e CT-2)  \n  Veículo terrestre autopropulsado mais pesado (recorde do Guinness após atualizações). Peso: ~2.721–3.016 toneladas, Dimensões: 40 m × 35 m. Construído em 1965; transporta foguetes/espaçonaves no Kennedy Space Center (velocidade máx. ~1–2 mph).\n\n- **BelAZ-75710** (caminhão basculante de mineração)  \n  Maior caminhão por capacidade de carga (~450 toneladas). Peso vazio: ~360 toneladas, Comprimento: ~20,6 m. Caminhão de transporte ultraclasse moderno; um dos maiores veículos sobre rodas em movimento.\n\n- **LeTourneau L-2350** (pá carregadeira / carregadeira frontal)  \n  Maior máquina de terraplenagem/carregadeira segundo os recordes do Guinness. Enorme capacidade da caçamba; diâmetro do pneu ~4 m. Usada em mineração pesada; uma das maiores carregadeiras sobre rodas.\n\nOutras enormes máquinas móveis notáveis incluem:\n- Big Muskie (escavadeira de decapagem histórica, ~13.500 toneladas, desmontada)\n- Marion 6360 (\"The Captain\", escavadeira de decapagem gigante, ~12.700 toneladas, sucateada)\n- Diversas tuneladoras gigantes (ex.: modelos Herrenknecht com cortadores de até ~17–20 m de diâmetro, embora frequentemente não sejam totalmente autopropulsadas da mesma forma)\n\nObservação: \"Maior\" depende da métrica — comprimento (F60), peso (Bagger 293), mobilidade autopropulsada (NASA Crawler) ou capacidade de carga (BelAZ). Estes são principalmente veículos industriais/de mineração/transporte terrestres, e não navios, aeronaves ou trens."
+  },
+  "chatWithCodeExample": {
+    "userMessage": "me mostre one-liners bonitos para kotlin, swift, c, python, js",
+    "codeIntro": "Aqui estão alguns one-liners curtos e bonitos em cada linguagem (edição 2025 😄):"
+  },
+  "exploreSpace": {
+    "topic": "Exploração Espacial",
+    "items": [
+      {"title": "Marte", "description": "O Planeta Vermelho, quarto a partir do Sol e alvo principal para a exploração humana."},
+      {"title": "Buracos Negros", "description": "Regiões do espaço-tempo onde a gravidade é tão forte que nada consegue escapar."},
+      {"title": "Apollo 11", "description": "A primeira missão tripulada a pousar na Lua em 1969, levando três astronautas."},
+      {"title": "Anéis de Saturno", "description": "Espetaculares anéis de gelo e rocha ao redor do gigante gasoso Saturno."},
+      {"title": "Programa Voyager", "description": "Duas espaçonaves gêmeas lançadas em 1977, agora no espaço interestelar."},
+      {"title": "Via Láctea", "description": "Nossa galáxia natal contendo mais de 100 bilhões de estrelas e incontáveis planetas."},
+      {"title": "Eclipses Solares", "description": "Quando a Lua passa entre o Sol e a Terra, projetando uma sombra."},
+      {"title": "Estrelas de Nêutrons", "description": "Remanescentes ultradensos de estrelas massivas compactados em uma pequena esfera."}
+    ]
+  }
+}

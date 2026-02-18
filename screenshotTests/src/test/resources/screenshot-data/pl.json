@@ -1,0 +1,23 @@
+{
+  "chatWithMessages": {
+    "userMessage": "podaj listę największych kiedykolwiek zbudowanych pojazdów ruchomych",
+    "assistantMessage": "Oto lista **największych kiedykolwiek zbudowanych pojazdów ruchomych** (z naciskiem na ogromne mobilne/samobieżne maszyny lądowe, uszeregowane w przybliżeniu według kombinacji wymiarów fizycznych, długości, masy i rozpoznawalności historycznej):\n\n- **Overburden Conveyor Bridge F60**  \n  Największy pod względem ogólnych wymiarów fizycznych / długości. Długość: ~502 m, Wysokość: ~80 m, Masa: ~13 600 ton. Zbudowany w NRD (1988–1991) do usuwania nadkładu w kopalniach węgla brunatnego; porusza się bardzo wolno po szynach.\n\n- **Bagger 293** (koparka wielonaczyniowa kołowa)  \n  Najcięższy pojazd lądowy w historii (~14 200–14 196 ton). Wysokość: ~96 m, Długość: ~225 m. Zbudowany w 1995 roku przez TAKRAF; rekordzista Guinnessa jako największa/najcięższa koparka lądowa; usuwa do ~240 000 ton materiału dziennie.\n\n- **Bagger 288** (koparka wielonaczyniowa kołowa)  \n  Wcześniejszy rekordzista najcięższego pojazdu lądowego. Wysokość: ~96 m, Długość: ~220 m, Masa: ~13 500 ton. Zbudowany w 1978 roku przez Krupp/TAKRAF; słynny z przemieszczenia na dystansie 22 km, pokonując drogi, rzeki i autostrady.\n\n- **NASA Crawler-Transporter** (CT-1 i CT-2)  \n  Najcięższy samobieżny pojazd lądowy (rekord Guinnessa po modernizacjach). Masa: ~2 721–3 016 ton, Wymiary: 40 m × 35 m. Zbudowany w 1965 roku; transportuje rakiety/statki kosmiczne w Kennedy Space Center (maks. prędkość ~1–2 mph).\n\n- **BelAZ-75710** (górnicza wywrotka)  \n  Największa ciężarówka pod względem ładowności (~450 ton). Masa własna: ~360 ton, Długość: ~20,6 m. Nowoczesna wywrotka ultraklasy; jeden z największych pojazdów kołowych.\n\n- **LeTourneau L-2350** (ładowarka kołowa / ładowarka czołowa)  \n  Największa maszyna do robót ziemnych/ładowarka według rekordów Guinnessa. Ogromna pojemność łyżki; średnica opony ~4 m. Używana w ciężkim górnictwie; jedna z największych ładowarek kołowych.\n\nInne godne uwagi ogromne maszyny ruchome to:\n- Big Muskie (historyczna koparka zdzierająca, ~13 500 ton, zdemontowana)\n- Marion 6360 (\"The Captain\", gigantyczna koparka zdzierająca, ~12 700 ton, złomowana)\n- Różne gigantyczne tarcze drążące tunele (np. modele Herrenknecht o średnicy głowic do ~17–20 m, choć często nie w pełni samobieżne w tym samym sensie)\n\nUwaga: \"Największy\" zależy od kryterium — długość (F60), masa (Bagger 293), samobieżna mobilność (NASA Crawler) lub ładowność (BelAZ). Są to głównie lądowe pojazdy przemysłowe/górnicze/transportowe, a nie statki, samoloty czy pociągi."
+  },
+  "chatWithCodeExample": {
+    "userMessage": "pokaż mi piękne jednolinijkowce dla kotlin, swift, c, python, js",
+    "codeIntro": "Oto kilka krótkich, pięknych jednolinijkowców w każdym języku (edycja 2025 😄):"
+  },
+  "exploreSpace": {
+    "topic": "Eksploracja kosmosu",
+    "items": [
+      {"title": "Mars", "description": "Czerwona Planeta, czwarta od Słońca i główny cel eksploracji załogowej."},
+      {"title": "Czarne dziury", "description": "Obszary czasoprzestrzeni, w których grawitacja jest tak silna, że nic nie może uciec."},
+      {"title": "Apollo 11", "description": "Pierwsza załogowa misja, która wylądowała na Księżycu w 1969 roku, z trzema astronautami na pokładzie."},
+      {"title": "Pierścienie Saturna", "description": "Spektakularne pierścienie z lodu i skał otaczające gazowego olbrzyma Saturna."},
+      {"title": "Program Voyager", "description": "Dwie sondy kosmiczne wystrzelone w 1977 roku, obecnie w przestrzeni międzygwiezdnej."},
+      {"title": "Droga Mleczna", "description": "Nasza galaktyka macierzysta zawierająca ponad 100 miliardów gwiazd i niezliczone planety."},
+      {"title": "Zaćmienia Słońca", "description": "Gdy Księżyc przechodzi między Słońcem a Ziemią, rzucając cień."},
+      {"title": "Gwiazdy neutronowe", "description": "Ultragęste pozostałości masywnych gwiazd ściśnięte w maleńką kulę."}
+    ]
+  }
+}

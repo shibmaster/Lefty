@@ -1,0 +1,23 @@
+{
+  "chatWithMessages": {
+    "userMessage": "berikan daftar kendaraan bergerak terbesar yang pernah dibuat",
+    "assistantMessage": "Berikut adalah daftar **kendaraan bergerak terbesar yang pernah dibuat** (berfokus pada mesin darat bergerak/bertenaga sendiri yang masif, diurutkan secara kasar berdasarkan kombinasi ukuran fisik, panjang, berat, dan pengakuan historis/ketenaran):\n\n- **Overburden Conveyor Bridge F60**  \n  Terbesar berdasarkan dimensi fisik keseluruhan / panjang. Panjang: ~502 m, Tinggi: ~80 m, Berat: ~13.600 ton. Dibangun di Jerman Timur (1988–1991) untuk pemindahan lapisan penutup pertambangan lignit; bergerak sangat lambat di atas rel.\n\n- **Bagger 293** (ekskavator roda timba)  \n  Kendaraan darat terberat yang pernah dibuat (~14.200–14.196 ton). Tinggi: ~96 m, Panjang: ~225 m. Dibangun pada 1995 oleh TAKRAF; pemegang rekor Guinness untuk ekskavator terestrial terbesar/terberat; memindahkan hingga ~240.000 ton material per hari.\n\n- **Bagger 288** (ekskavator roda timba)  \n  Sebelumnya pemegang rekor kendaraan darat terberat. Tinggi: ~96 m, Panjang: ~220 m, Berat: ~13.500 ton. Dibangun pada 1978 oleh Krupp/TAKRAF; terkenal karena relokasi 22 km melintasi jalan, sungai, dan jalan tol.\n\n- **NASA Crawler-Transporter** (CT-1 dan CT-2)  \n  Kendaraan darat bertenaga sendiri terberat (rekor Guinness setelah peningkatan). Berat: ~2.721–3.016 ton, Dimensi: 40 m × 35 m. Dibangun pada 1965; mengangkut roket/pesawat luar angkasa di Kennedy Space Center (kecepatan maks ~1–2 mph).\n\n- **BelAZ-75710** (truk tambang)  \n  Truk terbesar berdasarkan kapasitas muatan (~450 ton). Berat kosong: ~360 ton, Panjang: ~20,6 m. Truk angkut ultra-kelas modern; salah satu kendaraan bergerak beroda terbesar.\n\n- **LeTourneau L-2350** (wheel loader / front-end loader)  \n  Pemindah tanah/loader terbesar menurut rekor Guinness. Kapasitas timba yang sangat besar; diameter ban ~4 m. Digunakan dalam pertambangan berat; salah satu loader beroda terbesar.\n\nMesin bergerak besar lainnya yang patut dicatat termasuk:\n- Big Muskie (sekop penggalian historis, ~13.500 ton, dibongkar)\n- Marion 6360 (\"The Captain\", sekop penggalian raksasa, ~12.700 ton, dihancurkan)\n- Berbagai mesin bor terowongan raksasa (misalnya, model Herrenknecht hingga ~17–20 m diameter pemotong, meskipun sering kali tidak sepenuhnya bertenaga sendiri dengan cara yang sama)\n\nCatatan: \"Terbesar\" tergantung pada metriknya—panjang (F60), berat (Bagger 293), mobilitas bertenaga sendiri (NASA Crawler), atau muatan (BelAZ). Ini terutama kendaraan industri/pertambangan/transportasi berbasis darat, bukan kapal, pesawat, atau kereta api."
+  },
+  "chatWithCodeExample": {
+    "userMessage": "tunjukkan one-liner indah untuk kotlin, swift, c, python, js",
+    "codeIntro": "Berikut beberapa one-liner pendek dan indah dalam setiap bahasa (edisi 2025 😄):"
+  },
+  "exploreSpace": {
+    "topic": "Eksplorasi Luar Angkasa",
+    "items": [
+      {"title": "Mars", "description": "Planet Merah, keempat dari Matahari dan target utama untuk eksplorasi manusia."},
+      {"title": "Lubang Hitam", "description": "Wilayah ruang-waktu di mana gravitasi begitu kuat sehingga tidak ada yang bisa lolos."},
+      {"title": "Apollo 11", "description": "Misi berawak pertama yang mendarat di Bulan pada 1969, membawa tiga astronaut."},
+      {"title": "Cincin Saturnus", "description": "Cincin es dan batuan spektakuler yang mengelilingi raksasa gas Saturnus."},
+      {"title": "Program Voyager", "description": "Dua pesawat ruang angkasa kembar yang diluncurkan pada 1977, kini berada di ruang antarbintang."},
+      {"title": "Bima Sakti", "description": "Galaksi rumah kita yang mengandung lebih dari 100 miliar bintang dan planet yang tak terhitung."},
+      {"title": "Gerhana Matahari", "description": "Ketika Bulan melintas di antara Matahari dan Bumi, menjatuhkan bayangan."},
+      {"title": "Bintang Neutron", "description": "Sisa-sisa ultra-padat dari bintang masif yang terkemas dalam bola kecil."}
+    ]
+  }
+}

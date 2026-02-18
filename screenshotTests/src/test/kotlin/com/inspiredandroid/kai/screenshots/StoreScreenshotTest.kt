@@ -134,7 +134,7 @@ class StoreScreenshotTest(
     fun chatWithMessages() {
         snap("02", DarkColorScheme) {
             ChatScreenContent(
-                uiState = ScreenshotTestData.chatWithMessages,
+                uiState = ScreenshotTestData.localizedChatWithMessages(locale),
                 FakeTextToSpeechInstance(),
             )
         }
@@ -144,7 +144,7 @@ class StoreScreenshotTest(
     fun chatWithCodeExample() {
         snap("03", LightColorScheme) {
             ChatScreenContent(
-                uiState = ScreenshotTestData.chatWithCodeExample,
+                uiState = ScreenshotTestData.localizedChatWithCodeExample(locale),
                 FakeTextToSpeechInstance(),
             )
         }
@@ -166,10 +166,11 @@ class StoreScreenshotTest(
 
     @Test
     fun exploreSpace() {
+        val (topic, uiState) = ScreenshotTestData.localizedExploreSpace(locale)
         snap("06", DarkColorScheme) {
             ExploreScreenContent(
-                uiState = ScreenshotTestData.exploreSpace,
-                topic = "Space Exploration",
+                uiState = uiState,
+                topic = topic,
             )
         }
     }
