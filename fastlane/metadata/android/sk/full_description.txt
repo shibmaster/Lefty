@@ -1,0 +1,25 @@
+Potrebujete rýchle AI odpovede bez zbytočného balastu? Kai je váš bleskovo rýchly, open-source spoločník poháňaný modelmi ako Llama alebo Google Gemini. Ponorte sa do plynulých chatov na brainstorming, písanie, sumarizovanie, učenie alebo len tak pre zábavu – všetko v minimalistickom rozhraní, ktoré sa načíta za pár sekúnd.
+
+Podporované AI služby
+• Ollama: Pripojte sa k vlastným lokálne hostovaným AI modelom pre chaty zamerané na súkromie
+• Gemini: Pokročilá AI od Googlu s vstavanou podporou príloh súborov
+• xAI: Prístup k inovatívnym modelom Grok pre kreatívne a podnetné odpovede
+• Groq: Zažite ultrarýchle spracovanie AI pre okamžité odpovede
+• Mistral AI: Využite bezplatný tarif pre cenovo dostupné interakcie s AI
+
+Kľúčové funkcie
+• Šifrované lokálne úložisko: Bezpečne ukladajte históriu chatu v zariadení pomocou šifrovania end-to-end
+• Prevod textu na reč: Nechajte si odpovede AI prečítať nahlas prirodzene znejúcim hlasom
+• Prílohy súborov: Jednoducho nahrávajte súbory na obohatenie konverzácií (podporované cez Gemini)
+• Plynulé prepínanie služieb: Prepínajte medzi poskytovateľmi AI bez námahy aj uprostred konverzácie
+• Viackolové konverzácie: Užívajte si konverzácie zohľadňujúce kontext, kde si AI pamätá predchádzajúce správy
+• Jednoduché rozhranie chatu: Používateľsky prívetivý dizajn vhodný pre začiatočníkov aj skúsených
+
+Nástroje AI (zapnúť v Nastaveniach)
+• Získať miestny čas: AI poskytne presné informácie o aktuálnom dátume a čase
+• Získať polohu: Dostávajte odpovede zohľadňujúce polohu pomocou detekcie IP adresy
+• Odoslať upozornenie: Dostávajte push notifikácie spustené AI
+• Vytvoriť udalosť v kalendári: Pridávajte udalosti do kalendára priamo z chatu
+
+Súkromie na prvom mieste
+Kai kladie vaše súkromie na prvé miesto: Celá história chatu je uložená lokálne so silným šifrovaním. Pri používaní cloudových AI služieb sú vaše dáta odosielané priamo poskytovateľom na spracovanie – samotná aplikácia žiadne dáta nezbiera. Zostante v kontrole s touto open-source aplikáciou pre chat s AI.

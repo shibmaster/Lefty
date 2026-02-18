@@ -56,6 +56,14 @@ tasks.matching { it.name.contains("preparePaparazzi") }.configureEach {
     dependsOn(":composeApp:copyFossDebugComposeResourcesToAndroidAssets")
 }
 
+// Only run StoreScreenshotTest when generating store screenshots
+tasks.matching { it.name == "testDebugUnitTest" }.configureEach {
+    val task = this as Test
+    if (gradle.startParameter.taskNames.any { it.contains("generateStoreScreenshots") }) {
+        task.filter.includeTestsMatching("*.StoreScreenshotTest")
+    }
+}
+
 // Task to copy screenshots to fastlane and README locations
 tasks.register("updateScreenshots") {
     dependsOn("recordPaparazziDebug")
@@ -86,6 +94,38 @@ tasks.register("updateScreenshots") {
                 file.copyTo(fastlaneDir.resolve("0$destName"), overwrite = true)
                 file.copyTo(readmeDir.resolve("mobile-$destName"), overwrite = true)
                 println("Copied ${file.name} -> fastlane/$destName")
+            }
+        }
+    }
+}
+
+// Task to generate localized store screenshots and copy to fastlane structure
+tasks.register("generateStoreScreenshots") {
+    dependsOn("recordPaparazziDebug")
+
+    doLast {
+        val snapshotsDir = file("src/test/snapshots/images")
+        val fastlaneDir = rootProject.file("fastlane/metadata/android")
+
+        val regex = Regex("""StoreScreenshotTest_\w+\[([^\]]+)\]_store_[a-zA-Z-]+_(\d+(?:_\w+)?)\.png""")
+        val snapshots = snapshotsDir.listFiles()?.filter {
+            it.name.contains("StoreScreenshotTest_") && it.name.contains("_store_") && it.extension == "png"
+        } ?: emptyList()
+
+        if (snapshots.isEmpty()) {
+            println("No store screenshots found.")
+            return@doLast
+        }
+
+        snapshots.forEach { file ->
+            val match = regex.find(file.name)
+            if (match != null) {
+                val (locale, name) = match.destructured
+                val targetDir = File(fastlaneDir, "$locale/images/phoneScreenshots")
+                targetDir.mkdirs()
+                val targetFile = File(targetDir, "$name.png")
+                file.copyTo(targetFile, overwrite = true)
+                println("Copied -> $locale/$name.png")
             }
         }
     }

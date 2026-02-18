@@ -1,0 +1,25 @@
+¿Necesitas respuestas de IA rápidas sin complicaciones? Kai es tu compañero de código abierto ultra veloz, impulsado por modelos como Llama y Gemini de Google. Sumérgete en conversaciones fluidas para generar ideas, escribir, resumir, aprender o simplemente platicar, todo desde una interfaz minimalista que carga en segundos.
+
+Servicios de IA compatibles
+• Ollama: Conéctate a tus modelos de IA locales para conversaciones con enfoque en la privacidad
+• Gemini: La IA avanzada de Google con soporte integrado para adjuntar archivos
+• xAI: Accede a los innovadores modelos Grok para respuestas creativas y perspicaces
+• Groq: Disfruta inferencia de IA ultrarrápida para respuestas al instante
+• Mistral AI: Usa el nivel gratuito para interacciones de IA accesibles y económicas
+
+Funciones principales
+• Almacenamiento local cifrado: Guarda tu historial de chats en tu dispositivo de forma segura con cifrado de extremo a extremo
+• Texto a voz: Escucha las respuestas de la IA en voz alta con una salida de audio natural
+• Adjuntos de archivos: Sube archivos fácilmente para enriquecer tus conversaciones (disponible en Gemini)
+• Cambio de servicio sin fricciones: Cambia entre proveedores de IA en medio de una conversación sin esfuerzo
+• Conversaciones de varios turnos: Disfruta chats con conciencia del contexto donde la IA recuerda mensajes anteriores
+• Interfaz de chat sencilla: Diseño amigable para principiantes y expertos por igual
+
+Herramientas de IA (actívalas en Configuración)
+• Obtener hora local: La IA te proporciona la fecha y hora actuales con precisión
+• Obtener ubicación: Recibe respuestas basadas en tu ubicación mediante detección por IP
+• Enviar notificación: Recibe notificaciones push activadas por la IA
+• Crear evento de calendario: Agrega eventos a tu calendario directamente desde el chat
+
+La privacidad primero
+Kai prioriza tu privacidad: Todo el historial de chats se guarda localmente con cifrado robusto. Al usar servicios de IA en la nube, tus datos se envían directamente a los proveedores para su procesamiento; la app en sí no recopila ningún dato. Mantén el control con esta app de chat de IA de código abierto.

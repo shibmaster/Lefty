@@ -1,0 +1,25 @@
+Ai nevoie de răspunsuri AI rapide, fără complicații? Kai este companionul tău open-source, rapid ca fulgerul, bazat pe modele precum Llama și Gemini de la Google. Intră în conversații fluente pentru brainstorming, scris, rezumare, învățare sau discuții relaxate – totul într-o interfață minimalistă care se încarcă în câteva secunde.
+
+Servicii AI suportate
+• Ollama: Conectează-te la modelele AI locale auto-găzduite pentru conversații axate pe confidențialitate
+• Gemini: AI-ul avansat de la Google cu suport integrat pentru atașarea fișierelor
+• xAI: Accesează modelele inovatoare Grok pentru răspunsuri creative și perspicace
+• Groq: Beneficiază de inferență AI ultra-rapidă pentru răspunsuri instantanee
+• Mistral AI: Folosește nivelul gratuit pentru interacțiuni AI rentabile
+
+Funcționalități principale
+• Stocare locală criptată: Păstrează în siguranță istoricul conversațiilor pe dispozitivul tău cu criptare end-to-end
+• Text-to-Speech: Ascultă răspunsurile AI cu ieșire vocală naturală
+• Atașamente de fișiere: Încarcă ușor fișiere pentru a îmbogăți conversațiile (disponibil pe Gemini)
+• Schimbare ușoară între servicii: Treci de la un furnizor AI la altul fără efort, chiar în mijlocul conversației
+• Conversații cu mai multe runde: Bucură-te de discuții care țin cont de context, unde AI-ul își amintește mesajele anterioare
+• Interfață simplă de chat: Design intuitiv, potrivit atât pentru începători, cât și pentru experți
+
+Instrumente AI (Activează din Setări)
+• Obține ora locală: AI-ul furnizează informații precise despre data și ora curentă
+• Obține locația: Primește răspunsuri bazate pe locație prin detecție IP
+• Trimite notificare: Primește notificări push declanșate de AI
+• Creează eveniment în calendar: Adaugă evenimente în calendar direct din conversație
+
+Confidențialitate pe primul loc
+Kai pune confidențialitatea ta pe primul loc: Întreg istoricul conversațiilor este stocat local cu criptare puternică. La utilizarea serviciilor AI din cloud, datele tale sunt trimise direct la furnizori pentru procesare – aplicația în sine nu colectează niciun fel de date. Rămâi în control cu această aplicație open-source de chat AI.

@@ -1,0 +1,25 @@
+Hai bisogno di risposte rapide dall'IA senza fronzoli? Kai è il tuo assistente open source fulmineo, basato su modelli come Llama e Gemini di Google. Immergiti in conversazioni fluide per fare brainstorming, scrivere, riassumere, imparare o chiacchierare – il tutto con un'interfaccia minimalista che si carica in pochi secondi.
+
+Servizi AI supportati
+• Ollama: Connettiti ai tuoi modelli AI locali self-hosted per conversazioni orientate alla privacy
+• Gemini: L'IA avanzata di Google con supporto integrato per gli allegati
+• xAI: Accedi ai modelli innovativi Grok per risposte creative e perspicaci
+• Groq: Sperimenta un'inferenza AI ultra-rapida per risposte immediate
+• Mistral AI: Sfrutta il piano gratuito per interazioni AI convenienti
+
+Funzionalità principali
+• Archiviazione locale cifrata: Conserva in modo sicuro la cronologia delle chat sul dispositivo con crittografia end-to-end
+• Sintesi vocale: Ascolta le risposte dell'IA con una voce dal suono naturale
+• Allegati: Carica facilmente file per arricchire le tue conversazioni (supportato su Gemini)
+• Cambio servizio immediato: Passa da un provider AI all'altro senza interruzioni, anche a metà conversazione
+• Conversazioni multi-turno: Chat consapevoli del contesto in cui l'IA ricorda i messaggi precedenti
+• Interfaccia chat semplice: Design intuitivo adatto sia ai principianti che agli utenti esperti
+
+Strumenti AI (attivabili nelle Impostazioni)
+• Ora locale: L'IA fornisce data e ora corrente con precisione
+• Posizione: Ricevi risposte basate sulla tua posizione tramite rilevamento IP
+• Invia notifica: Ricevi notifiche push attivate dall'IA
+• Crea evento nel calendario: Aggiungi eventi al tuo calendario direttamente dalla chat
+
+La privacy prima di tutto
+Kai mette la tua privacy al primo posto: tutta la cronologia delle chat viene archiviata localmente con una crittografia robusta. Quando si utilizzano servizi AI cloud, i tuoi dati vengono inviati direttamente ai provider per l'elaborazione – l'app stessa non raccoglie alcun dato. Mantieni il controllo con questa app di chat AI open source.

@@ -1,0 +1,25 @@
+Behoefte aan snelle AI-antwoorden zonder alle fratsen? Kai is jouw razendsnelle, open-source gesprekspartner, aangedreven door modellen zoals Llama en Google's Gemini. Duik in vloeiende gesprekken voor brainstormen, schrijven, samenvatten, leren of een gewoon praatje – allemaal in een minimalistische interface die in een paar seconden laadt.
+
+Ondersteunde AI-diensten
+• Ollama: Verbind met je zelfgehoste lokale AI-modellen voor privacygerichte gesprekken
+• Gemini: Google's geavanceerde AI met ingebouwde ondersteuning voor bestandsbijlagen
+• xAI: Toegang tot innovatieve Grok-modellen voor creatieve en inzichtelijke antwoorden
+• Groq: Ervaar ultrasnelle AI-inferentie voor razendsnelle reacties
+• Mistral AI: Maak gebruik van de gratis laag voor kosteneffectieve AI-interacties
+
+Belangrijkste functies
+• Versleutelde lokale opslag: Bewaar je chatgeschiedenis veilig op je apparaat met end-to-end-versleuteling
+• Tekst-naar-spraak: Hoor AI-antwoorden hardop met natuurlijk klinkende stemuitvoer
+• Bestandsbijlagen: Upload eenvoudig bestanden om je gesprekken te verrijken (ondersteund bij Gemini)
+• Naadloos wisselen van dienst: Schakel moeiteloos tussen AI-aanbieders, ook midden in een gesprek
+• Meerbeurtige gesprekken: Geniet van contextbewuste chats waarbij de AI eerdere berichten onthoudt
+• Eenvoudige chatinterface: Gebruiksvriendelijk ontwerp voor zowel beginners als gevorderden
+
+AI-tools (in te schakelen via Instellingen)
+• Lokale tijd opvragen: AI geeft nauwkeurige informatie over de huidige datum en tijd
+• Locatie opvragen: Ontvang locatiegerichte antwoorden via IP-detectie
+• Melding versturen: Ontvang pushmeldingen die door de AI worden geactiveerd
+• Agenda-afspraak aanmaken: Voeg afspraken rechtstreeks vanuit de chat toe aan je agenda
+
+Privacy voorop
+Kai stelt jouw privacy centraal: alle chatgeschiedenis wordt lokaal opgeslagen met sterke versleuteling. Bij gebruik van cloud-AI-diensten worden je gegevens rechtstreeks naar de aanbieders verstuurd voor verwerking – de app zelf verzamelt geen gegevens. Blijf in controle met deze open-source AI-chatapp.

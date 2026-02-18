@@ -1,0 +1,25 @@
+Besoin de réponses IA rapides sans le superflu ? Kai est votre compagnon open source ultra-rapide, propulsé par des modèles comme Llama et Gemini de Google. Plongez dans des conversations fluides pour brainstormer, écrire, résumer, apprendre ou simplement discuter – le tout dans une interface minimaliste qui se charge en quelques secondes.
+
+Services IA pris en charge
+• Ollama : Connectez-vous à vos modèles IA locaux auto-hébergés pour des conversations respectueuses de votre vie privée
+• Gemini : L'IA avancée de Google avec prise en charge native des pièces jointes
+• xAI : Accédez aux modèles Grok innovants pour des réponses créatives et pertinentes
+• Groq : Profitez d'une inférence IA ultra-rapide pour des réponses instantanées
+• Mistral AI : Exploitez le niveau gratuit pour des interactions IA économiques
+
+Fonctionnalités principales
+• Stockage local chiffré : Conservez votre historique de conversations sur votre appareil en toute sécurité grâce au chiffrement de bout en bout
+• Synthèse vocale : Écoutez les réponses de l'IA à voix haute avec une sortie vocale naturelle
+• Pièces jointes : Importez facilement des fichiers pour enrichir vos conversations (compatible avec Gemini)
+• Changement de service fluide : Passez d'un fournisseur IA à l'autre sans effort, même en cours de conversation
+• Conversations multi-tours : Profitez de discussions contextuelles où l'IA se souvient des messages précédents
+• Interface de chat simple : Un design intuitif adapté aussi bien aux débutants qu'aux utilisateurs avancés
+
+Outils IA (à activer dans les paramètres)
+• Heure locale : L'IA vous fournit la date et l'heure actuelles avec précision
+• Localisation : Recevez des réponses géolocalisées grâce à la détection par IP
+• Envoyer une notification : Recevez des notifications push déclenchées par l'IA
+• Créer un événement calendrier : Ajoutez des événements à votre agenda directement depuis le chat
+
+La confidentialité avant tout
+Kai fait de votre vie privée une priorité : tout l'historique de chat est stocké localement avec un chiffrement robuste. Lorsque vous utilisez des services IA en ligne, vos données sont envoyées directement aux fournisseurs pour traitement – aucune collecte de données par l'application elle-même. Gardez le contrôle avec cette application de chat IA open source.

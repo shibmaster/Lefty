@@ -1,0 +1,25 @@
+Du möchtest schnelle KI-Antworten ohne unnötigen Ballast? Kai ist dein blitzschneller Open-Source-Begleiter, betrieben von Modellen wie Llama und Googles Gemini. Tauche ein in reibungslose Chats zum Brainstormen, Schreiben, Zusammenfassen, Lernen oder einfach für lockere Gespräche – alles in einer minimalistischen Oberfläche, die in Sekundenschnelle lädt.
+
+Unterstützte KI-Dienste
+• Ollama: Verbinde dich mit deinen selbst gehosteten lokalen KI-Modellen für datenschutzorientierte Chats
+• Gemini: Googles fortschrittliche KI mit integrierter Dateianhang-Unterstützung
+• xAI: Greife auf innovative Grok-Modelle für kreative und aufschlussreiche Antworten zu
+• Groq: Erlebe ultraschnelle KI-Inferenz für blitzschnelle Antworten
+• Mistral AI: Nutze den kostenlosen Tarif für günstige KI-Interaktionen
+
+Hauptfunktionen
+• Verschlüsselter lokaler Speicher: Speichere deinen Chatverlauf sicher auf deinem Gerät mit Ende-zu-Ende-Verschlüsselung
+• Text-to-Speech: Lass KI-Antworten mit natürlich klingender Stimme vorlesen
+• Dateianhänge: Lade Dateien einfach hoch, um deine Gespräche zu bereichern (unterstützt bei Gemini)
+• Nahtloser Dienst-Wechsel: Wechsle während eines Gesprächs mühelos zwischen KI-Anbietern
+• Mehrstufige Unterhaltungen: Genieße kontextbewusste Chats, bei denen die KI vorherige Nachrichten berücksichtigt
+• Einfache Chat-Oberfläche: Benutzerfreundliches Design für Einsteiger und Experten gleichermaßen
+
+KI-Tools (in den Einstellungen aktivierbar)
+• Aktuelle Uhrzeit abrufen: Die KI liefert genaue Informationen zu Datum und Uhrzeit
+• Standort abrufen: Erhalte standortbezogene Antworten per IP-Erkennung
+• Benachrichtigung senden: Erhalte Push-Benachrichtigungen, die von der KI ausgelöst werden
+• Kalenderereignis erstellen: Füge Termine direkt aus dem Chat zu deinem Kalender hinzu
+
+Datenschutz an erster Stelle
+Kai stellt deinen Datenschutz in den Vordergrund: Der gesamte Chatverlauf wird lokal mit starker Verschlüsselung gespeichert. Bei der Nutzung von Cloud-KI-Diensten werden deine Daten direkt zur Verarbeitung an die Anbieter übertragen – die App selbst sammelt keine Daten. Behalte die Kontrolle mit dieser Open-Source-KI-Chat-App.

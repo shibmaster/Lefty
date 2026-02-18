@@ -1,0 +1,25 @@
+Precisa de respostas rápidas de IA sem complicação? O Kai é seu companheiro de código aberto ultrarrápido, alimentado por modelos como Llama e Gemini do Google. Mergulhe em conversas fluidas para brainstorming, escrita, resumos, aprendizado ou bate-papos informais – tudo em uma interface minimalista que carrega em segundos.
+
+Serviços de IA Suportados
+• Ollama: Conecte-se aos seus modelos de IA locais auto-hospedados para conversas com foco em privacidade
+• Gemini: IA avançada do Google com suporte integrado a anexos de arquivos
+• xAI: Acesse os inovadores modelos Grok para respostas criativas e perspicazes
+• Groq: Experimente inferência de IA ultrarrápida para respostas ágeis
+• Mistral AI: Utilize o plano gratuito para interações de IA com ótimo custo-benefício
+
+Recursos Principais
+• Armazenamento Local Criptografado: Guarde seu histórico de conversas no dispositivo com segurança e criptografia de ponta a ponta
+• Texto para Fala: Ouça as respostas da IA em voz alta com saída de voz natural
+• Anexos de Arquivos: Envie arquivos facilmente para enriquecer suas conversas (disponível no Gemini)
+• Troca de Serviço sem Interrupção: Alterne entre provedores de IA sem esforço durante a conversa
+• Conversas com Múltiplos Turnos: Aproveite chats com consciência de contexto, onde a IA lembra mensagens anteriores
+• Interface de Chat Simples: Design amigável para iniciantes e especialistas
+
+Ferramentas de IA (Ativar nas Configurações)
+• Obter Hora Local: A IA fornece informações precisas sobre data e hora atuais
+• Obter Localização: Receba respostas baseadas na sua localização via detecção por IP
+• Enviar Notificação: Receba notificações push disparadas pela IA
+• Criar Evento no Calendário: Adicione eventos ao seu calendário diretamente pelo chat
+
+Privacidade em Primeiro Lugar
+O Kai prioriza sua privacidade: Todo o histórico de conversas é armazenado localmente com criptografia robusta. Ao usar serviços de IA na nuvem, seus dados são enviados diretamente aos provedores para processamento – sem coleta de dados pelo próprio aplicativo. Mantenha o controle com este app de chat de IA de código aberto.

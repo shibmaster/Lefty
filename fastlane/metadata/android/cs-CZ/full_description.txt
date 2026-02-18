@@ -1,0 +1,25 @@
+Potřebujete rychlé odpovědi od AI bez zbytečného balastu? Kai je váš bleskurychlý open-source společník poháněný modely jako Llama nebo Google Gemini. Ponořte se do plynulých konverzací pro brainstorming, psaní, shrnování, učení nebo jen tak pro povídání – vše v minimalistickém rozhraní, které se načte během okamžiku.
+
+Podporované AI služby
+• Ollama: Připojte se k vlastním lokálně hostovaným modelům AI pro konverzace zaměřené na soukromí
+• Gemini: Pokročilá AI od Googlu s vestavěnou podporou příloh souborů
+• xAI: Přístup k inovativním modelům Grok pro kreativní a podnětné odpovědi
+• Groq: Zažijte bleskurychlé zpracování AI pro okamžité odpovědi
+• Mistral AI: Využijte bezplatný tarif pro cenově dostupné interakce s AI
+
+Klíčové funkce
+• Šifrované lokální úložiště: Bezpečně ukládejte historii chatu v zařízení s end-to-end šifrováním
+• Převod textu na řeč: Nechte si odpovědi AI přečíst nahlas přirozeně znějícím hlasem
+• Přílohy souborů: Snadno nahrávejte soubory pro obohacení konverzací (podporováno v Gemini)
+• Plynulé přepínání služeb: Přepínejte mezi poskytovateli AI bez námahy i uprostřed konverzace
+• Vícekolové konverzace: Užívejte si konverzace zohledňující kontext, kde si AI pamatuje předchozí zprávy
+• Jednoduché rozhraní chatu: Uživatelsky přívětivý design vhodný pro začátečníky i pokročilé
+
+Nástroje AI (zapnutí v Nastavení)
+• Zjistit místní čas: AI poskytne přesné informace o aktuálním datu a čase
+• Zjistit polohu: Dostávejte odpovědi zohledňující polohu pomocí detekce IP adresy
+• Odeslat oznámení: Dostávejte push notifikace spouštěné AI
+• Vytvořit událost v kalendáři: Přidávejte události do kalendáře přímo z chatu
+
+Soukromí na prvním místě
+Kai dává vaše soukromí na první místo: Veškerá historie chatu je uložena lokálně se silným šifrováním. Při používání cloudových AI služeb jsou vaše data odesílána přímo poskytovatelům ke zpracování – samotná aplikace žádná data neshromažďuje. Zůstaňte v kontrole s touto open-source aplikací pro chat s AI.

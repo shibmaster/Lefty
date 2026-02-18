@@ -1,0 +1,25 @@
+Gereksiz karmaşıklık olmadan hızlı yapay zeka yanıtlarına mı ihtiyacınız var? Kai, Llama ve Google'ın Gemini gibi modellerle desteklenen, şimşek hızında açık kaynaklı yardımcınızdır. Beyin fırtınası, yazarlık, özetleme, öğrenme veya gündelik sohbet için kesintisiz konuşmalara dalın – hepsi saniyeler içinde yüklenen minimalist bir arayüzde.
+
+Desteklenen Yapay Zeka Servisleri
+• Ollama: Gizlilik odaklı sohbetler için kendi barındırdığınız yerel yapay zeka modellerine bağlanın
+• Gemini: Yerleşik dosya eki desteğiyle Google'ın gelişmiş yapay zekası
+• xAI: Yaratıcı ve özgün yanıtlar için yenilikçi Grok modellerine erişin
+• Groq: Hızlı yanıtlar için son derece hızlı yapay zeka çıkarımı deneyimi
+• Mistral AI: Uygun maliyetli yapay zeka etkileşimleri için ücretsiz katmanı kullanın
+
+Temel Özellikler
+• Şifreli Yerel Depolama: Sohbet geçmişinizi uçtan uca şifreleme ile cihazınızda güvenle saklayın
+• Metinden Sese: Yapay zeka yanıtlarını doğal sesli çıkışla yüksek sesten dinleyin
+• Dosya Ekleri: Konuşmalarınızı zenginleştirmek için kolayca dosya yükleyin (Gemini'de desteklenir)
+• Kesintisiz Servis Değiştirme: Konuşma ortasında yapay zeka sağlayıcıları arasında zahmetsizce geçiş yapın
+• Çok Turlu Konuşmalar: Yapay zekanın önceki mesajları hatırladığı bağlam duyarlı sohbetlerin tadını çıkarın
+• Sade Sohbet Arayüzü: Hem yeni başlayanlar hem de uzmanlar için kullanıcı dostu tasarım
+
+Yapay Zeka Araçları (Ayarlardan Etkinleştirin)
+• Yerel Saati Al: Yapay zeka doğru güncel tarih ve saat bilgisi sağlar
+• Konum Al: IP tespiti kullanarak konuma dayalı yanıtlar alın
+• Bildirim Gönder: Yapay zeka tarafından tetiklenen anlık bildirimler alın
+• Takvim Etkinliği Oluştur: Sohbetten doğrudan takviminize etkinlik ekleyin
+
+Önce Gizlilik
+Kai gizliliğinizi ön planda tutar: Tüm sohbet geçmişi güçlü şifreleme ile yerel olarak saklanır. Bulut tabanlı yapay zeka servisleri kullanılırken verileriniz işlenmek üzere doğrudan sağlayıcılara iletilir – uygulama tarafından herhangi bir veri toplanmaz. Bu açık kaynaklı yapay zeka sohbet uygulamasıyla kontrolü elinizde tutun.

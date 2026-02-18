@@ -1,0 +1,25 @@
+Har du brug for hurtige AI-svar uden unødvendigt fyld? Kai er din lynhurtige, open source-følgesvend, drevet af modeller som Llama og Googles Gemini. Dyk ned i problemfrie samtaler til brainstorming, skrivning, opsummering, læring eller bare en hyggesnak – alt sammen i en minimalistisk brugerflade, der loader på få sekunder.
+
+Understøttede AI-tjenester
+• Ollama: Opret forbindelse til dine selvhostede lokale AI-modeller til privatlivsfokuserede samtaler
+• Gemini: Googles avancerede AI med indbygget understøttelse af filvedhæftninger
+• xAI: Få adgang til innovative Grok-modeller for kreative og indsigtsfulde svar
+• Groq: Oplev ultraraskt AI-inferens for lynhurtige svar
+• Mistral AI: Brug det gratis niveau til omkostningseffektive AI-interaktioner
+
+Nøglefunktioner
+• Krypteret lokal lagring: Gem din chathistorik sikkert på din enhed med end-to-end-kryptering
+• Tekst-til-tale: Hør AI-svar højt med naturligt lydende stemmeoutput
+• Filvedhæftninger: Upload nemt filer for at berige dine samtaler (understøttet på Gemini)
+• Problemfri tjenesteskift: Skift ubesværet mellem AI-udbydere midt i en samtale
+• Samtaler med flere ture: Nyd kontekstbevidste chats, hvor AI husker tidligere beskeder
+• Enkel chatbrugerflade: Brugervenligt design for begyndere og eksperter alike
+
+AI-værktøjer (aktivér i indstillinger)
+• Hent lokal tid: AI giver præcis information om aktuel dato og tid
+• Hent placering: Modtag stedbaserede svar via IP-registrering
+• Send notifikation: Modtag push-notifikationer udløst af AI
+• Opret kalenderbegivenhed: Tilføj begivenheder til din kalender direkte fra chatten
+
+Privatliv først
+Kai prioriterer dit privatliv: Al chathistorik gemmes lokalt med stærk kryptering. Når du bruger cloud-AI-tjenester, sendes dine data direkte til udbyderne til behandling – appen indsamler ingen data selv. Bevar kontrollen med denne open source AI-chatapp.

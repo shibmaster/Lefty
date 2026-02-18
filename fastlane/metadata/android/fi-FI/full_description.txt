@@ -1,0 +1,25 @@
+Tarvitsetko nopeita tekoälyvastauksia ilman turhaa monimutkaisuutta? Kai on salamannopea, avoimen lähdekoodin kumppanisi, jota käyttävät Llama- ja Googlen Gemini-mallit. Sukella sujuviin keskusteluihin ideointia, kirjoittamista, tiivistämistä, oppimista tai rentoa jutustelua varten – kaikki minimalistisessa käyttöliittymässä, joka latautuu sekunneissa.
+
+Tuetut tekoälypalvelut
+• Ollama: Yhdistä itse isännöityihin paikallisiin tekoälymalleihin yksityisyyttä arvostaviin keskusteluihin
+• Gemini: Googlen kehittynyt tekoäly sisäänrakennetulla tiedostoliitetoiminnolla
+• xAI: Käytä innovatiivisia Grok-malleja luoviin ja oivaltaviin vastauksiin
+• Groq: Koe ultranopea tekoälyn päättely nopeita vastauksia varten
+• Mistral AI: Hyödynnä ilmaistasoa kustannustehokkaisiin tekoälyvuorovaikutuksiin
+
+Tärkeimmät ominaisuudet
+• Salattu paikallinen tallennus: Tallenna chat-historia turvallisesti laitteellesi päästä päähän -salauksella
+• Tekstistä puheeksi: Kuuntele tekoälyvastaukset ääneen luonnollisella äänellä
+• Tiedostoliitteet: Lataa tiedostoja helposti keskustelujesi rikastamiseksi (tuettu Geminissä)
+• Saumaton palvelunvaihto: Vaihda tekoälypalveluiden välillä vaivattomasti kesken keskustelun
+• Monivaiheiset keskustelut: Nauti asiayhteyden huomioivista chateista, joissa tekoäly muistaa aiemmat viestit
+• Yksinkertainen chat-käyttöliittymä: Käyttäjäystävällinen muotoilu niin aloittelijoille kuin asiantuntijoillekin
+
+Tekoälytyökalut (ota käyttöön asetuksissa)
+• Hae paikallinen aika: Tekoäly tarjoaa tarkan nykyisen päivämäärän ja kellonajan
+• Hae sijainti: Vastaanota sijaintiin perustuvat vastaukset IP-tunnistuksen avulla
+• Lähetä ilmoitus: Saa tekoälyn käynnistämiä push-ilmoituksia
+• Luo kalenteritapahtuma: Lisää tapahtumia kalenteriisi suoraan chatista
+
+Yksityisyys etusijalla
+Kai asettaa yksityisyytesi etusijalle: Kaikki chat-historia tallennetaan paikallisesti vahvalla salauksella. Pilvi-tekoälypalveluita käytettäessä tietosi lähetetään suoraan palveluntarjoajille käsittelyä varten – sovellus itse ei kerää tietoja. Pysy hallinnassa tämän avoimen lähdekoodin tekoäly-chat-sovelluksen avulla.
