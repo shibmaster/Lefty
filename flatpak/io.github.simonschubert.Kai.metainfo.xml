@@ -44,7 +44,7 @@
   <screenshots>
     <screenshot type="default">
       <caption>Main chat interface</caption>
-      <image>https://raw.githubusercontent.com/SimonSchubert/Kai/v1.7.1/screenshots/desktop-1.png</image>
+      <image>https://raw.githubusercontent.com/SimonSchubert/Kai/v1.7.2/screenshots/desktop-1.png</image>
     </screenshot>
   </screenshots>
 
@@ -62,8 +62,8 @@
   </supports>
 
   <releases>
-    <release version="1.7.1" date="2025-05-09">
-      <url type="details">https://github.com/SimonSchubert/Kai/releases/tag/v1.7.1</url>
+    <release version="1.7.2" date="2026-02-19">
+      <url type="details">https://github.com/SimonSchubert/Kai/releases/tag/v1.7.2</url>
     </release>
   </releases>
 </component>
