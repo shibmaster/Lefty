@@ -35,7 +35,12 @@ interface DataRepository {
     fun startNewChat()
 
     // Explore
-    suspend fun askExplore(prompt: String): String
+    suspend fun askExplore(
+        prompt: String,
+        topic: String? = null,
+        topicDetail: String? = null,
+        language: String? = null,
+    ): String
 
     // Tool management
     fun getToolDefinitions(): List<ToolInfo>

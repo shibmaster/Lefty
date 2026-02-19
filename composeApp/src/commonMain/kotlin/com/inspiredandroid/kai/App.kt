@@ -57,7 +57,7 @@ data class Explore(val topic: String)
 
 @Serializable
 @SerialName("explore_detail")
-data class ExploreDetail(val itemName: String)
+data class ExploreDetail(val itemName: String, val topic: String? = null)
 
 @Composable
 @Preview
@@ -150,7 +150,7 @@ fun App(
                             navController.navigateUp()
                         },
                         onNavigateToDetail = { itemName ->
-                            navController.navigate(ExploreDetail(itemName))
+                            navController.navigate(ExploreDetail(itemName = itemName, topic = route.topic))
                         },
                     )
                 }
@@ -158,11 +158,12 @@ fun App(
                     val route = backStackEntry.toRoute<ExploreDetail>()
                     ExploreDetailScreen(
                         itemName = route.itemName,
+                        topic = route.topic,
                         onNavigateBack = {
                             navController.navigateUp()
                         },
                         onNavigateToDetail = { itemName ->
-                            navController.navigate(ExploreDetail(itemName))
+                            navController.navigate(ExploreDetail(itemName = itemName))
                         },
                     )
                 }

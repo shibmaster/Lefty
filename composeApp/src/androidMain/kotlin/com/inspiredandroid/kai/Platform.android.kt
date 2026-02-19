@@ -57,6 +57,8 @@ actual val BackIcon: ImageVector = Icons.AutoMirrored.Filled.ArrowBack
 
 actual val isMobilePlatform: Boolean = true
 
+actual val platformName: String = "Android"
+
 actual fun getAppFilesDirectory(): String {
     val context: Context by inject(Context::class.java)
     return context.filesDir.absolutePath
@@ -102,6 +104,8 @@ actual fun getPlatformToolDefinitions(): List<ToolInfo> = listOf(
         descriptionRes = Res.string.tool_create_calendar_event_description,
     ),
 )
+
+actual fun getDeviceLanguage(): String = java.util.Locale.getDefault().language
 
 actual fun getAvailableTools(): List<Tool> {
     val context: Context by inject(Context::class.java)

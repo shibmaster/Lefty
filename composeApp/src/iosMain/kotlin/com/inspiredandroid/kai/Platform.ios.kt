@@ -20,6 +20,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import platform.Foundation.currentLocale
+import platform.Foundation.languageCode
 import kotlin.coroutines.CoroutineContext
 
 actual fun httpClient(config: HttpClientConfig<*>.() -> Unit): HttpClient = HttpClient(Darwin) {
@@ -33,6 +35,8 @@ actual fun onDragAndDropEventDropped(event: DragAndDropEvent): PlatformFile? = n
 actual val BackIcon: ImageVector = Icons.AutoMirrored.Filled.ArrowBackIos
 
 actual val isMobilePlatform: Boolean = true
+
+actual val platformName: String = "iOS"
 
 actual fun getAppFilesDirectory(): String {
     val paths = platform.Foundation.NSSearchPathForDirectoriesInDomains(
@@ -53,5 +57,7 @@ actual fun getPlatformToolDefinitions(): List<ToolInfo> = CommonTools.commonTool
 private object IosKoinHelper : KoinComponent {
     val appSettings: AppSettings by inject()
 }
+
+actual fun getDeviceLanguage(): String = platform.Foundation.NSLocale.currentLocale.languageCode
 
 actual fun getAvailableTools(): List<Tool> = CommonTools.getCommonTools(IosKoinHelper.appSettings)

@@ -34,3 +34,7 @@ expect fun getAvailableTools(): List<Tool>
  * Unlike getAvailableTools(), this returns all tools regardless of enabled state.
  */
 expect fun getPlatformToolDefinitions(): List<ToolInfo>
+
+expect val platformName: String
+
+expect fun getDeviceLanguage(): String

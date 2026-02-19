@@ -146,7 +146,12 @@ class FakeDataRepository : DataRepository {
         chatHistory.value = emptyList()
     }
 
-    override suspend fun askExplore(prompt: String): String {
+    override suspend fun askExplore(
+        prompt: String,
+        topic: String?,
+        topicDetail: String?,
+        language: String?,
+    ): String {
         askExploreCalls.add(prompt)
         askExploreException?.let { throw it }
         return askExploreResponse

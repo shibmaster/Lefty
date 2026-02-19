@@ -700,7 +700,12 @@ class RemoteDataRepository(
     }
 
     // Explore
-    override suspend fun askExplore(prompt: String): String = when (val service = currentService()) {
+    override suspend fun askExplore(
+        prompt: String,
+        topic: String?,
+        topicDetail: String?,
+        language: String?,
+    ): String = when (val service = currentService()) {
         Service.Gemini -> {
             val messages = listOf(
                 com.inspiredandroid.kai.network.dtos.gemini.GeminiChatRequestDto.Content(
@@ -721,7 +726,13 @@ class RemoteDataRepository(
                     content = prompt,
                 ),
             )
-            val response = sendOpenAICompatibleRequest(service, messages, emptyList(), customHeaders = mapOf("X-Request-Source" to "explore")).getOrThrow()
+            val customHeaders = buildMap {
+                put("X-Request-Source", "explore")
+                topic?.let { put("X-Explore-Topic", it) }
+                topicDetail?.let { put("X-Explore-Detail", it) }
+                language?.let { put("X-Explore-Language", it) }
+            }
+            val response = sendOpenAICompatibleRequest(service, messages, emptyList(), customHeaders = customHeaders).getOrThrow()
             response.choices.firstOrNull()?.message?.content ?: ""
         }
     }

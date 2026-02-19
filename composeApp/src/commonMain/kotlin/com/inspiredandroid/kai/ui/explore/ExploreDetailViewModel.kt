@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.inspiredandroid.kai.data.DataRepository
 import com.inspiredandroid.kai.getBackgroundDispatcher
+import com.inspiredandroid.kai.getDeviceLanguage
 import com.inspiredandroid.kai.network.toUserMessage
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,6 +20,7 @@ import kotlin.coroutines.CoroutineContext
 @Immutable
 data class ExploreDetailUiState(
     val itemName: String = "",
+    val topic: String? = null,
     val markdownContent: String = "",
     val references: List<String> = emptyList(),
     val isLoading: Boolean = false,
@@ -33,9 +35,9 @@ class ExploreDetailViewModel(
     private val _state = MutableStateFlow(ExploreDetailUiState())
     val state: StateFlow<ExploreDetailUiState> = _state
 
-    fun loadItem(itemName: String) {
+    fun loadItem(itemName: String, topic: String? = null) {
         if (_state.value.isLoading) return
-        _state.update { it.copy(isLoading = true, error = null, itemName = itemName) }
+        _state.update { it.copy(isLoading = true, error = null, itemName = itemName, topic = topic) }
 
         viewModelScope.launch(backgroundDispatcher) {
             try {
@@ -44,7 +46,12 @@ Include relevant sections with headers. Be detailed and informative.
 At the very end, add a line "---REFERENCES---" followed by a JSON array of 5 related topic names that the reader might want to explore next.
 Example end: ---REFERENCES---["Topic A","Topic B","Topic C","Topic D","Topic E"]"""
 
-                val response = dataRepository.askExplore(prompt)
+                val response = dataRepository.askExplore(
+                    prompt = prompt,
+                    topic = topic,
+                    topicDetail = itemName,
+                    language = getDeviceLanguage(),
+                )
                 val (content, references) = parseDetailResponse(response)
                 _state.update {
                     it.copy(
@@ -64,7 +71,7 @@ Example end: ---REFERENCES---["Topic A","Topic B","Topic C","Topic D","Topic E"]
         val name = _state.value.itemName
         if (name.isNotEmpty()) {
             _state.update { it.copy(isLoading = false) }
-            loadItem(name)
+            loadItem(name, _state.value.topic)
         }
     }
 

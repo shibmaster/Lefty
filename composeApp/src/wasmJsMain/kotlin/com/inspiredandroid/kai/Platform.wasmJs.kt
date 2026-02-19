@@ -31,6 +31,8 @@ actual val BackIcon: ImageVector = Icons.AutoMirrored.Filled.ArrowBack
 
 actual val isMobilePlatform: Boolean = false
 
+actual val platformName: String = "Web"
+
 actual fun getAppFilesDirectory(): String {
     // Web uses localStorage, return empty string as no file path is needed
     return ""
@@ -48,5 +50,7 @@ actual fun getPlatformToolDefinitions(): List<ToolInfo> = CommonTools.commonTool
 private object WebKoinHelper : KoinComponent {
     val appSettings: AppSettings by inject()
 }
+
+actual fun getDeviceLanguage(): String = kotlinx.browser.window.navigator.language.substringBefore("-")
 
 actual fun getAvailableTools(): List<Tool> = CommonTools.getCommonTools(WebKoinHelper.appSettings)

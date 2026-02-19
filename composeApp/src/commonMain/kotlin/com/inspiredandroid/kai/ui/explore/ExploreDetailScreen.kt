@@ -49,6 +49,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun ExploreDetailScreen(
     itemName: String,
+    topic: String? = null,
     onNavigateBack: () -> Unit,
     onNavigateToDetail: (String) -> Unit,
     viewModel: ExploreDetailViewModel = koinViewModel(),
@@ -56,7 +57,7 @@ fun ExploreDetailScreen(
     val uiState by viewModel.state.collectAsState()
 
     LaunchedEffect(itemName) {
-        viewModel.loadItem(itemName)
+        viewModel.loadItem(itemName, topic)
     }
 
     Column(

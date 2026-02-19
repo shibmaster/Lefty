@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.inspiredandroid.kai.data.DataRepository
 import com.inspiredandroid.kai.getBackgroundDispatcher
+import com.inspiredandroid.kai.getDeviceLanguage
 import com.inspiredandroid.kai.network.toUserMessage
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -51,7 +52,11 @@ Return ONLY a JSON array with objects having "title", "description" (one short s
 Example: [{"title":"Example","description":"A short description","imageUrl":"https://upload.wikimedia.org/..."}]
 Return ONLY the JSON array, no markdown, no explanation."""
 
-                val response = dataRepository.askExplore(prompt)
+                val response = dataRepository.askExplore(
+                    prompt = prompt,
+                    topic = topic,
+                    language = getDeviceLanguage(),
+                )
                 val items = parseItemsFromJson(response)
                 _state.update { it.copy(items = items, isLoading = false) }
             } catch (e: Exception) {

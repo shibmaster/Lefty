@@ -2,8 +2,10 @@ package com.inspiredandroid.kai.network
 
 import com.inspiredandroid.kai.data.AppSettings
 import com.inspiredandroid.kai.data.Service
+import com.inspiredandroid.kai.Version
 import com.inspiredandroid.kai.httpClient
 import com.inspiredandroid.kai.isDebugBuild
+import com.inspiredandroid.kai.platformName
 import com.inspiredandroid.kai.network.dtos.gemini.FunctionDeclaration
 import com.inspiredandroid.kai.network.dtos.gemini.FunctionParameters
 import com.inspiredandroid.kai.network.dtos.gemini.GeminiChatRequestDto
@@ -19,6 +21,7 @@ import io.ktor.client.HttpClientConfig
 import io.ktor.client.call.body
 import io.ktor.client.engine.HttpClientEngineConfig
 import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.UserAgent
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.EMPTY
 import io.ktor.client.plugins.logging.LogLevel
@@ -51,6 +54,9 @@ class Requests(private val appSettings: AppSettings) {
                     explicitNulls = false
                 },
             )
+        }
+        install(UserAgent) {
+            agent = "Kai/${Version.appVersion} ($platformName)"
         }
         install(HttpTimeout) {
             requestTimeoutMillis = 60.seconds.inWholeMilliseconds

@@ -114,9 +114,10 @@ fun ExploreScreenContent(
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = uiState.error ?: "",
+                            text = uiState.error,
                             color = MaterialTheme.colorScheme.error,
                             style = MaterialTheme.typography.bodyMedium,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                         )
                         TextButton(onClick = onRetry) {
                             Text(stringResource(Res.string.explore_retry))

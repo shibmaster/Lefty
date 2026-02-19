@@ -57,6 +57,8 @@ actual val BackIcon: ImageVector = Icons.AutoMirrored.Filled.ArrowBack
 
 actual val isMobilePlatform: Boolean = false
 
+actual val platformName: String = "Desktop"
+
 actual fun getAppFilesDirectory(): String {
     val userHome = System.getProperty("user.home")
     val kaiDir = File("$userHome/.kai")
@@ -75,6 +77,8 @@ actual fun createSecureSettings(): Settings {
 actual fun createLegacySettings(): Settings? = null // Same storage location, no migration needed
 
 actual fun getPlatformToolDefinitions(): List<ToolInfo> = CommonTools.commonToolDefinitions
+
+actual fun getDeviceLanguage(): String = java.util.Locale.getDefault().language
 
 actual fun getAvailableTools(): List<Tool> {
     val appSettings: AppSettings by inject(AppSettings::class.java)
