@@ -123,6 +123,31 @@ jobs:
           name: rpm-package
           path: composeApp/build/compose/binaries/main/rpm/*.rpm
 
+  linux-tar:
+    name: Generate Linux Tarball
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Set execution flag for gradlew
+        run: chmod +x gradlew
+      - name: Build application distribution
+        run: ./gradlew createDistributable --stacktrace
+      - name: Create tarball
+        run: |
+          cd composeApp/build/compose/binaries/main/app
+          tar czf "$GITHUB_WORKSPACE/Kai-linux-x86_64.tar.gz" Kai
+      - name: Upload Tarball Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-tar-package
+          path: Kai-linux-x86_64.tar.gz
+
   appimage:
     name: Generate AppImage
     runs-on: ubuntu-latest
@@ -191,8 +216,8 @@ jobs:
           path: Kai-*.AppImage
 
   release:
-    name: Release APK, DMG, MSI, DEB, RPM and AppImage
-    needs: [apk, dmg, msi, deb, rpm, appimage]
+    name: Release APK, DMG, MSI, DEB, RPM, AppImage and Tarball
+    needs: [apk, dmg, msi, deb, rpm, appimage, linux-tar]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -227,6 +252,11 @@ jobs:
         uses: actions/download-artifact@v4.1.7
         with:
           name: appimage-package
+
+      - name: Download Linux Tarball Artifact
+        uses: actions/download-artifact@v4.1.7
+        with:
+          name: linux-tar-package
 
       - name: List downloaded files (for debugging)
         run: ls -la
@@ -323,3 +353,13 @@ jobs:
           asset_path: ${{ steps.appimage.outputs.file }}
           asset_name: Kai-${{ steps.get_version.outputs.version }}-linux.AppImage
           asset_content_type: application/octet-stream
+
+      - name: Upload Linux Tarball to Github Release
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: Kai-linux-x86_64.tar.gz
+          asset_name: Kai-${{ steps.get_version.outputs.version }}-linux-x86_64.tar.gz
+          asset_content_type: application/gzip
