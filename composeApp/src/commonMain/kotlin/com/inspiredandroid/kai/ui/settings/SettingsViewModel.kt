@@ -35,12 +35,14 @@ class SettingsViewModel(private val dataRepository: DataRepository) : ViewModel(
             apiKey = dataRepository.getApiKey(currentService.value),
             baseUrl = dataRepository.getBaseUrl(currentService.value),
             tools = dataRepository.getToolDefinitions(),
+            showTopics = dataRepository.isShowTopicsEnabled(),
             onSelectTab = ::onSelectTab,
             onSelectService = ::onSelectService,
             onSelectModel = ::onSelectModel,
             onChangeApiKey = ::onChangeApiKey,
             onChangeBaseUrl = ::onChangeBaseUrl,
             onToggleTool = ::onToggleTool,
+            onToggleShowTopics = ::onToggleShowTopics,
         ),
     )
 
@@ -110,6 +112,11 @@ class SettingsViewModel(private val dataRepository: DataRepository) : ViewModel(
             it.copy(baseUrl = baseUrl, connectionStatus = ConnectionStatus.Unknown)
         }
         checkConnectionDebounced(service)
+    }
+
+    private fun onToggleShowTopics(enabled: Boolean) {
+        dataRepository.setShowTopicsEnabled(enabled)
+        _state.update { it.copy(showTopics = enabled) }
     }
 
     private fun onToggleTool(toolId: String, enabled: Boolean) {

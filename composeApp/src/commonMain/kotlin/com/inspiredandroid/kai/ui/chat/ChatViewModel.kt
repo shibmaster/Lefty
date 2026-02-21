@@ -35,6 +35,7 @@ class ChatViewModel(
         ChatUiState(
             actions = actions,
             showPrivacyInfo = true,
+            showTopics = dataRepository.isShowTopicsEnabled(),
         ),
     )
 
@@ -135,6 +136,12 @@ class ChatViewModel(
         dataRepository.startNewChat()
         _state.update {
             it.copy(error = null)
+        }
+    }
+
+    fun refreshSettings() {
+        _state.update {
+            it.copy(showTopics = dataRepository.isShowTopicsEnabled())
         }
     }
 

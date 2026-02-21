@@ -99,6 +99,8 @@ import kai.composeapp.generated.resources.settings_model_label
 import kai.composeapp.generated.resources.settings_openai_compatible_or_other_service
 import kai.composeapp.generated.resources.settings_openai_compatible_providers
 import kai.composeapp.generated.resources.settings_openai_compatible_setup_ollama
+import kai.composeapp.generated.resources.settings_show_topics
+import kai.composeapp.generated.resources.settings_show_topics_description
 import kai.composeapp.generated.resources.settings_sign_in_copy_api_key_from
 import kai.composeapp.generated.resources.settings_status_checking
 import kai.composeapp.generated.resources.settings_status_connected
@@ -107,6 +109,7 @@ import kai.composeapp.generated.resources.settings_status_error_connection_faile
 import kai.composeapp.generated.resources.settings_status_error_invalid_key
 import kai.composeapp.generated.resources.settings_status_error_quota_exhausted
 import kai.composeapp.generated.resources.settings_status_error_rate_limited
+import kai.composeapp.generated.resources.settings_tab_general
 import kai.composeapp.generated.resources.settings_tab_services
 import kai.composeapp.generated.resources.settings_tab_tools
 import kai.composeapp.generated.resources.settings_tools_description
@@ -159,6 +162,13 @@ fun SettingsScreenContent(
             Spacer(Modifier.height(16.dp))
 
             when (uiState.currentTab) {
+                SettingsTab.General -> {
+                    GeneralContent(
+                        showTopics = uiState.showTopics,
+                        onToggleShowTopics = uiState.onToggleShowTopics,
+                    )
+                }
+
                 SettingsTab.Services -> {
                     when (uiState.currentService) {
                         Service.Free -> {
@@ -287,9 +297,17 @@ private fun SettingsTabSelector(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
     ) {
         SegmentedButton(
+            selected = currentTab == SettingsTab.General,
+            onClick = { onSelectTab(SettingsTab.General) },
+            shape = SegmentedButtonDefaults.itemShape(index = 0, count = 3),
+            modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
+        ) {
+            Text(stringResource(Res.string.settings_tab_general))
+        }
+        SegmentedButton(
             selected = currentTab == SettingsTab.Services,
             onClick = { onSelectTab(SettingsTab.Services) },
-            shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+            shape = SegmentedButtonDefaults.itemShape(index = 1, count = 3),
             modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
         ) {
             Text(stringResource(Res.string.settings_tab_services))
@@ -297,7 +315,7 @@ private fun SettingsTabSelector(
         SegmentedButton(
             selected = currentTab == SettingsTab.Tools,
             onClick = { onSelectTab(SettingsTab.Tools) },
-            shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+            shape = SegmentedButtonDefaults.itemShape(index = 2, count = 3),
             modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
         ) {
             Text(stringResource(Res.string.settings_tab_tools))
@@ -896,5 +914,41 @@ private fun ToolItem(
             onCheckedChange = onToggle,
             modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
         )
+    }
+}
+
+@Composable
+private fun GeneralContent(
+    showTopics: Boolean,
+    onToggleShowTopics: (Boolean) -> Unit,
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(Res.string.settings_show_topics),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+                Text(
+                    text = stringResource(Res.string.settings_show_topics_description),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+
+            Spacer(Modifier.width(16.dp))
+
+            Switch(
+                checked = showTopics,
+                onCheckedChange = onToggleShowTopics,
+                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
+            )
+        }
     }
 }

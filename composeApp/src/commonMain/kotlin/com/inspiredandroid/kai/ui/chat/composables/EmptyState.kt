@@ -70,7 +70,7 @@ private data class ExploreTopic(
 )
 
 @Composable
-internal fun EmptyState(modifier: Modifier, isUsingSharedKey: Boolean, onNavigateToExplore: (String) -> Unit = {}) {
+internal fun EmptyState(modifier: Modifier, isUsingSharedKey: Boolean, showTopics: Boolean = true, onNavigateToExplore: (String) -> Unit = {}) {
     val isInspectionMode = LocalInspectionMode.current
     val topics = listOf(
         ExploreTopic(stringResource(Res.string.topic_people), Icons.Default.Group, Color(0xFFE57373), "People"),
@@ -138,17 +138,19 @@ internal fun EmptyState(modifier: Modifier, isUsingSharedKey: Boolean, onNavigat
                 )
             }
             Spacer(Modifier.height(24.dp))
-            LazyRow(
-                contentPadding = PaddingValues(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                items(topics) { topic ->
-                    TopicCard(
-                        topic = topic,
-                        onClick = {
-                            onNavigateToExplore(topic.promptTitle ?: topic.title)
-                        },
-                    )
+            if (showTopics) {
+                LazyRow(
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    items(topics) { topic ->
+                        TopicCard(
+                            topic = topic,
+                            onClick = {
+                                onNavigateToExplore(topic.promptTitle ?: topic.title)
+                            },
+                        )
+                    }
                 }
             }
         }

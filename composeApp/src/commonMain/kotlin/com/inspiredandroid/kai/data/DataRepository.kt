@@ -45,4 +45,8 @@ interface DataRepository {
     // Tool management
     fun getToolDefinitions(): List<ToolInfo>
     fun setToolEnabled(toolId: String, enabled: Boolean)
+
+    // General settings
+    fun isShowTopicsEnabled(): Boolean
+    fun setShowTopicsEnabled(enabled: Boolean)
 }

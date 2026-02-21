@@ -127,6 +127,7 @@ fun App(
                 composable<Settings> {
                     SettingsScreen(
                         onNavigateBack = {
+                            chatViewModel.refreshSettings()
                             navController.navigateUp()
                         },
                     )

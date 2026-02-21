@@ -118,11 +118,19 @@ class AppSettings(private val settings: Settings) {
         }
     }
 
+    // Show topics setting
+    fun isShowTopicsEnabled(): Boolean = settings.getBoolean(KEY_SHOW_TOPICS, true)
+
+    fun setShowTopicsEnabled(enabled: Boolean) {
+        settings.putBoolean(KEY_SHOW_TOPICS, enabled)
+    }
+
     companion object {
         const val KEY_CURRENT_SERVICE_ID = "current_service_id"
         const val KEY_APP_OPENS = "app_opens"
         const val KEY_ENCRYPTION_KEY = "encryption_key"
         const val KEY_MIGRATION_COMPLETE = "migration_complete_v1"
         const val KEY_TOOL_PREFIX = "tool_enabled_"
+        const val KEY_SHOW_TOPICS = "show_topics"
     }
 }

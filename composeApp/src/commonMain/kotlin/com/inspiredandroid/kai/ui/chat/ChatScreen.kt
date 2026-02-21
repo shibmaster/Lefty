@@ -118,7 +118,7 @@ fun ChatScreenContent(
                     ),
             ) {
                 if (uiState.history.isEmpty()) {
-                    EmptyState(Modifier.fillMaxWidth().weight(1f), uiState.showPrivacyInfo, onNavigateToExplore)
+                    EmptyState(Modifier.fillMaxWidth().weight(1f), uiState.showPrivacyInfo, uiState.showTopics, onNavigateToExplore)
                 } else {
                     val listState = rememberLazyListState()
                     val componentScope = rememberCoroutineScope()

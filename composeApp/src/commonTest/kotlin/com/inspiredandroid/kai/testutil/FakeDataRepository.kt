@@ -161,4 +161,9 @@ class FakeDataRepository : DataRepository {
 
     override fun setToolEnabled(toolId: String, enabled: Boolean) {
     }
+
+    override fun isShowTopicsEnabled(): Boolean = true
+
+    override fun setShowTopicsEnabled(enabled: Boolean) {
+    }
 }

@@ -533,4 +533,11 @@ class RemoteDataRepository(
     override fun setToolEnabled(toolId: String, enabled: Boolean) {
         appSettings.setToolEnabled(toolId, enabled)
     }
+
+    // General settings
+    override fun isShowTopicsEnabled(): Boolean = appSettings.isShowTopicsEnabled()
+
+    override fun setShowTopicsEnabled(enabled: Boolean) {
+        appSettings.setShowTopicsEnabled(enabled)
+    }
 }

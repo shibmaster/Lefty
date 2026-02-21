@@ -60,8 +60,11 @@
     <string name="settings_tools_title">Tools</string>
     <string name="settings_tools_description">Enable or disable AI tools that can perform actions on your behalf.</string>
     <string name="settings_tools_none_available">No tools available on this platform.</string>
+    <string name="settings_tab_general">General</string>
     <string name="settings_tab_services">Services</string>
     <string name="settings_tab_tools">Tools</string>
+    <string name="settings_show_topics">Show Topics</string>
+    <string name="settings_show_topics_description">Show topic suggestions on the empty chat screen</string>
     <string name="explore_retry">Retry</string>
     <string name="explore_related_topics">Related Topics</string>
     <string name="history_just_now">Just now</string>
