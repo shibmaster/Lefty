@@ -17,9 +17,7 @@ import com.inspiredandroid.kai.network.dtos.openaicompatible.OpenAICompatibleCha
 import com.inspiredandroid.kai.network.dtos.openaicompatible.OpenAICompatibleModelResponseDto
 import com.inspiredandroid.kai.network.tools.Tool
 import com.inspiredandroid.kai.platformName
-import io.ktor.client.HttpClientConfig
 import io.ktor.client.call.body
-import io.ktor.client.engine.HttpClientEngineConfig
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.UserAgent
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -78,6 +76,8 @@ class Requests(private val appSettings: AppSettings) {
         }
     }
 
+    // region Gemini
+
     suspend fun getGeminiModels(): Result<GeminiModelsResponseDto> = try {
         val apiKey = appSettings.getApiKey(Service.Gemini).ifEmpty { throw GeminiInvalidApiKeyException() }
         val response: HttpResponse =
@@ -135,18 +135,28 @@ class Requests(private val appSettings: AppSettings) {
         Result.failure(e)
     }
 
-    suspend fun freeChat(
+    // endregion
+
+    // region OpenAI-compatible (unified)
+
+    suspend fun openAICompatibleChat(
+        service: Service,
         messages: List<OpenAICompatibleChatRequestDto.Message>,
-        tools: List<Tool>,
+        tools: List<Tool> = emptyList(),
         customHeaders: Map<String, String> = emptyMap(),
     ): Result<OpenAICompatibleChatResponseDto> = try {
+        val apiKey = getApiKeyOrThrow(service)
+        val model = if (service == Service.Free) null else appSettings.getSelectedModelId(service)
+        val url = resolveUrl(service, service.chatUrl)
         val response: HttpResponse =
-            defaultClient.post(Service.Free.chatUrl) {
+            defaultClient.post(url) {
                 contentType(ContentType.Application.Json)
+                apiKey?.let { bearerAuth(it) }
                 customHeaders.forEach { (k, v) -> header(k, v) }
                 setBody(
                     OpenAICompatibleChatRequestDto(
                         messages = messages,
+                        model = model,
                         tools = tools.map { it.toRequestTool() }.ifEmpty { null },
                     ),
                 )
@@ -154,18 +164,100 @@ class Requests(private val appSettings: AppSettings) {
         if (response.status.isSuccess()) {
             Result.success(response.body())
         } else {
+            handleOpenAICompatibleError(service, response)
+        }
+    } catch (e: OpenAICompatibleApiException) {
+        Result.failure(e)
+    } catch (e: Exception) {
+        Result.failure(OpenAICompatibleConnectionException())
+    }
+
+    suspend fun getOpenAICompatibleModels(service: Service): Result<OpenAICompatibleModelResponseDto> = try {
+        val modelsUrl = service.modelsUrl
+            ?: return Result.failure(OpenAICompatibleGenericException("Models URL not configured for ${service.displayName}"))
+        val url = resolveUrl(service, modelsUrl)
+        val apiKey = getOptionalApiKey(service)
+        val response: HttpResponse = defaultClient.get(url) {
+            apiKey?.let { bearerAuth(it) }
+        }
+        if (response.status.isSuccess()) {
+            Result.success(response.body())
+        } else {
+            handleOpenAICompatibleError(service, response)
+        }
+    } catch (e: OpenAICompatibleApiException) {
+        Result.failure(e)
+    } catch (e: Exception) {
+        Result.failure(OpenAICompatibleConnectionException())
+    }
+
+    suspend fun validateOpenRouterApiKey(): Result<Unit> = try {
+        val apiKey = appSettings.getApiKey(Service.OpenRouter).ifEmpty { throw OpenAICompatibleInvalidApiKeyException() }
+        val response: HttpResponse = defaultClient.get("https://openrouter.ai/api/v1/auth/key") {
+            bearerAuth(apiKey)
+        }
+        if (response.status.isSuccess()) {
+            Result.success(Unit)
+        } else {
             when (response.status.value) {
-                401 -> throw OpenAICompatibleInvalidApiKeyException()
-
-                429 -> throw OpenAICompatibleRateLimitExceededException()
-
-                else -> {
-                    throw GenericNetworkException("Free tier request failed: ${response.status}")
-                }
+                401, 403 -> throw OpenAICompatibleInvalidApiKeyException()
+                else -> throw OpenAICompatibleGenericException("Failed to validate OpenRouter API key: ${response.status}")
             }
         }
-    } catch (e: Exception) {
+    } catch (e: OpenAICompatibleApiException) {
         Result.failure(e)
+    } catch (e: Exception) {
+        Result.failure(OpenAICompatibleConnectionException())
+    }
+
+    // endregion
+
+    // region Helpers
+
+    private fun resolveUrl(service: Service, path: String): String = if (service == Service.OpenAICompatible) {
+        "${appSettings.getBaseUrl(service)}$path"
+    } else {
+        path
+    }
+
+    private fun getApiKeyOrThrow(service: Service): String? {
+        if (!service.requiresApiKey && !service.supportsOptionalApiKey) return null
+        val key = appSettings.getApiKey(service)
+        if (service.requiresApiKey && key.isEmpty()) throw OpenAICompatibleInvalidApiKeyException()
+        return key.ifEmpty { null }
+    }
+
+    private fun getOptionalApiKey(service: Service): String? {
+        if (!service.requiresApiKey && !service.supportsOptionalApiKey) return null
+        return appSettings.getApiKey(service).ifEmpty { null }
+    }
+
+    private suspend fun handleOpenAICompatibleError(
+        service: Service,
+        response: HttpResponse,
+    ): Nothing {
+        when (response.status.value) {
+            401 -> throw OpenAICompatibleInvalidApiKeyException()
+
+            402 -> throw OpenAICompatibleQuotaExhaustedException()
+
+            404 -> throw OpenAICompatibleModelNotFoundException(appSettings.getSelectedModelId(service))
+
+            429 -> throw OpenAICompatibleRateLimitExceededException()
+
+            else -> {
+                if (service == Service.XAI) {
+                    val responseBody = response.bodyAsText()
+                    if (responseBody.contains("exhausted", ignoreCase = true) ||
+                        responseBody.contains("credits", ignoreCase = true) ||
+                        responseBody.contains("spending limit", ignoreCase = true)
+                    ) {
+                        throw OpenAICompatibleQuotaExhaustedException()
+                    }
+                }
+                throw OpenAICompatibleGenericException("${service.displayName} request failed: ${response.status}")
+            }
+        }
     }
 
     private fun Tool.toRequestTool(): OpenAICompatibleChatRequestDto.Tool = OpenAICompatibleChatRequestDto.Tool(
@@ -202,298 +294,5 @@ class Requests(private val appSettings: AppSettings) {
         ),
     )
 
-    suspend fun groqChat(
-        messages: List<OpenAICompatibleChatRequestDto.Message>,
-        tools: List<Tool> = emptyList(),
-    ): Result<OpenAICompatibleChatResponseDto> = try {
-        val apiKey = appSettings.getApiKey(Service.Groq).ifEmpty { throw OpenAICompatibleInvalidApiKeyException() }
-        val model = appSettings.getSelectedModelId(Service.Groq)
-        val response: HttpResponse =
-            defaultClient.post(Service.Groq.chatUrl) {
-                contentType(ContentType.Application.Json)
-                bearerAuth(apiKey)
-                setBody(
-                    OpenAICompatibleChatRequestDto(
-                        messages = messages,
-                        model = model,
-                        tools = tools.map { it.toRequestTool() }.ifEmpty { null },
-                    ),
-                )
-            }
-        if (response.status.isSuccess()) {
-            Result.success(response.body())
-        } else {
-            when (response.status.value) {
-                401 -> throw OpenAICompatibleInvalidApiKeyException()
-                429 -> throw OpenAICompatibleRateLimitExceededException()
-                else -> throw OpenAICompatibleGenericException("Groq request failed: ${response.status}")
-            }
-        }
-    } catch (e: Exception) {
-        Result.failure(e)
-    }
-
-    suspend fun getGroqModels(): Result<OpenAICompatibleModelResponseDto> = try {
-        val apiKey = appSettings.getApiKey(Service.Groq).ifEmpty { throw OpenAICompatibleInvalidApiKeyException() }
-        val modelsUrl = Service.Groq.modelsUrl
-            ?: return Result.failure(OpenAICompatibleGenericException("Models URL not configured for Groq"))
-        val response: HttpResponse = defaultClient.get(modelsUrl) {
-            bearerAuth(apiKey)
-        }
-        if (response.status.isSuccess()) {
-            Result.success(response.body())
-        } else {
-            when (response.status.value) {
-                401 -> throw OpenAICompatibleInvalidApiKeyException()
-                else -> throw OpenAICompatibleGenericException("Failed to fetch Groq models: ${response.status}")
-            }
-        }
-    } catch (e: OpenAICompatibleApiException) {
-        Result.failure(e)
-    } catch (e: Exception) {
-        Result.failure(OpenAICompatibleConnectionException())
-    }
-
-    suspend fun xaiChat(
-        messages: List<OpenAICompatibleChatRequestDto.Message>,
-        tools: List<Tool> = emptyList(),
-    ): Result<OpenAICompatibleChatResponseDto> = try {
-        val apiKey = appSettings.getApiKey(Service.XAI).ifEmpty { throw OpenAICompatibleInvalidApiKeyException() }
-        val model = appSettings.getSelectedModelId(Service.XAI)
-        val response: HttpResponse =
-            defaultClient.post(Service.XAI.chatUrl) {
-                contentType(ContentType.Application.Json)
-                bearerAuth(apiKey)
-                setBody(
-                    OpenAICompatibleChatRequestDto(
-                        messages = messages,
-                        model = model,
-                        tools = tools.map { it.toRequestTool() }.ifEmpty { null },
-                    ),
-                )
-            }
-        if (response.status.isSuccess()) {
-            Result.success(response.body())
-        } else {
-            when (response.status.value) {
-                401 -> throw OpenAICompatibleInvalidApiKeyException()
-                429 -> throw OpenAICompatibleRateLimitExceededException()
-                else -> throw OpenAICompatibleGenericException("xAI request failed: ${response.status}")
-            }
-        }
-    } catch (e: Exception) {
-        Result.failure(e)
-    }
-
-    suspend fun getXaiModels(): Result<OpenAICompatibleModelResponseDto> = try {
-        val apiKey = appSettings.getApiKey(Service.XAI).ifEmpty { throw OpenAICompatibleInvalidApiKeyException() }
-        val modelsUrl = Service.XAI.modelsUrl
-            ?: return Result.failure(OpenAICompatibleGenericException("Models URL not configured for xAI"))
-        val response: HttpResponse = defaultClient.get(modelsUrl) {
-            bearerAuth(apiKey)
-        }
-        if (response.status.isSuccess()) {
-            Result.success(response.body())
-        } else {
-            when (response.status.value) {
-                401 -> throw OpenAICompatibleInvalidApiKeyException()
-
-                402 -> throw OpenAICompatibleQuotaExhaustedException()
-
-                else -> {
-                    val responseBody = response.bodyAsText()
-                    if (responseBody.contains("exhausted", ignoreCase = true) ||
-                        responseBody.contains("credits", ignoreCase = true) ||
-                        responseBody.contains("spending limit", ignoreCase = true)
-                    ) {
-                        throw OpenAICompatibleQuotaExhaustedException()
-                    }
-                    throw OpenAICompatibleGenericException("Failed to fetch xAI models: ${response.status}")
-                }
-            }
-        }
-    } catch (e: OpenAICompatibleApiException) {
-        Result.failure(e)
-    } catch (e: Exception) {
-        Result.failure(OpenAICompatibleConnectionException())
-    }
-
-    suspend fun openRouterChat(
-        messages: List<OpenAICompatibleChatRequestDto.Message>,
-        tools: List<Tool> = emptyList(),
-    ): Result<OpenAICompatibleChatResponseDto> = try {
-        val apiKey = appSettings.getApiKey(Service.OpenRouter).ifEmpty { throw OpenAICompatibleInvalidApiKeyException() }
-        val model = appSettings.getSelectedModelId(Service.OpenRouter)
-        val response: HttpResponse =
-            defaultClient.post(Service.OpenRouter.chatUrl) {
-                contentType(ContentType.Application.Json)
-                bearerAuth(apiKey)
-                setBody(
-                    OpenAICompatibleChatRequestDto(
-                        messages = messages,
-                        model = model,
-                        tools = tools.map { it.toRequestTool() }.ifEmpty { null },
-                    ),
-                )
-            }
-        if (response.status.isSuccess()) {
-            Result.success(response.body())
-        } else {
-            when (response.status.value) {
-                401 -> throw OpenAICompatibleInvalidApiKeyException()
-                429 -> throw OpenAICompatibleRateLimitExceededException()
-                else -> throw OpenAICompatibleGenericException("OpenRouter request failed: ${response.status}")
-            }
-        }
-    } catch (e: Exception) {
-        Result.failure(e)
-    }
-
-    suspend fun nvidiaChat(
-        messages: List<OpenAICompatibleChatRequestDto.Message>,
-        tools: List<Tool> = emptyList(),
-    ): Result<OpenAICompatibleChatResponseDto> = try {
-        val apiKey = appSettings.getApiKey(Service.Nvidia).ifEmpty { throw OpenAICompatibleInvalidApiKeyException() }
-        val model = appSettings.getSelectedModelId(Service.Nvidia)
-        val response: HttpResponse =
-            defaultClient.post(Service.Nvidia.chatUrl) {
-                contentType(ContentType.Application.Json)
-                bearerAuth(apiKey)
-                setBody(
-                    OpenAICompatibleChatRequestDto(
-                        messages = messages,
-                        model = model,
-                        tools = tools.map { it.toRequestTool() }.ifEmpty { null },
-                    ),
-                )
-            }
-        if (response.status.isSuccess()) {
-            Result.success(response.body())
-        } else {
-            when (response.status.value) {
-                401 -> throw OpenAICompatibleInvalidApiKeyException()
-                429 -> throw OpenAICompatibleRateLimitExceededException()
-                else -> throw OpenAICompatibleGenericException("NVIDIA request failed: ${response.status}")
-            }
-        }
-    } catch (e: Exception) {
-        Result.failure(e)
-    }
-
-    suspend fun getNvidiaModels(): Result<OpenAICompatibleModelResponseDto> = try {
-        val apiKey = appSettings.getApiKey(Service.Nvidia).ifEmpty { throw OpenAICompatibleInvalidApiKeyException() }
-        val modelsUrl = Service.Nvidia.modelsUrl
-            ?: return Result.failure(OpenAICompatibleGenericException("Models URL not configured for NVIDIA"))
-        val response: HttpResponse = defaultClient.get(modelsUrl) {
-            bearerAuth(apiKey)
-        }
-        if (response.status.isSuccess()) {
-            Result.success(response.body())
-        } else {
-            when (response.status.value) {
-                401 -> throw OpenAICompatibleInvalidApiKeyException()
-                else -> throw OpenAICompatibleGenericException("Failed to fetch NVIDIA models: ${response.status}")
-            }
-        }
-    } catch (e: OpenAICompatibleApiException) {
-        Result.failure(e)
-    } catch (e: Exception) {
-        Result.failure(OpenAICompatibleConnectionException())
-    }
-
-    suspend fun getOpenRouterModels(): Result<OpenAICompatibleModelResponseDto> = try {
-        val modelsUrl = Service.OpenRouter.modelsUrl
-            ?: return Result.failure(OpenAICompatibleGenericException("Models URL not configured for OpenRouter"))
-        // OpenRouter's models endpoint is public, no auth needed
-        val response: HttpResponse = defaultClient.get(modelsUrl)
-        if (response.status.isSuccess()) {
-            Result.success(response.body())
-        } else {
-            throw OpenAICompatibleGenericException("Failed to fetch OpenRouter models: ${response.status}")
-        }
-    } catch (e: OpenAICompatibleApiException) {
-        Result.failure(e)
-    } catch (e: Exception) {
-        Result.failure(OpenAICompatibleConnectionException())
-    }
-
-    suspend fun validateOpenRouterApiKey(): Result<Unit> = try {
-        val apiKey = appSettings.getApiKey(Service.OpenRouter).ifEmpty { throw OpenAICompatibleInvalidApiKeyException() }
-        val response: HttpResponse = defaultClient.get("https://openrouter.ai/api/v1/auth/key") {
-            bearerAuth(apiKey)
-        }
-        if (response.status.isSuccess()) {
-            Result.success(Unit)
-        } else {
-            when (response.status.value) {
-                401, 403 -> throw OpenAICompatibleInvalidApiKeyException()
-                else -> throw OpenAICompatibleGenericException("Failed to validate OpenRouter API key: ${response.status}")
-            }
-        }
-    } catch (e: OpenAICompatibleApiException) {
-        Result.failure(e)
-    } catch (e: Exception) {
-        Result.failure(OpenAICompatibleConnectionException())
-    }
-
-    suspend fun openAICompatibleChat(
-        messages: List<OpenAICompatibleChatRequestDto.Message>,
-        baseUrl: String,
-        tools: List<Tool> = emptyList(),
-    ): Result<OpenAICompatibleChatResponseDto> = try {
-        val model = appSettings.getSelectedModelId(Service.OpenAICompatible)
-        if (model.isEmpty()) {
-            throw OpenAICompatibleModelNotFoundException("No model selected")
-        }
-        val apiKey = appSettings.getApiKey(Service.OpenAICompatible)
-        val response: HttpResponse =
-            defaultClient.post("$baseUrl${Service.OpenAICompatible.chatUrl}") {
-                contentType(ContentType.Application.Json)
-                if (apiKey.isNotBlank()) {
-                    bearerAuth(apiKey)
-                }
-                setBody(
-                    OpenAICompatibleChatRequestDto(
-                        messages = messages,
-                        model = model,
-                        tools = tools.map { it.toRequestTool() }.ifEmpty { null },
-                    ),
-                )
-            }
-        if (response.status.isSuccess()) {
-            Result.success(response.body())
-        } else {
-            when (response.status.value) {
-                401 -> throw OpenAICompatibleInvalidApiKeyException()
-                404 -> throw OpenAICompatibleModelNotFoundException(model)
-                else -> throw OpenAICompatibleGenericException("Request failed: ${response.status}")
-            }
-        }
-    } catch (e: OpenAICompatibleApiException) {
-        Result.failure(e)
-    } catch (e: Exception) {
-        Result.failure(OpenAICompatibleConnectionException())
-    }
-
-    suspend fun getOpenAICompatibleModels(baseUrl: String): Result<OpenAICompatibleModelResponseDto> = try {
-        val apiKey = appSettings.getApiKey(Service.OpenAICompatible)
-        val response: HttpResponse =
-            defaultClient.get("$baseUrl${Service.OpenAICompatible.modelsUrl}") {
-                if (apiKey.isNotBlank()) {
-                    bearerAuth(apiKey)
-                }
-            }
-        if (response.status.isSuccess()) {
-            Result.success(response.body())
-        } else {
-            when (response.status.value) {
-                401 -> throw OpenAICompatibleInvalidApiKeyException()
-                else -> throw OpenAICompatibleGenericException("Failed to fetch models: ${response.status}")
-            }
-        }
-    } catch (e: OpenAICompatibleApiException) {
-        Result.failure(e)
-    } catch (e: Exception) {
-        Result.failure(OpenAICompatibleConnectionException())
-    }
+    // endregion
 }

@@ -7,7 +7,6 @@ import coil3.util.MimeTypeMap
 import com.inspiredandroid.kai.getAvailableTools
 import com.inspiredandroid.kai.getPlatformToolDefinitions
 import com.inspiredandroid.kai.network.Requests
-import com.inspiredandroid.kai.network.dtos.gemini.GeminiChatResponseDto
 import com.inspiredandroid.kai.network.dtos.openaicompatible.OpenAICompatibleChatResponseDto
 import com.inspiredandroid.kai.network.tools.Tool
 import com.inspiredandroid.kai.network.tools.ToolInfo
@@ -22,23 +21,9 @@ import io.github.vinceglb.filekit.extension
 import io.github.vinceglb.filekit.readBytes
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.new_conversation
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonNull
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.boolean
-import kotlinx.serialization.json.booleanOrNull
-import kotlinx.serialization.json.double
-import kotlinx.serialization.json.doubleOrNull
-import kotlinx.serialization.json.int
-import kotlinx.serialization.json.intOrNull
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
 import org.jetbrains.compose.resources.getString
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
@@ -51,6 +36,7 @@ class RemoteDataRepository(
     private val requests: Requests,
     private val appSettings: AppSettings,
     private val conversationStorage: ConversationStorage,
+    private val toolExecutor: ToolExecutor,
 ) : DataRepository {
 
     /**
@@ -133,35 +119,22 @@ class RemoteDataRepository(
 
     override suspend fun fetchModels(service: Service) {
         when (service) {
-            Service.Groq -> fetchGroqModels()
-            Service.XAI -> fetchXaiModels()
-            Service.OpenRouter -> fetchOpenRouterModels()
-            Service.Nvidia -> fetchNvidiaModels()
-            Service.OpenAICompatible -> fetchOpenAICompatibleModels()
             Service.Gemini -> fetchGeminiModels()
             Service.Free -> { /* Free has no models */ }
+            else -> fetchOpenAICompatibleModels(service)
         }
     }
 
     override suspend fun validateConnection(service: Service) {
         when (service) {
-            Service.Gemini -> fetchGeminiModels()
-
-            Service.Groq -> fetchGroqModels()
-
-            Service.XAI -> fetchXaiModels()
-
-            Service.Nvidia -> fetchNvidiaModels()
+            Service.Free -> { /* Always valid */ }
 
             Service.OpenRouter -> {
-                // Validate API key first, then fetch models
                 requests.validateOpenRouterApiKey().getOrThrow()
-                fetchOpenRouterModels()
+                fetchModels(service)
             }
 
-            Service.OpenAICompatible -> fetchOpenAICompatibleModels()
-
-            Service.Free -> { /* Always valid */ }
+            else -> fetchModels(service)
         }
     }
 
@@ -190,116 +163,33 @@ class RemoteDataRepository(
         }
     }
 
-    private suspend fun fetchGroqModels() {
-        val response = requests.getGroqModels().getOrThrow()
-        val selectedModelId = appSettings.getSelectedModelId(Service.Groq)
-        val models = response.data
-            .filter { it.isActive == true }
-            .sortedByDescending { it.context_window }
-            .map {
-                SettingsModel(
-                    id = it.id,
-                    subtitle = it.owned_by ?: "",
-                    description = it.created?.toHumanReadableDate(),
-                    createdAt = it.created ?: 0L,
-                    isSelected = it.id == selectedModelId,
-                )
-            }
-        modelsByService[Service.Groq]?.update { models }
-        // Auto-select first model if none selected or selected model not in list
-        if (models.isNotEmpty() && models.none { it.isSelected }) {
-            appSettings.setSelectedModelId(Service.Groq, models.first().id)
-            updateModelsSelection(Service.Groq)
+    private suspend fun fetchOpenAICompatibleModels(service: Service) {
+        val response = requests.getOpenAICompatibleModels(service).getOrThrow()
+        val selectedModelId = appSettings.getSelectedModelId(service)
+        val filtered = if (service.filterActiveStrictly) {
+            response.data.filter { it.isActive == true }
+        } else {
+            response.data.filter { it.isActive != false }
         }
-    }
-
-    private suspend fun fetchXaiModels() {
-        val response = requests.getXaiModels().getOrThrow()
-        val selectedModelId = appSettings.getSelectedModelId(Service.XAI)
-        val models = response.data
-            .filter { it.isActive != false }
-            .sortedByDescending { it.context_window }
-            .map {
-                SettingsModel(
-                    id = it.id,
-                    subtitle = it.owned_by ?: "",
-                    description = it.created?.toHumanReadableDate(),
-                    createdAt = it.created ?: 0L,
-                    isSelected = it.id == selectedModelId,
-                )
-            }
-        modelsByService[Service.XAI]?.update { models }
-        // Auto-select first model if none selected or selected model not in list
-        if (models.isNotEmpty() && models.none { it.isSelected }) {
-            appSettings.setSelectedModelId(Service.XAI, models.first().id)
-            updateModelsSelection(Service.XAI)
+        val sorted = if (service.sortModelsById) {
+            filtered.sortedBy { it.id }
+        } else {
+            filtered.sortedByDescending { it.context_window }
         }
-    }
-
-    private suspend fun fetchOpenRouterModels() {
-        val response = requests.getOpenRouterModels().getOrThrow()
-        val selectedModelId = appSettings.getSelectedModelId(Service.OpenRouter)
-        val models = response.data
-            .filter { it.isActive != false }
-            .sortedByDescending { it.context_window }
-            .map {
-                SettingsModel(
-                    id = it.id,
-                    subtitle = it.owned_by ?: "",
-                    description = it.created?.toHumanReadableDate(),
-                    createdAt = it.created ?: 0L,
-                    isSelected = it.id == selectedModelId,
-                )
-            }
-        modelsByService[Service.OpenRouter]?.update { models }
-        // Auto-select first model if none selected or selected model not in list
-        if (models.isNotEmpty() && models.none { it.isSelected }) {
-            appSettings.setSelectedModelId(Service.OpenRouter, models.first().id)
-            updateModelsSelection(Service.OpenRouter)
+        val models = sorted.map {
+            SettingsModel(
+                id = it.id,
+                subtitle = it.owned_by ?: "",
+                description = if (service.includeModelDate) it.created?.toHumanReadableDate() else null,
+                createdAt = if (service.includeModelDate) it.created ?: 0L else 0L,
+                isSelected = it.id == selectedModelId,
+            )
         }
-    }
-
-    private suspend fun fetchNvidiaModels() {
-        val response = requests.getNvidiaModels().getOrThrow()
-        val selectedModelId = appSettings.getSelectedModelId(Service.Nvidia)
-        val models = response.data
-            .filter { it.isActive != false }
-            .sortedBy { it.id }
-            .map {
-                SettingsModel(
-                    id = it.id,
-                    subtitle = it.owned_by ?: "",
-                    description = null,
-                    isSelected = it.id == selectedModelId,
-                )
-            }
-        modelsByService[Service.Nvidia]?.update { models }
+        modelsByService[service]?.update { models }
         // Auto-select first model if none selected or selected model not in list
         if (models.isNotEmpty() && models.none { it.isSelected }) {
-            appSettings.setSelectedModelId(Service.Nvidia, models.first().id)
-            updateModelsSelection(Service.Nvidia)
-        }
-    }
-
-    private suspend fun fetchOpenAICompatibleModels() {
-        val baseUrl = appSettings.getBaseUrl(Service.OpenAICompatible)
-        val response = requests.getOpenAICompatibleModels(baseUrl).getOrThrow()
-        val selectedModelId = appSettings.getSelectedModelId(Service.OpenAICompatible)
-        val models = response.data
-            .sortedBy { it.id }
-            .map {
-                SettingsModel(
-                    id = it.id,
-                    subtitle = it.owned_by ?: "",
-                    description = null,
-                    isSelected = it.id == selectedModelId,
-                )
-            }
-        modelsByService[Service.OpenAICompatible]?.update { models }
-        // Auto-select first model if none selected or selected model not in list
-        if (models.isNotEmpty() && models.none { it.isSelected }) {
-            appSettings.setSelectedModelId(Service.OpenAICompatible, models.first().id)
-            updateModelsSelection(Service.OpenAICompatible)
+            appSettings.setSelectedModelId(service, models.first().id)
+            updateModelsSelection(service)
         }
     }
 
@@ -351,12 +241,12 @@ class RemoteDataRepository(
             }
 
             else -> {
-                // All OpenAI-compatible services (Free, Groq, XAI, OpenRouter, OpenAICompatible)
+                // All OpenAI-compatible services (Free, Groq, XAI, OpenRouter, Nvidia, OpenAICompatible)
                 if (tools.isNotEmpty()) {
                     handleOpenAICompatibleChatWithTools(service, messages, tools)
                 } else {
                     val openAIMessages = messages.map { it.toGroqMessageDto() }
-                    val response = sendOpenAICompatibleRequest(service, openAIMessages, emptyList()).getOrThrow()
+                    val response = requests.openAICompatibleChat(service, openAIMessages).getOrThrow()
                     response.choices.firstOrNull()?.message?.content ?: ""
                 }
             }
@@ -370,30 +260,6 @@ class RemoteDataRepository(
         saveCurrentConversation()
     }
 
-    private suspend fun sendOpenAICompatibleRequest(
-        service: Service,
-        messages: List<com.inspiredandroid.kai.network.dtos.openaicompatible.OpenAICompatibleChatRequestDto.Message>,
-        tools: List<Tool>,
-        customHeaders: Map<String, String> = emptyMap(),
-    ): Result<OpenAICompatibleChatResponseDto> = when (service) {
-        Service.Free -> requests.freeChat(messages = messages, tools = tools, customHeaders = customHeaders)
-
-        Service.Groq -> requests.groqChat(messages = messages, tools = tools)
-
-        Service.XAI -> requests.xaiChat(messages = messages, tools = tools)
-
-        Service.OpenRouter -> requests.openRouterChat(messages = messages, tools = tools)
-
-        Service.Nvidia -> requests.nvidiaChat(messages = messages, tools = tools)
-
-        Service.OpenAICompatible -> {
-            val baseUrl = appSettings.getBaseUrl(Service.OpenAICompatible)
-            requests.openAICompatibleChat(messages = messages, baseUrl = baseUrl, tools = tools)
-        }
-
-        Service.Gemini -> throw IllegalArgumentException("Gemini should not use OpenAI-compatible request")
-    }
-
     private suspend fun handleOpenAICompatibleChatWithTools(
         service: Service,
         messages: List<History>,
@@ -403,7 +269,7 @@ class RemoteDataRepository(
 
         // Loop until AI returns a final response (no more tool calls)
         while (true) {
-            val response = sendOpenAICompatibleRequest(service, currentMessages, tools).getOrThrow()
+            val response = requests.openAICompatibleChat(service, currentMessages, tools).getOrThrow()
             val message = response.choices.firstOrNull()?.message ?: return ""
 
             val toolCalls = message.toolCalls
@@ -426,7 +292,7 @@ class RemoteDataRepository(
             // Process each tool call
             for (toolCall in toolCalls) {
                 val toolExecutingId = Uuid.random().toString()
-                val toolDisplayName = getToolDisplayName(toolCall.function.name)
+                val toolDisplayName = toolExecutor.getToolDisplayName(toolCall.function.name)
 
                 // Add tool executing message to show in UI
                 chatHistory.update {
@@ -439,7 +305,7 @@ class RemoteDataRepository(
                 }
 
                 // Execute the tool
-                val toolResult = executeTool(toolCall.function.name, toolCall.function.arguments)
+                val toolResult = toolExecutor.executeTool(toolCall.function.name, toolCall.function.arguments)
 
                 // Remove tool executing message and add tool result
                 chatHistory.update { history ->
@@ -479,7 +345,7 @@ class RemoteDataRepository(
                 val fc = part.functionCall!!
                 val argsJson = fc.args?.let { args ->
                     args.entries.joinToString(", ", "{", "}") { (k, v) ->
-                        "\"$k\": ${formatJsonElement(v)}"
+                        "\"$k\": ${toolExecutor.formatJsonElement(v)}"
                     }
                 } ?: "{}"
                 ToolCallInfo(
@@ -503,7 +369,7 @@ class RemoteDataRepository(
             // Process each function call
             for (toolCallInfo in toolCallInfos) {
                 val toolExecutingId = Uuid.random().toString()
-                val toolDisplayName = getToolDisplayName(toolCallInfo.name)
+                val toolDisplayName = toolExecutor.getToolDisplayName(toolCallInfo.name)
 
                 // Add tool executing message to show in UI
                 chatHistory.update {
@@ -516,7 +382,7 @@ class RemoteDataRepository(
                 }
 
                 // Execute the tool
-                val toolResult = executeTool(toolCallInfo.name, toolCallInfo.arguments)
+                val toolResult = toolExecutor.executeTool(toolCallInfo.name, toolCallInfo.arguments)
 
                 // Remove tool executing message and add tool result
                 chatHistory.update { history ->
@@ -528,82 +394,6 @@ class RemoteDataRepository(
                     )
                 }
             }
-        }
-    }
-
-    private fun formatJsonElement(element: JsonElement): String = when {
-        element is JsonNull -> "null"
-        element is JsonPrimitive && element.isString -> "\"${element.content}\""
-        element is JsonPrimitive -> element.content
-        else -> element.toString()
-    }
-
-    private val jsonParser = Json { ignoreUnknownKeys = true }
-
-    private suspend fun executeTool(name: String, arguments: String): String {
-        println("[Tool] executeTool called: name=$name, arguments=$arguments")
-
-        // Find the tool in available tools
-        val tools = getAvailableTools()
-        println("[Tool] Available tools: ${tools.map { it.schema.name }}")
-        val tool = tools.find { it.schema.name == name }
-        if (tool == null) {
-            println("[Tool] Tool not found: $name")
-            return """{"success": false, "error": "Unknown tool: $name"}"""
-        }
-
-        // Parse JSON arguments to Map
-        val args = try {
-            parseJsonToMap(arguments)
-        } catch (e: Exception) {
-            println("[Tool] Failed to parse arguments: ${e.message}")
-            return """{"success": false, "error": "Failed to parse arguments: ${e.message}"}"""
-        }
-        println("[Tool] Parsed arguments: $args")
-
-        // Execute the tool
-        return try {
-            println("[Tool] Executing tool...")
-            val result = tool.execute(args)
-            println("[Tool] Tool execution result: $result")
-            when (result) {
-                is Map<*, *> -> {
-                    // Convert map to JSON string
-                    val jsonEntries = result.entries.joinToString(", ") { (k, v) ->
-                        val valueStr = when (v) {
-                            is String -> "\"$v\""
-                            is Boolean, is Number -> v.toString()
-                            else -> "\"$v\""
-                        }
-                        "\"$k\": $valueStr"
-                    }
-                    "{$jsonEntries}"
-                }
-
-                is String -> result
-
-                else -> """{"result": "$result"}"""
-            }
-        } catch (e: Exception) {
-            println("[Tool] Tool execution failed: ${e.message}")
-            e.printStackTrace()
-            """{"success": false, "error": "Tool execution failed: ${e.message}"}"""
-        }
-    }
-
-    private fun parseJsonToMap(json: String): Map<String, Any> {
-        val jsonObject = jsonParser.parseToJsonElement(json).jsonObject
-        return jsonObject.toMap()
-    }
-
-    private fun JsonObject.toMap(): Map<String, Any> = entries.associate { (key, value) ->
-        key to when (value) {
-            is JsonPrimitive if value.isString -> value.content
-            is JsonPrimitive if value.booleanOrNull != null -> value.boolean
-            is JsonPrimitive if value.intOrNull != null -> value.int
-            is JsonPrimitive if value.doubleOrNull != null -> value.double
-            is JsonObject -> value.toMap()
-            else -> value.toString()
         }
     }
 
@@ -732,22 +522,13 @@ class RemoteDataRepository(
                 topicDetail?.let { put("X-Explore-Detail", it) }
                 language?.let { put("X-Explore-Language", it) }
             }
-            val response = sendOpenAICompatibleRequest(service, messages, emptyList(), customHeaders = customHeaders).getOrThrow()
+            val response = requests.openAICompatibleChat(service, messages, customHeaders = customHeaders).getOrThrow()
             response.choices.firstOrNull()?.message?.content ?: ""
         }
     }
 
     // Tool management
     override fun getToolDefinitions(): List<ToolInfo> = getPlatformToolDefinitions().map { it.copy(isEnabled = appSettings.isToolEnabled(it.id)) }
-
-    /**
-     * Gets the human-readable display name for a tool given its ID.
-     * Falls back to the ID if not found.
-     */
-    private suspend fun getToolDisplayName(toolId: String): String {
-        val toolInfo = getPlatformToolDefinitions().find { it.id == toolId } ?: return toolId
-        return toolInfo.nameRes?.let { getString(it) } ?: toolInfo.name
-    }
 
     override fun setToolEnabled(toolId: String, enabled: Boolean) {
         appSettings.setToolEnabled(toolId, enabled)

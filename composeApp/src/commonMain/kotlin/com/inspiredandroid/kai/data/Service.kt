@@ -18,6 +18,9 @@ sealed class Service(
     val defaultModels: List<ModelDefinition> = emptyList(),
     val chatUrl: String,
     val modelsUrl: String? = null,
+    val filterActiveStrictly: Boolean = false,
+    val sortModelsById: Boolean = false,
+    val includeModelDate: Boolean = true,
 ) {
     data object Free : Service(
         id = "free",
@@ -38,6 +41,7 @@ sealed class Service(
         defaultModels = emptyList(),
         chatUrl = "https://api.groq.com/openai/v1/chat/completions",
         modelsUrl = "https://api.groq.com/openai/v1/models",
+        filterActiveStrictly = true,
     )
 
     data object XAI : Service(
@@ -71,6 +75,8 @@ sealed class Service(
         defaultModels = emptyList(),
         chatUrl = "https://integrate.api.nvidia.com/v1/chat/completions",
         modelsUrl = "https://integrate.api.nvidia.com/v1/models",
+        sortModelsById = true,
+        includeModelDate = false,
     )
 
     data object Gemini : Service(
@@ -93,6 +99,8 @@ sealed class Service(
         settingsKeyPrefix = "openai-compatible",
         chatUrl = "/v1/chat/completions",
         modelsUrl = "/v1/models",
+        sortModelsById = true,
+        includeModelDate = false,
     )
 
     companion object {

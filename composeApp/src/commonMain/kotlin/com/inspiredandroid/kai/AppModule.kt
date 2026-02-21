@@ -4,6 +4,7 @@ import com.inspiredandroid.kai.data.AppSettings
 import com.inspiredandroid.kai.data.ConversationStorage
 import com.inspiredandroid.kai.data.DataRepository
 import com.inspiredandroid.kai.data.RemoteDataRepository
+import com.inspiredandroid.kai.data.ToolExecutor
 import com.inspiredandroid.kai.network.Requests
 import com.inspiredandroid.kai.tools.CalendarPermissionController
 import com.inspiredandroid.kai.tools.NotificationPermissionController
@@ -33,8 +34,11 @@ val appModule = module {
     single<ConversationStorage> {
         ConversationStorage(get())
     }
+    single<ToolExecutor> {
+        ToolExecutor()
+    }
     single<RemoteDataRepository> {
-        RemoteDataRepository(get(), get(), get())
+        RemoteDataRepository(get(), get(), get(), get())
     }
     single<DataRepository> { get<RemoteDataRepository>() }
     viewModel { SettingsViewModel(get<DataRepository>()) }

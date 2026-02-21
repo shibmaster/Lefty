@@ -134,7 +134,7 @@ class SettingsViewModelTest {
     }
 
     @Test
-    fun `models are sorted by createdAt for Groq service`() = runTest {
+    fun `models are passed through in data layer order`() = runTest {
         val models = listOf(
             SettingsModel(id = "model-old", subtitle = "Old Model", createdAt = 1000L),
             SettingsModel(id = "model-new", subtitle = "New Model", createdAt = 3000L),
@@ -150,9 +150,10 @@ class SettingsViewModelTest {
             skipItems(1)
             val state = awaitItem()
             assertEquals(3, state.models.size)
-            assertEquals("model-new", state.models[0].id)
-            assertEquals("model-mid", state.models[1].id)
-            assertEquals("model-old", state.models[2].id)
+            // Models are now sorted in the data layer, not the ViewModel
+            assertEquals("model-old", state.models[0].id)
+            assertEquals("model-new", state.models[1].id)
+            assertEquals("model-mid", state.models[2].id)
         }
     }
 

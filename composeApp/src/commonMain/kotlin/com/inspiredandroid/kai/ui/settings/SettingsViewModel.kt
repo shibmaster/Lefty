@@ -51,7 +51,7 @@ class SettingsViewModel(private val dataRepository: DataRepository) : ViewModel(
         ) { localState, models ->
             localState.copy(
                 currentService = service,
-                models = if (service == Service.Groq || service == Service.XAI || service == Service.OpenRouter) models.sortedByDescending { it.createdAt } else models,
+                models = models,
                 selectedModel = models.firstOrNull { it.isSelected },
             )
         }
@@ -133,27 +133,15 @@ class SettingsViewModel(private val dataRepository: DataRepository) : ViewModel(
     }
 
     private fun checkConnection(service: Service) {
-        when (service) {
-            Service.Free -> {
-                // Free tier always works
-                _state.update { it.copy(connectionStatus = ConnectionStatus.Connected) }
-            }
-
-            Service.Gemini, Service.Groq, Service.XAI, Service.OpenRouter, Service.Nvidia -> {
-                // These services require an API key
-                val hasApiKey = dataRepository.getApiKey(service).isNotBlank()
-                if (hasApiKey) {
-                    validateConnectionWithStatus(service)
-                } else {
-                    _state.update { it.copy(connectionStatus = ConnectionStatus.Unknown) }
-                }
-            }
-
-            Service.OpenAICompatible -> {
-                // OpenAI-compatible APIs don't always need an API key, just validate connection
-                validateConnectionWithStatus(service)
-            }
+        if (service == Service.Free) {
+            _state.update { it.copy(connectionStatus = ConnectionStatus.Connected) }
+            return
         }
+        if (service.requiresApiKey && dataRepository.getApiKey(service).isBlank()) {
+            _state.update { it.copy(connectionStatus = ConnectionStatus.Unknown) }
+            return
+        }
+        validateConnectionWithStatus(service)
     }
 
     private fun validateConnectionWithStatus(service: Service) {
