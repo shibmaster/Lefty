@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Computer
 import androidx.compose.material.icons.filled.Group
@@ -79,74 +80,76 @@ internal fun EmptyState(modifier: Modifier, isUsingSharedKey: Boolean, onNavigat
         ExploreTopic(stringResource(Res.string.topic_space), Icons.Default.RocketLaunch, Color(0xFFBA68C8), "Space Exploration"),
     )
 
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        if (isInspectionMode) {
-            // Use static logo for previews/screenshots since Lottie loads asynchronously
-            Image(
-                modifier = Modifier.size(64.dp),
-                imageVector = vectorResource(Res.drawable.logo),
-                contentDescription = null,
-            )
-            Spacer(Modifier.height(12.dp))
-        } else {
-            val composition by rememberLottieComposition {
-                LottieCompositionSpec.JsonString(
-                    Res.readBytes("files/lottie_loading.json").decodeToString(),
+    DisableSelection {
+        Column(
+            modifier = modifier,
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            if (isInspectionMode) {
+                // Use static logo for previews/screenshots since Lottie loads asynchronously
+                Image(
+                    modifier = Modifier.size(64.dp),
+                    imageVector = vectorResource(Res.drawable.logo),
+                    contentDescription = null,
+                )
+                Spacer(Modifier.height(12.dp))
+            } else {
+                val composition by rememberLottieComposition {
+                    LottieCompositionSpec.JsonString(
+                        Res.readBytes("files/lottie_loading.json").decodeToString(),
+                    )
+                }
+                Image(
+                    modifier = Modifier.size(128.dp),
+                    painter = rememberLottiePainter(
+                        composition = composition,
+                        iterations = Compottie.IterateForever,
+                        speed = 0.6f,
+                    ),
+                    contentDescription = null,
                 )
             }
-            Image(
-                modifier = Modifier.size(128.dp),
-                painter = rememberLottiePainter(
-                    composition = composition,
-                    iterations = Compottie.IterateForever,
-                    speed = 0.6f,
-                ),
-                contentDescription = null,
+            Text(
+                text = stringResource(Res.string.welcome_message),
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onBackground,
             )
-        }
-        Text(
-            text = stringResource(Res.string.welcome_message),
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onBackground,
-        )
-        if (isUsingSharedKey) {
-            val linkColor = MaterialTheme.colorScheme.primary
-            val prefixText = stringResource(Res.string.privacy_agree_prefix)
-            val policyText = stringResource(Res.string.privacy_policy)
-            val annotatedString = remember(prefixText, policyText, linkColor) {
-                buildAnnotatedString {
-                    append(prefixText)
-                    withLink(LinkAnnotation.Url(url = "https://schubert-simon.de/privacy/kai.txt")) {
-                        withStyle(style = SpanStyle(color = linkColor)) {
-                            append(policyText)
+            if (isUsingSharedKey) {
+                val linkColor = MaterialTheme.colorScheme.primary
+                val prefixText = stringResource(Res.string.privacy_agree_prefix)
+                val policyText = stringResource(Res.string.privacy_policy)
+                val annotatedString = remember(prefixText, policyText, linkColor) {
+                    buildAnnotatedString {
+                        append(prefixText)
+                        withLink(LinkAnnotation.Url(url = "https://schubert-simon.de/privacy/kai.txt")) {
+                            withStyle(style = SpanStyle(color = linkColor)) {
+                                append(policyText)
+                            }
                         }
                     }
                 }
-            }
-            Text(
-                annotatedString,
-                modifier = Modifier.padding(horizontal = 16.dp),
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onBackground,
-            )
-        }
-        Spacer(Modifier.height(24.dp))
-        LazyRow(
-            contentPadding = PaddingValues(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            items(topics) { topic ->
-                TopicCard(
-                    topic = topic,
-                    onClick = {
-                        onNavigateToExplore(topic.promptTitle ?: topic.title)
-                    },
+                Text(
+                    annotatedString,
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onBackground,
                 )
+            }
+            Spacer(Modifier.height(24.dp))
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                items(topics) { topic ->
+                    TopicCard(
+                        topic = topic,
+                        onClick = {
+                            onNavigateToExplore(topic.promptTitle ?: topic.title)
+                        },
+                    )
+                }
             }
         }
     }
