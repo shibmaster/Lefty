@@ -146,6 +146,10 @@ class FakeDataRepository : DataRepository {
         chatHistory.value = emptyList()
     }
 
+    override suspend fun restoreLatestConversation() {
+        // No-op in tests
+    }
+
     override suspend fun askExplore(
         prompt: String,
         topic: String?,
