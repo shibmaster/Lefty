@@ -33,6 +33,7 @@ object ScreenshotTestData {
         actions = noOpChatActions,
         history = emptyList(),
         showPrivacyInfo = false,
+        showTopics = false
     )
 
     val chatWithMessages = ChatUiState(
