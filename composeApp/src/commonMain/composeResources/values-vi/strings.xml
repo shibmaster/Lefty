@@ -93,4 +93,9 @@
     <string name="topic_technology">Công nghệ</string>
     <string name="topic_countries">Quốc gia</string>
     <string name="topic_space">Vũ trụ</string>
+    <string name="settings_tab_general">Chung</string>
+    <string name="settings_show_topics">Hiển thị chủ đề</string>
+    <string name="settings_show_topics_description">Hiển thị gợi ý chủ đề trên màn hình trò chuyện trống</string>
+    <string name="tool_set_alarm_name">Đặt báo thức</string>
+    <string name="tool_set_alarm_description">Đặt báo thức hoặc hẹn giờ đếm ngược trên thiết bị</string>
 </resources>

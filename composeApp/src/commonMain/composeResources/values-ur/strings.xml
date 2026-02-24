@@ -93,4 +93,9 @@
     <string name="topic_technology">ٹیکنالوجی</string>
     <string name="topic_countries">ممالک</string>
     <string name="topic_space">خلا</string>
+    <string name="settings_tab_general">عمومی</string>
+    <string name="settings_show_topics">موضوعات دکھائیں</string>
+    <string name="settings_show_topics_description">خالی چیٹ اسکرین پر موضوعات کی تجاویز دکھائیں</string>
+    <string name="tool_set_alarm_name">الارم سیٹ کریں</string>
+    <string name="tool_set_alarm_description">ڈیوائس پر الارم یا الٹی گنتی ٹائمر سیٹ کریں</string>
 </resources>

@@ -93,4 +93,9 @@
     <string name="topic_technology">Технологии</string>
     <string name="topic_countries">Страны</string>
     <string name="topic_space">Космос</string>
+    <string name="settings_tab_general">Общие</string>
+    <string name="settings_show_topics">Показать темы</string>
+    <string name="settings_show_topics_description">Показывать предложения тем на пустом экране чата</string>
+    <string name="tool_set_alarm_name">Установить будильник</string>
+    <string name="tool_set_alarm_description">Установить будильник или таймер обратного отсчёта на устройстве</string>
 </resources>

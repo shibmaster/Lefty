@@ -93,4 +93,9 @@
     <string name="topic_technology">เทคโนโลยี</string>
     <string name="topic_countries">ประเทศ</string>
     <string name="topic_space">อวกาศ</string>
+    <string name="settings_tab_general">ทั่วไป</string>
+    <string name="settings_show_topics">แสดงหัวข้อ</string>
+    <string name="settings_show_topics_description">แสดงคำแนะนำหัวข้อบนหน้าจอแชทว่าง</string>
+    <string name="tool_set_alarm_name">ตั้งปลุก</string>
+    <string name="tool_set_alarm_description">ตั้งปลุกหรือตั้งเวลานับถอยหลังบนอุปกรณ์</string>
 </resources>

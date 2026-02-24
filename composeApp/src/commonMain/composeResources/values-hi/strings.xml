@@ -93,4 +93,9 @@
     <string name="topic_technology">प्रौद्योगिकी</string>
     <string name="topic_countries">देश</string>
     <string name="topic_space">अंतरिक्ष</string>
+    <string name="settings_tab_general">सामान्य</string>
+    <string name="settings_show_topics">विषय दिखाएं</string>
+    <string name="settings_show_topics_description">खाली चैट स्क्रीन पर विषय सुझाव दिखाएं</string>
+    <string name="tool_set_alarm_name">अलार्म सेट करें</string>
+    <string name="tool_set_alarm_description">डिवाइस पर अलार्म या काउंटडाउन टाइमर सेट करें</string>
 </resources>

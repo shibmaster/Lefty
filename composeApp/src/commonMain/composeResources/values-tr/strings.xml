@@ -93,4 +93,9 @@
     <string name="topic_technology">Teknoloji</string>
     <string name="topic_countries">Ülkeler</string>
     <string name="topic_space">Uzay</string>
+    <string name="settings_tab_general">Genel</string>
+    <string name="settings_show_topics">Konuları Göster</string>
+    <string name="settings_show_topics_description">Boş sohbet ekranında konu önerileri göster</string>
+    <string name="tool_set_alarm_name">Alarm Kur</string>
+    <string name="tool_set_alarm_description">Cihazda alarm veya geri sayım sayacı kur</string>
 </resources>

@@ -93,4 +93,9 @@
     <string name="topic_technology">Technologia</string>
     <string name="topic_countries">Kraje</string>
     <string name="topic_space">Kosmos</string>
+    <string name="settings_tab_general">Ogólne</string>
+    <string name="settings_show_topics">Pokaż tematy</string>
+    <string name="settings_show_topics_description">Pokaż sugestie tematów na pustym ekranie czatu</string>
+    <string name="tool_set_alarm_name">Ustaw alarm</string>
+    <string name="tool_set_alarm_description">Ustaw alarm lub minutnik na urządzeniu</string>
 </resources>

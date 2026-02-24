@@ -93,4 +93,9 @@
     <string name="topic_technology">Technologie</string>
     <string name="topic_countries">Landen</string>
     <string name="topic_space">Ruimte</string>
+    <string name="settings_tab_general">Algemeen</string>
+    <string name="settings_show_topics">Onderwerpen tonen</string>
+    <string name="settings_show_topics_description">Toon onderwerpensuggesties op het lege chatscherm</string>
+    <string name="tool_set_alarm_name">Wekker instellen</string>
+    <string name="tool_set_alarm_description">Een wekker of afteltimer instellen op het apparaat</string>
 </resources>

@@ -93,4 +93,9 @@
     <string name="topic_technology">Tecnología</string>
     <string name="topic_countries">Países</string>
     <string name="topic_space">Espacio</string>
+    <string name="settings_tab_general">General</string>
+    <string name="settings_show_topics">Mostrar temas</string>
+    <string name="settings_show_topics_description">Mostrar sugerencias de temas en la pantalla de chat vacía</string>
+    <string name="tool_set_alarm_name">Configurar alarma</string>
+    <string name="tool_set_alarm_description">Configurar una alarma o temporizador en el dispositivo</string>
 </resources>

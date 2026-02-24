@@ -93,4 +93,9 @@
     <string name="topic_technology">تكنولوجيا</string>
     <string name="topic_countries">دول</string>
     <string name="topic_space">فضاء</string>
+    <string name="settings_tab_general">عام</string>
+    <string name="settings_show_topics">إظهار المواضيع</string>
+    <string name="settings_show_topics_description">عرض اقتراحات المواضيع على شاشة الدردشة الفارغة</string>
+    <string name="tool_set_alarm_name">ضبط المنبه</string>
+    <string name="tool_set_alarm_description">ضبط منبه أو مؤقت تنازلي على الجهاز</string>
 </resources>

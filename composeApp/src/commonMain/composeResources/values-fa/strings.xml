@@ -93,4 +93,9 @@
     <string name="topic_technology">فناوری</string>
     <string name="topic_countries">کشورها</string>
     <string name="topic_space">فضا</string>
+    <string name="settings_tab_general">عمومی</string>
+    <string name="settings_show_topics">نمایش موضوعات</string>
+    <string name="settings_show_topics_description">نمایش پیشنهادات موضوعی در صفحه چت خالی</string>
+    <string name="tool_set_alarm_name">تنظیم زنگ هشدار</string>
+    <string name="tool_set_alarm_description">تنظیم زنگ هشدار یا تایمر شمارش معکوس روی دستگاه</string>
 </resources>

@@ -93,4 +93,9 @@
     <string name="topic_technology">Teknologi</string>
     <string name="topic_countries">Negara</string>
     <string name="topic_space">Luar Angkasa</string>
+    <string name="settings_tab_general">Umum</string>
+    <string name="settings_show_topics">Tampilkan Topik</string>
+    <string name="settings_show_topics_description">Tampilkan saran topik di layar obrolan kosong</string>
+    <string name="tool_set_alarm_name">Setel Alarm</string>
+    <string name="tool_set_alarm_description">Setel alarm atau timer hitung mundur di perangkat</string>
 </resources>

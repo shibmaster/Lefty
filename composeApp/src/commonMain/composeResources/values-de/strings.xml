@@ -93,4 +93,9 @@
     <string name="topic_technology">Technologie</string>
     <string name="topic_countries">Länder</string>
     <string name="topic_space">Weltraum</string>
+    <string name="settings_tab_general">Allgemein</string>
+    <string name="settings_show_topics">Themen anzeigen</string>
+    <string name="settings_show_topics_description">Themenvorschläge auf dem leeren Chat-Bildschirm anzeigen</string>
+    <string name="tool_set_alarm_name">Wecker stellen</string>
+    <string name="tool_set_alarm_description">Einen Wecker oder Countdown-Timer auf dem Gerät einstellen</string>
 </resources>

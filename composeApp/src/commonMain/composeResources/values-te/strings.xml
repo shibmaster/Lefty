@@ -93,4 +93,9 @@
     <string name="topic_technology">సాంకేతికత</string>
     <string name="topic_countries">దేశాలు</string>
     <string name="topic_space">అంతరిక్షం</string>
+    <string name="settings_tab_general">సాధారణ</string>
+    <string name="settings_show_topics">అంశాలు చూపించు</string>
+    <string name="settings_show_topics_description">ఖాళీ చాట్ స్క్రీన్‌లో అంశ సూచనలు చూపించు</string>
+    <string name="tool_set_alarm_name">అలారం సెట్ చేయి</string>
+    <string name="tool_set_alarm_description">పరికరంలో అలారం లేదా కౌంట్‌డౌన్ టైమర్ సెట్ చేయి</string>
 </resources>

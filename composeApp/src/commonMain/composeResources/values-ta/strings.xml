@@ -93,4 +93,9 @@
     <string name="topic_technology">தொழில்நுட்பம்</string>
     <string name="topic_countries">நாடுகள்</string>
     <string name="topic_space">விண்வெளி</string>
+    <string name="settings_tab_general">பொது</string>
+    <string name="settings_show_topics">தலைப்புகளைக் காட்டு</string>
+    <string name="settings_show_topics_description">காலி அரட்டைத் திரையில் தலைப்பு பரிந்துரைகளைக் காட்டு</string>
+    <string name="tool_set_alarm_name">அலாரம் அமை</string>
+    <string name="tool_set_alarm_description">சாதனத்தில் அலாரம் அல்லது கவுண்ட்டவுன் டைமர் அமை</string>
 </resources>

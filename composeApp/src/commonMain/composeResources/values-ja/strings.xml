@@ -93,4 +93,9 @@
     <string name="topic_technology">テクノロジー</string>
     <string name="topic_countries">国</string>
     <string name="topic_space">宇宙</string>
+    <string name="settings_tab_general">一般</string>
+    <string name="settings_show_topics">トピックを表示</string>
+    <string name="settings_show_topics_description">空のチャット画面にトピックの提案を表示</string>
+    <string name="tool_set_alarm_name">アラームを設定</string>
+    <string name="tool_set_alarm_description">デバイスにアラームまたはカウントダウンタイマーを設定</string>
 </resources>

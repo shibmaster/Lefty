@@ -93,4 +93,9 @@
     <string name="topic_technology">Teknolojia</string>
     <string name="topic_countries">Nchi</string>
     <string name="topic_space">Anga</string>
+    <string name="settings_tab_general">Jumla</string>
+    <string name="settings_show_topics">Onyesha Mada</string>
+    <string name="settings_show_topics_description">Onyesha mapendekezo ya mada kwenye skrini tupu ya mazungumzo</string>
+    <string name="tool_set_alarm_name">Weka Kengele</string>
+    <string name="tool_set_alarm_description">Weka kengele au kipima muda cha kuhesabu kwenye kifaa</string>
 </resources>

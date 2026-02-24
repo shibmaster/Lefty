@@ -93,4 +93,9 @@
     <string name="topic_technology">기술</string>
     <string name="topic_countries">국가</string>
     <string name="topic_space">우주</string>
+    <string name="settings_tab_general">일반</string>
+    <string name="settings_show_topics">주제 표시</string>
+    <string name="settings_show_topics_description">빈 채팅 화면에 주제 제안 표시</string>
+    <string name="tool_set_alarm_name">알람 설정</string>
+    <string name="tool_set_alarm_description">기기에 알람 또는 카운트다운 타이머 설정</string>
 </resources>

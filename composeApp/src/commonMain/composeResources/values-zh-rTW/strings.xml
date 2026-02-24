@@ -93,4 +93,9 @@
     <string name="topic_technology">科技</string>
     <string name="topic_countries">國家</string>
     <string name="topic_space">太空</string>
+    <string name="settings_tab_general">一般</string>
+    <string name="settings_show_topics">顯示主題</string>
+    <string name="settings_show_topics_description">在空白聊天畫面顯示主題建議</string>
+    <string name="tool_set_alarm_name">設定鬧鐘</string>
+    <string name="tool_set_alarm_description">在裝置上設定鬧鐘或倒數計時器</string>
 </resources>
