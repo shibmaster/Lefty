@@ -47,10 +47,8 @@ private val modelsWithoutToolSupport = listOf(
     "deepseek-coder:6.7b",
 )
 
-private fun supportsTools(modelId: String): Boolean {
-    return modelsWithoutToolSupport.none { pattern ->
-        modelId.lowercase().startsWith(pattern.lowercase())
-    }
+private fun supportsTools(modelId: String): Boolean = modelsWithoutToolSupport.none { pattern ->
+    modelId.lowercase().startsWith(pattern.lowercase())
 }
 
 class RemoteDataRepository(
