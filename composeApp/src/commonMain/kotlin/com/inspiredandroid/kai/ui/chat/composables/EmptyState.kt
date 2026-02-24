@@ -73,11 +73,10 @@ private data class ExploreTopic(
 internal fun EmptyState(modifier: Modifier, isUsingSharedKey: Boolean, showTopics: Boolean = true, onNavigateToExplore: (String) -> Unit = {}) {
     val isInspectionMode = LocalInspectionMode.current
     val topics = listOf(
+        ExploreTopic(stringResource(Res.string.topic_space), Icons.Default.RocketLaunch, Color(0xFFBA68C8), "Space Exploration"),
+        ExploreTopic(stringResource(Res.string.topic_technology), Icons.Default.Computer, Color(0xFFFFB74D), "Technology"),
         ExploreTopic(stringResource(Res.string.topic_people), Icons.Default.Group, Color(0xFFE57373), "People"),
         ExploreTopic(stringResource(Res.string.topic_sport), Icons.Default.SportsSoccer, Color(0xFF81C784), "Sport"),
-        ExploreTopic(stringResource(Res.string.topic_technology), Icons.Default.Computer, Color(0xFFFFB74D), "Technology"),
-        ExploreTopic(stringResource(Res.string.topic_countries), Icons.Default.Public, Color(0xFF64B5F6), "Countries"),
-        ExploreTopic(stringResource(Res.string.topic_space), Icons.Default.RocketLaunch, Color(0xFFBA68C8), "Space Exploration"),
     )
 
     DisableSelection {

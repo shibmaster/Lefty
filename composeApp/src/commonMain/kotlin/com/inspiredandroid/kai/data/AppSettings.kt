@@ -119,7 +119,7 @@ class AppSettings(private val settings: Settings) {
     }
 
     // Show topics setting
-    fun isShowTopicsEnabled(): Boolean = settings.getBoolean(KEY_SHOW_TOPICS, true)
+    fun isShowTopicsEnabled(): Boolean = settings.getBoolean(KEY_SHOW_TOPICS, false)
 
     fun setShowTopicsEnabled(enabled: Boolean) {
         settings.putBoolean(KEY_SHOW_TOPICS, enabled)
