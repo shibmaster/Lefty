@@ -32,6 +32,27 @@ import kotlin.time.ExperimentalTime
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
+private val modelsWithoutToolSupport = listOf(
+    "llama3.2:1b",
+    "llama3.2:3b",
+    "llama3.1:8b",
+    "gemma2",
+    "gemma:2b",
+    "gemma:7b",
+    "phi3:mini",
+    "tinyllama",
+    "stablelm",
+    "codellama",
+    "deepseek-coder:1.3b",
+    "deepseek-coder:6.7b",
+)
+
+private fun supportsTools(modelId: String): Boolean {
+    return modelsWithoutToolSupport.none { pattern ->
+        modelId.lowercase().startsWith(pattern.lowercase())
+    }
+}
+
 class RemoteDataRepository(
     private val requests: Requests,
     private val appSettings: AppSettings,
@@ -225,7 +246,8 @@ class RemoteDataRepository(
         }
         val service = currentService()
         val messages = chatHistory.value
-        val tools = getAvailableTools()
+        val modelId = appSettings.getSelectedModelId(service)
+        val tools = if (supportsTools(modelId)) getAvailableTools() else emptyList()
 
         val responseText = when (service) {
             Service.Gemini -> {
