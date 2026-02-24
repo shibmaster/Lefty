@@ -139,7 +139,7 @@ class RemoteDataRepository(
     override suspend fun fetchModels(service: Service) {
         when (service) {
             Service.Gemini -> fetchGeminiModels()
-            Service.Free -> { /* Free has no models */ }
+            Service.Free -> { /* No model listing */ }
             else -> fetchOpenAICompatibleModels(service)
         }
     }
@@ -151,6 +151,17 @@ class RemoteDataRepository(
             Service.OpenRouter -> {
                 requests.validateOpenRouterApiKey().getOrThrow()
                 fetchModels(service)
+            }
+
+            Service.OpenClaw -> {
+                // OpenClaw has no models endpoint — just test the chat endpoint
+                val testMessages = listOf(
+                    com.inspiredandroid.kai.network.dtos.openaicompatible.OpenAICompatibleChatRequestDto.Message(
+                        role = "user",
+                        content = "hi",
+                    ),
+                )
+                requests.openAICompatibleChat(service, testMessages).getOrThrow()
             }
 
             else -> fetchModels(service)
@@ -417,8 +428,17 @@ class RemoteDataRepository(
         }
     }
 
+    private fun trimToRecentExchanges(history: List<History>, maxExchanges: Int): List<History> {
+        val userIndices = history.mapIndexedNotNull { index, h ->
+            if (h.role == History.Role.USER) index else null
+        }
+        if (userIndices.size <= maxExchanges) return history
+        val cutoffIndex = userIndices[userIndices.size - maxExchanges]
+        return history.subList(cutoffIndex, history.size)
+    }
+
     private suspend fun saveCurrentConversation() {
-        val history = chatHistory.value
+        val history = trimToRecentExchanges(chatHistory.value, 20)
         if (history.isEmpty()) return
 
         val now = Clock.System.now().toEpochMilliseconds()
@@ -507,6 +527,25 @@ class RemoteDataRepository(
     override fun startNewChat() {
         _currentConversationId.value = null
         chatHistory.value = emptyList()
+    }
+
+    override suspend fun restoreLatestConversation() {
+        if (currentService() != Service.OpenClaw) return
+
+        // Already have a loaded conversation with messages — nothing to do
+        val currentId = _currentConversationId.value
+        if (currentId != null && chatHistory.value.isNotEmpty() &&
+            savedConversations.value.any { it.id == currentId && it.serviceId == Service.OpenClaw.id }
+        ) {
+            return
+        }
+
+        val latest = savedConversations.value
+            .filter { it.serviceId == Service.OpenClaw.id }
+            .maxByOrNull { it.updatedAt }
+            ?: return
+
+        loadConversation(latest.id)
     }
 
     // Explore

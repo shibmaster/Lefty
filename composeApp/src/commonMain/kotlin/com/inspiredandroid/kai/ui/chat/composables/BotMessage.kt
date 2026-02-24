@@ -41,6 +41,7 @@ internal fun BotMessage(
     textToSpeech: TextToSpeechInstance?,
     isSpeaking: Boolean,
     setIsSpeaking: (Boolean) -> Unit,
+    isOpenClaw: Boolean = false,
 ) {
     val isInspectionMode = LocalInspectionMode.current
     val markdownState = rememberMarkdownState(message, immediate = isInspectionMode)
@@ -95,14 +96,16 @@ internal fun BotMessage(
                 )
             },
         )
-        val uriHandler = LocalUriHandler.current
-        SmallIconButton(
-            iconResource = Res.drawable.ic_flag,
-            contentDescription = stringResource(Res.string.bot_message_flag_content_description),
-            onClick = {
-                uriHandler.openUri("https://form.jotform.com/250014908169355")
-            },
-        )
+        if (!isOpenClaw) {
+            val uriHandler = LocalUriHandler.current
+            SmallIconButton(
+                iconResource = Res.drawable.ic_flag,
+                contentDescription = stringResource(Res.string.bot_message_flag_content_description),
+                onClick = {
+                    uriHandler.openUri("https://form.jotform.com/250014908169355")
+                },
+            )
+        }
         Spacer(Modifier.weight(1f))
     }
 }

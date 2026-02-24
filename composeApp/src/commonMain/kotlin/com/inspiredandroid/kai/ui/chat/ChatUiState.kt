@@ -28,6 +28,7 @@ data class ChatUiState(
     val hasSavedConversations: Boolean = false,
     val shouldScrollToBottom: Boolean = false,
     val showTopics: Boolean = true,
+    val isOpenClaw: Boolean = false,
 )
 
 @Immutable

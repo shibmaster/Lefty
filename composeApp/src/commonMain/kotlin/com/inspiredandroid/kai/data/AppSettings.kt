@@ -41,11 +41,12 @@ class AppSettings(private val settings: Settings) {
     // Base URL (for self-hosted services like OpenAI-compatible APIs)
     fun getBaseUrl(service: Service): String = when (service) {
         Service.OpenAICompatible -> settings.getString(service.baseUrlKey, Service.DEFAULT_OPENAI_COMPATIBLE_BASE_URL)
+        Service.OpenClaw -> settings.getString(service.baseUrlKey, Service.DEFAULT_OPENCLAW_GATEWAY_URL)
         else -> ""
     }
 
     fun setBaseUrl(service: Service, baseUrl: String) {
-        if (service == Service.OpenAICompatible) {
+        if (service == Service.OpenAICompatible || service == Service.OpenClaw) {
             settings.putString(service.baseUrlKey, baseUrl)
         }
     }
@@ -101,6 +102,7 @@ class AppSettings(private val settings: Settings) {
             }
         }
         migrateString(legacySettings, Service.OpenAICompatible.baseUrlKey)
+        migrateString(legacySettings, Service.OpenClaw.baseUrlKey)
 
         settings.putBoolean(KEY_MIGRATION_COMPLETE, true)
     }

@@ -3,6 +3,7 @@ package com.inspiredandroid.kai.ui.history
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.inspiredandroid.kai.data.DataRepository
+import com.inspiredandroid.kai.data.Service
 import com.inspiredandroid.kai.getBackgroundDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -23,8 +24,13 @@ class HistoryViewModel(
         dataRepository.savedConversations,
         showDeleteAllDialogFlow,
     ) { conversations, showDialog ->
+        val filtered = if (dataRepository.currentService() == Service.OpenClaw) {
+            conversations
+        } else {
+            conversations.filter { it.serviceId != Service.OpenClaw.id }
+        }
         HistoryUiState(
-            conversations = conversations.sortedByDescending { it.updatedAt },
+            conversations = filtered.sortedByDescending { it.updatedAt },
             showDeleteAllDialog = showDialog,
         )
     }.stateIn(

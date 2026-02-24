@@ -84,6 +84,7 @@ fun ChatScreenContent(
             actions = uiState.actions,
             isChatHistoryEmpty = uiState.history.isEmpty(),
             hasSavedConversations = uiState.hasSavedConversations,
+            isOpenClaw = uiState.isOpenClaw,
             onNavigateToSettings = onNavigateToSettings,
             onNavigateToHistory = onNavigateToHistory,
         )
@@ -173,6 +174,7 @@ fun ChatScreenContent(
                                             setIsSpeaking = {
                                                 uiState.actions.setIsSpeaking(it, history.id)
                                             },
+                                            isOpenClaw = uiState.isOpenClaw,
                                         )
                                     }
                                 }

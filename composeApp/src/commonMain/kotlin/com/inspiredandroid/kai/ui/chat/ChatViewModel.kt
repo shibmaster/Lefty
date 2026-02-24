@@ -36,12 +36,14 @@ class ChatViewModel(
             actions = actions,
             showPrivacyInfo = true,
             showTopics = dataRepository.isShowTopicsEnabled(),
+            isOpenClaw = dataRepository.currentService() == Service.OpenClaw,
         ),
     )
 
     init {
         viewModelScope.launch(backgroundDispatcher) {
             dataRepository.loadConversations()
+            dataRepository.restoreLatestConversation()
         }
     }
 
@@ -53,7 +55,11 @@ class ChatViewModel(
         state.copy(
             history = history,
             allowFileAttachment = dataRepository.currentService() == Service.Gemini,
-            hasSavedConversations = savedConversations.isNotEmpty(),
+            hasSavedConversations = if (state.isOpenClaw) {
+                savedConversations.isNotEmpty()
+            } else {
+                savedConversations.any { it.serviceId != Service.OpenClaw.id }
+            },
         )
     }.stateIn(
         scope = viewModelScope,
@@ -140,8 +146,20 @@ class ChatViewModel(
     }
 
     fun refreshSettings() {
+        val wasOpenClaw = _state.value.isOpenClaw
+        val isNowOpenClaw = dataRepository.currentService() == Service.OpenClaw
         _state.update {
-            it.copy(showTopics = dataRepository.isShowTopicsEnabled())
+            it.copy(
+                showTopics = dataRepository.isShowTopicsEnabled(),
+                isOpenClaw = isNowOpenClaw,
+            )
+        }
+        if (isNowOpenClaw) {
+            viewModelScope.launch(backgroundDispatcher) {
+                dataRepository.restoreLatestConversation()
+            }
+        } else if (wasOpenClaw) {
+            dataRepository.startNewChat()
         }
     }
 

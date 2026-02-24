@@ -33,11 +33,12 @@ internal fun TopBar(
     actions: ChatActions,
     isChatHistoryEmpty: Boolean,
     hasSavedConversations: Boolean,
+    isOpenClaw: Boolean = false,
     onNavigateToSettings: () -> Unit,
     onNavigateToHistory: () -> Unit,
 ) {
     Row {
-        if (hasSavedConversations) {
+        if (hasSavedConversations && !isOpenClaw) {
             IconButton(
                 modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
                 onClick = onNavigateToHistory,
@@ -51,7 +52,7 @@ internal fun TopBar(
             }
         }
 
-        if (!isChatHistoryEmpty) {
+        if (!isChatHistoryEmpty && !isOpenClaw) {
             IconButton(
                 modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
                 onClick = {

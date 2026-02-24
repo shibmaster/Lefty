@@ -26,6 +26,8 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
@@ -47,6 +49,7 @@ import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
@@ -72,6 +75,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withLink
@@ -253,6 +257,16 @@ fun SettingsScreenContent(
                                 connectionStatus = uiState.connectionStatus,
                             )
                         }
+
+                        Service.OpenClaw -> {
+                            OpenClawSettings(
+                                gatewayUrl = uiState.baseUrl,
+                                onChangeGatewayUrl = uiState.onChangeBaseUrl,
+                                token = uiState.apiKey,
+                                onChangeToken = uiState.onChangeApiKey,
+                                connectionStatus = uiState.connectionStatus,
+                            )
+                        }
                     }
                 }
 
@@ -263,6 +277,8 @@ fun SettingsScreenContent(
                     )
                 }
             }
+
+            Spacer(Modifier.height(16.dp))
 
             Spacer(Modifier.weight(1f))
 
@@ -619,6 +635,133 @@ private fun OpenAICompatibleSettings(
     if (connectionStatus == ConnectionStatus.Connected) {
         ModelSelection(selectedModel, models, onSelectModel)
     }
+}
+
+@Composable
+private fun OpenClawSettings(
+    gatewayUrl: String,
+    onChangeGatewayUrl: (String) -> Unit,
+    token: String,
+    onChangeToken: (String) -> Unit,
+    connectionStatus: ConnectionStatus,
+) {
+    var baseUrlFocused by remember { mutableStateOf(false) }
+    OutlinedTextField(
+        modifier = Modifier.fillMaxWidth().onFocusChanged { baseUrlFocused = it.isFocused },
+        value = gatewayUrl,
+        onValueChange = onChangeGatewayUrl,
+        label = {
+            Text(
+                "Gateway URL",
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+        },
+        colors = outlineTextFieldColors(),
+        singleLine = true,
+        trailingIcon = if (baseUrlFocused && gatewayUrl.isNotEmpty()) {
+            {
+                IconButton(
+                    onClick = { onChangeGatewayUrl("") },
+                    modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Clear,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        } else {
+            null
+        },
+    )
+
+    Spacer(Modifier.height(8.dp))
+
+    var tokenFocused by remember { mutableStateOf(false) }
+    OutlinedTextField(
+        modifier = Modifier.fillMaxWidth().onFocusChanged { tokenFocused = it.isFocused },
+        value = token,
+        onValueChange = onChangeToken,
+        label = {
+            Text(
+                "Token",
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+        },
+        colors = outlineTextFieldColors(),
+        singleLine = true,
+        trailingIcon = if (tokenFocused && token.isNotEmpty()) {
+            {
+                IconButton(
+                    onClick = { onChangeToken("") },
+                    modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Clear,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        } else {
+            null
+        },
+    )
+
+    Spacer(Modifier.height(8.dp))
+
+    ConnectionStatusIndicator(connectionStatus)
+
+    Spacer(Modifier.height(12.dp))
+
+    val linkColor = MaterialTheme.colorScheme.primary
+    val setupText = remember(linkColor) {
+        buildAnnotatedString {
+            append("1. Setup Tailscale (")
+            withLink(LinkAnnotation.Url(url = "https://tailscale.com")) {
+                withStyle(style = SpanStyle(color = linkColor)) {
+                    append("tailscale.com")
+                }
+            }
+            append(") on both your openclaw server and this device.\n\n")
+            append("2. Add the following to ~/.openclaw/openclaw.json to enable the HTTP chat endpoint:\n")
+        }
+    }
+    Text(
+        setupText,
+        modifier = Modifier.fillMaxWidth(),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+
+    Spacer(Modifier.height(8.dp))
+
+    SelectionContainer {
+        Surface(
+            shape = RoundedCornerShape(8.dp),
+            color = MaterialTheme.colorScheme.surfaceVariant,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(
+                text = "\"gateway\": {\n  \"http\": {\n    \"endpoints\": {\n      \"chatCompletions\": {\n        \"enabled\": true\n      }\n    }\n  }\n}",
+                modifier = Modifier.padding(12.dp),
+                style = MaterialTheme.typography.bodySmall,
+                fontFamily = FontFamily.Monospace,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+
+    Spacer(Modifier.height(8.dp))
+
+    Text(
+        text = "3. Use your server\u2019s Tailscale IP as the Gateway URL (e.g. http://<tailscale-ip>:18789).\n\n" +
+            "4. Copy your token from gateway.auth.token in ~/.openclaw/openclaw.json and paste it above.",
+        modifier = Modifier.fillMaxWidth(),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
 }
 
 @Composable
