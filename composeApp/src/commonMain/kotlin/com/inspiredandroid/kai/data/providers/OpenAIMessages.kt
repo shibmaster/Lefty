@@ -13,6 +13,7 @@ internal fun buildOpenAIMessages(
     systemPrompt: String?,
     modelId: String,
     declaredToolNames: Set<String>? = null,
+    supportsAudio: Boolean = false,
 ): List<OpenAICompatibleChatRequestDto.Message> = buildList {
     // Images go through only when both the service and the specific model accept them.
     // Mixed services (e.g. Z.AI) host text-only and vision models side by side.
@@ -27,7 +28,7 @@ internal fun buildOpenAIMessages(
     }
     addAll(
         sanitizeToolMessages(
-            messages.map { it.toGroqMessageDto(service.reasoningRequestMode, supportsImages) },
+            messages.map { it.toGroqMessageDto(service.reasoningRequestMode, supportsImages, supportsAudio) },
             declaredToolNames,
         ),
     )

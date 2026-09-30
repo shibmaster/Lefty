@@ -10,6 +10,7 @@ import com.inspiredandroid.kai.data.ServiceEntry
 import com.inspiredandroid.kai.data.SharedJson
 import com.inspiredandroid.kai.data.SmsDraft
 import com.inspiredandroid.kai.data.UiSubmission
+import com.inspiredandroid.kai.data.openAIAudioFormat
 import com.inspiredandroid.kai.network.UiError
 import com.inspiredandroid.kai.network.dtos.gemini.GeminiChatRequestDto
 import com.inspiredandroid.kai.network.dtos.openaicompatible.OpenAICompatibleChatRequestDto
@@ -57,6 +58,12 @@ private fun List<Attachment>.splitForMessage(): AttachmentSplit {
     return AttachmentSplit(prefix.toString(), binaries)
 }
 
+/** Single voice-message capture (tap mic, tap again to send). */
+enum class VoiceState { Idle, Recording, Transcribing }
+
+/** Hands-free talk loop: listen, send, speak the reply, listen again. */
+enum class TalkMode { Off, Listening, Thinking, Speaking }
+
 @Immutable
 data class ConversationSummary(
     val id: String,
@@ -92,6 +99,10 @@ data class ChatUiState(
     val isRestoring: Boolean = true,
     val installedSkills: ImmutableList<com.inspiredandroid.kai.skills.SkillManifest> = persistentListOf(),
     val composerPrefill: String? = null,
+    /** Mic button shown: the platform can record and the target model accepts audio. */
+    val isVoiceInputAvailable: Boolean = false,
+    val voiceState: VoiceState = VoiceState.Idle,
+    val talkMode: TalkMode = TalkMode.Off,
 ) {
     val heartbeatConversationId: String?
         get() = savedConversations.firstOrNull { it.isHeartbeat }?.id
@@ -136,6 +147,7 @@ data class ToolCallInfo(
 fun History.toGroqMessageDto(
     reasoningMode: ReasoningRequestMode = ReasoningRequestMode.NONE,
     supportsImages: Boolean = true,
+    supportsAudio: Boolean = false,
 ): OpenAICompatibleChatRequestDto.Message = when (role) {
     History.Role.USER -> {
         val split = attachments.splitForMessage()
@@ -148,8 +160,28 @@ fun History.toGroqMessageDto(
         } else {
             emptyList()
         }
+        // Audio becomes input_audio parts (wav/mp3 only — the formats OpenAI-compatible servers
+        // such as llama.cpp accept); dropped entirely for models without audio input.
+        val audioParts = if (supportsAudio) {
+            split.binaries.mapNotNull { att ->
+                if (!att.mimeType.startsWith("audio/")) return@mapNotNull null
+                val format = openAIAudioFormat(att.mimeType, att.fileName) ?: return@mapNotNull null
+                buildJsonObject {
+                    put("type", "input_audio")
+                    put(
+                        "input_audio",
+                        buildJsonObject {
+                            put("data", att.data)
+                            put("format", format)
+                        },
+                    )
+                }
+            }
+        } else {
+            emptyList()
+        }
         val fullText = "${split.textPrefix}$content"
-        val messageContent: JsonElement = if (imageAttachments.isEmpty()) {
+        val messageContent: JsonElement = if (imageAttachments.isEmpty() && audioParts.isEmpty()) {
             JsonPrimitive(fullText)
         } else {
             JsonArray(
@@ -173,6 +205,7 @@ fun History.toGroqMessageDto(
                             },
                         )
                     }
+                    addAll(audioParts)
                 },
             )
         }
@@ -219,7 +252,8 @@ fun History.toGroqMessageDto(
 
 fun History.toAnthropicContentBlocks(): JsonElement = when (role) {
     History.Role.USER -> {
-        val split = attachments.splitForMessage()
+        // Claude has no audio input; audio attachments would otherwise be sent as broken image blocks.
+        val split = attachments.filterNot { it.mimeType.startsWith("audio/") }.splitForMessage()
         val fullText = "${split.textPrefix}$content"
         if (split.binaries.isEmpty()) {
             JsonPrimitive(fullText)

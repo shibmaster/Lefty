@@ -28,6 +28,9 @@ enum class AppPermission {
      * LM Studio, ...) on the user's home network.
      */
     LOCAL_NETWORK,
+
+    /** Microphone access for voice messages and talk mode. */
+    RECORD_AUDIO,
 }
 
 /**

@@ -180,6 +180,10 @@
     <string name="settings_notifications_queued">%1$d notifications queued for next heartbeat</string>
     <string name="settings_notifications_clear_queue">Clear queue</string>
     <string name="settings_dynamic_ui">Dynamic UI</string>
+    <string name="settings_voice_transcribe_first">Transcribe voice messages first</string>
+    <string name="settings_voice_transcribe_first_description">Recorded messages are transcribed by the model and put in the message box for you to edit. When off, the recording is sent to the model as audio. Talk mode sends transcripts automatically.</string>
+    <string name="settings_talk_silence">Talk mode pause</string>
+    <string name="settings_talk_silence_description">How long a pause ends your turn in talk mode.</string>
     <string name="settings_dynamic_ui_description">Allow the AI to create interactive UI elements like buttons, forms and cards inline in responses. Change applies to new conversations.</string>
     <string name="bot_message_thinking_label">Thinking</string>
     <string name="bot_message_thinking_expand_content_description">Expand or collapse thinking</string>
@@ -380,6 +384,16 @@
     <string name="error_file_too_large">File is too large. Text files must be under 100 KB.</string>
     <string name="error_image_too_large">Image is too large. Try a smaller image.</string>
     <string name="error_context_window_exceeded">Context window too large for fallback service. Try starting a new chat or using a model with a larger context window.</string>
+    <string name="error_audio_input_not_supported">No configured model accepts audio. Enable "Model accepts audio input" in the service's Advanced settings.</string>
+    <string name="error_microphone_permission">Microphone access is needed for voice messages.</string>
+    <string name="error_recording_failed">Recording failed. Is the microphone in use by another app?</string>
+    <string name="voice_no_speech">No speech detected</string>
+    <string name="voice_recording">Recording… tap ✓ to send</string>
+    <string name="voice_transcribing">Transcribing…</string>
+    <string name="talk_listening">Listening… tap to leave talk mode</string>
+    <string name="talk_thinking">Thinking…</string>
+    <string name="talk_speaking">Speaking…</string>
+    <string name="voice_message">Voice message</string>
     <string name="error_insufficient_credits">Insufficient credits</string>
     <string name="error_quota_exhausted">Quota exhausted</string>
     <string name="error_content_moderation">Content moderation</string>

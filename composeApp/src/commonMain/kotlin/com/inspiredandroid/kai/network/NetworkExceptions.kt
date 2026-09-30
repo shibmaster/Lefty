@@ -6,6 +6,7 @@ import com.inspiredandroid.kai.inference.ModelIntegrityException
 import com.inspiredandroid.kai.inference.NoModelDownloadedException
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.error_all_services_failed
+import kai.composeapp.generated.resources.error_audio_input_not_supported
 import kai.composeapp.generated.resources.error_bad_request
 import kai.composeapp.generated.resources.error_content_moderation
 import kai.composeapp.generated.resources.error_context_window_exceeded
@@ -60,6 +61,7 @@ class OpenAICompatibleTimeoutException : OpenAICompatibleApiException()
 class OpenAICompatibleBadRequestException(detail: String? = null) : OpenAICompatibleApiException(detail)
 
 class ContextWindowExceededException : ApiException(null)
+class AudioInputNotSupportedException : ApiException(null)
 class UnsupportedFileTypeException : ApiException(null)
 class FileTooLargeException : ApiException(null)
 class AllServicesFailedException : ApiException(null)
@@ -124,6 +126,8 @@ fun Exception.toUiError(): UiError = when (this) {
     is FileTooLargeException -> UiError.Resource(Res.string.error_file_too_large)
 
     is ContextWindowExceededException -> UiError.Resource(Res.string.error_context_window_exceeded)
+
+    is AudioInputNotSupportedException -> UiError.Resource(Res.string.error_audio_input_not_supported)
 
     is AllServicesFailedException -> UiError.Resource(Res.string.error_all_services_failed)
 

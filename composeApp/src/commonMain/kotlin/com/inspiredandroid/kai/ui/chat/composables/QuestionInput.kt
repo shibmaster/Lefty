@@ -10,6 +10,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -61,6 +62,8 @@ import com.inspiredandroid.kai.currentPlatform
 import com.inspiredandroid.kai.data.ServiceEntry
 import com.inspiredandroid.kai.data.imageExtensions
 import com.inspiredandroid.kai.skills.SkillManifest
+import com.inspiredandroid.kai.ui.chat.TalkMode
+import com.inspiredandroid.kai.ui.chat.VoiceState
 import com.inspiredandroid.kai.ui.gradientBrush
 import com.inspiredandroid.kai.ui.handCursor
 import com.inspiredandroid.kai.ui.outlineTextFieldColors
@@ -71,11 +74,19 @@ import io.github.vinceglb.filekit.extension
 import io.github.vinceglb.filekit.name
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.ic_attach
+import kai.composeapp.generated.resources.ic_close
 import kai.composeapp.generated.resources.ic_file
 import kai.composeapp.generated.resources.ic_image
+import kai.composeapp.generated.resources.ic_mic
 import kai.composeapp.generated.resources.ic_stop
+import kai.composeapp.generated.resources.ic_talk
 import kai.composeapp.generated.resources.ic_up
 import kai.composeapp.generated.resources.prompt_ask_question
+import kai.composeapp.generated.resources.talk_listening
+import kai.composeapp.generated.resources.talk_speaking
+import kai.composeapp.generated.resources.talk_thinking
+import kai.composeapp.generated.resources.voice_recording
+import kai.composeapp.generated.resources.voice_transcribing
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.painterResource
@@ -98,6 +109,13 @@ fun QuestionInput(
     onSelectService: (String) -> Unit = {},
     installedSkills: ImmutableList<SkillManifest> = persistentListOf(),
     modifier: Modifier = Modifier,
+    isVoiceInputAvailable: Boolean = false,
+    voiceState: VoiceState = VoiceState.Idle,
+    talkMode: TalkMode = TalkMode.Off,
+    onStartRecording: () -> Unit = {},
+    onStopRecording: () -> Unit = {},
+    onCancelRecording: () -> Unit = {},
+    onToggleTalkMode: () -> Unit = {},
 ) {
     Column(modifier = modifier) {
         // Slash autocomplete: shown when the user is typing the first token and it starts
@@ -233,8 +251,16 @@ fun QuestionInput(
                 },
             colors = outlineTextFieldColors(),
             placeholder = {
+                val placeholderRes = when {
+                    talkMode == TalkMode.Listening -> Res.string.talk_listening
+                    talkMode == TalkMode.Thinking -> Res.string.talk_thinking
+                    talkMode == TalkMode.Speaking -> Res.string.talk_speaking
+                    voiceState == VoiceState.Recording -> Res.string.voice_recording
+                    voiceState == VoiceState.Transcribing -> Res.string.voice_transcribing
+                    else -> Res.string.prompt_ask_question
+                }
                 Text(
-                    stringResource(Res.string.prompt_ask_question),
+                    stringResource(placeholderRes),
                     color = MaterialTheme.colorScheme.onBackground,
                 )
             },
@@ -250,10 +276,34 @@ fun QuestionInput(
                             onSelectService = onSelectService,
                         )
                     }
-                    if (isLoading) {
-                        TrailingIcon(icon = Res.drawable.ic_stop, onClick = cancel, isPulsing = true)
-                    } else if (textState.text.isNotBlank()) {
-                        TrailingIcon(icon = Res.drawable.ic_up, onClick = { submitQuestion() })
+                    when {
+                        // Talk mode owns the button until the user leaves it, even while a reply loads.
+                        talkMode != TalkMode.Off -> TrailingIcon(
+                            icon = Res.drawable.ic_talk,
+                            onClick = onToggleTalkMode,
+                            isPulsing = talkMode == TalkMode.Listening,
+                        )
+
+                        voiceState == VoiceState.Recording -> {
+                            CircleIconButton(
+                                icon = vectorResource(Res.drawable.ic_close),
+                                onClick = onCancelRecording,
+                                tint = MaterialTheme.colorScheme.onBackground,
+                            )
+                            TrailingIcon(icon = Res.drawable.ic_up, onClick = onStopRecording, isPulsing = true)
+                        }
+
+                        voiceState == VoiceState.Transcribing -> TrailingIcon(icon = Res.drawable.ic_mic, onClick = {}, isPulsing = true)
+
+                        isLoading -> TrailingIcon(icon = Res.drawable.ic_stop, onClick = cancel, isPulsing = true)
+
+                        textState.text.isNotBlank() -> TrailingIcon(icon = Res.drawable.ic_up, onClick = { submitQuestion() })
+
+                        isVoiceInputAvailable -> TrailingIcon(
+                            icon = Res.drawable.ic_mic,
+                            onClick = onStartRecording,
+                            onLongClick = onToggleTalkMode,
+                        )
                     }
                 }
             },
@@ -325,6 +375,7 @@ internal fun TrailingIcon(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     isPulsing: Boolean = false,
+    onLongClick: (() -> Unit)? = null,
 ) {
     val pulseModifier = if (isPulsing) {
         val infiniteTransition = rememberInfiniteTransition()
@@ -358,9 +409,7 @@ internal fun TrailingIcon(
             .clip(CircleShape)
             .background(brush = gradientBrush, CircleShape)
             .handCursor()
-            .clickable {
-                onClick()
-            },
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick),
         contentAlignment = Alignment.Center,
     ) {
         Icon(

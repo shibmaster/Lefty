@@ -50,6 +50,8 @@ private fun permissionsFor(permission: AppPermission): Array<String> = when (per
     } else {
         emptyArray()
     }
+
+    AppPermission.RECORD_AUDIO -> arrayOf(Manifest.permission.RECORD_AUDIO)
 }
 
 private val androidContext: Context by inject(Context::class.java)

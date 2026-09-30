@@ -1,6 +1,6 @@
 # Chat & Conversations
 
-**Last verified:** 2026-09-07
+**Last verified:** 2026-09-30
 
 Kai's chat system manages the message history, conversation persistence, file attachments, and speech output. Conversations are service-independent — switching providers does not affect which conversation is loaded or restored. Multiple conversations are persisted and browsable via a history sheet.
 
@@ -64,7 +64,7 @@ Auto-derived from the first user message when a conversation is saved for the fi
 
 ## File Attachments
 
-Multiple files can be attached to a single prompt. Each file is added one at a time via the file picker or drag-and-drop, and appears as a chip below the input. Clicking a chip removes that specific file from the queue. All queued files are cleared after the prompt is sent. Three categories of files are supported:
+Multiple files can be attached to a single prompt. Each file is added one at a time via the file picker or drag-and-drop, and appears as a chip below the input. Clicking a chip removes that specific file from the queue. All queued files are cleared after the prompt is sent. Four categories of files are supported:
 
 ### Images
 - Attach via file picker or drag-and-drop
@@ -89,12 +89,31 @@ Multiple files can be attached to a single prompt. Each file is added one at a t
 - Sent as a `document` block (Anthropic) or `inline_data` (Gemini). On the OpenAI-compatible wire path (OpenAI, OpenRouter, and other OpenAI-compatible services), PDF binaries are currently dropped from the request body — only image parts are encoded as `image_url` — so a PDF attach on OpenAI/OpenRouter is accepted by the UI but not transmitted to the model
 - Shown as a filename chip in the user message bubble
 
+### Audio
+- Supports `.wav`, `.mp3`, `.m4a`, `.ogg`, `.opus`, `.flac`, `.aac`; maximum size 20 MB
+- Offered only when the service a new message goes to accepts audio: the per-instance "Model accepts audio input" advanced setting, or, when that is unset, a model-name heuristic (omni, Voxtral, Gemma 3n, Ultravox, gpt-audio, … and every Gemini model). Never on-device, Free or Anthropic
+- Sent as an `input_audio` part (OpenAI-compatible — wav and mp3 only, the formats llama.cpp accepts) or `inline_data` (Gemini). Dropped for Anthropic, the OpenAI Responses API and any model without audio input
+- A message carrying audio skips fallback entries that can't hear it (the thinking indicator names the skipped service) instead of silently losing the audio
+- Shown as a play/stop chip in the user message bubble; recordings are labelled "Voice message"
+- Audio is dropped from the saved copy first when a message would exceed the storage cap, replaced by a "[voice message — audio not saved]" marker so the history still reads correctly (about 23 s of recorded 16 kHz audio fits)
+
 ### General behavior
 - The attachment button is shown whenever the active service supports file attachments (text files work with all remote models); it is hidden when the active service runs on-device, since on-device services do not support attachments
 - Unsupported file types (e.g., `.zip`) show an error message
 - Files exceeding the per-category size limit show a size error; size is checked by stat before the file is read, so multi-gigabyte attachments are rejected without allocating memory for the full contents
 - Long filenames in chips are truncated with an ellipsis while preserving the extension
 - File attachments persist across conversation save/restore via an `attachments` list on each message; older conversations saved with a single-file schema are migrated on load. An attachment large enough to push its message past the storage cap is dropped from the saved copy (see [Conversation Storage](#conversation-storage)) — the message text stays
+
+## Voice Input
+
+Speech is recognised by the chat model itself (audio input), not by the platform's speech recognizer. Voice input is Android-only and needs the microphone permission, which is requested on first use; a denial shows a snackbar.
+
+- **Mic button** — appears in place of the send button when the input is empty, nothing is loading and the target model accepts audio (see [Audio](#audio))
+- **Tap** records a voice message (16 kHz mono WAV). The button pulses and turns into a send button, with a ✕ next to it to discard. Recording stops after 2 minutes at the latest
+- **Send mode** (Settings > General > "Transcribe voice messages first"): off (default) sends the recording as an audio attachment; on asks the first audio-capable service to transcribe it verbatim and puts the transcript into the message box for editing
+- **Long-press** starts **talk mode**, a hands-free loop: listen → the take ends after a pause (Settings > General > "Talk mode pause", default 1.2 s) → send (audio, or the transcript when transcribe-first is on) → the reply is read aloud → listen again. The button shows the talk-mode icon and pulses while listening; the input placeholder shows listening / thinking / speaking
+- Talk mode turns speech output on, never records while a reply is being spoken, and ends when the user taps the button, nobody speaks for 15 seconds, recording fails, or a request fails. Leaving talk mode stops any speech and cancels a request still in flight
+- Silence detection is an energy gate relative to the background noise measured in the first ~300 ms of each take
 
 ## Speech Output (TTS)
 
@@ -140,6 +159,9 @@ Multiple files can be attached to a single prompt. Each file is added one at a t
 | `composeApp/src/commonMain/.../ui/chat/composables/ChatHistorySheet.kt` | Bottom sheet listing saved conversations |
 | `composeApp/src/commonMain/.../ui/chat/composables/HeartbeatBanner.kt` | Dismissable banner for heartbeat notifications |
 | `composeApp/src/commonMain/.../ui/chat/composables/TopBar.kt` | Top bar with new chat, history, TTS, and settings icons |
-| `composeApp/src/commonMain/.../ui/chat/composables/QuestionInput.kt` | Text input with send/stop button |
+| `composeApp/src/commonMain/.../ui/chat/composables/QuestionInput.kt` | Text input with send/stop button, mic and talk-mode button |
+| `composeApp/src/commonMain/.../audio/VoiceRecorder.kt` | Recorder / player interfaces and silence-detection config |
+| `composeApp/src/androidMain/.../audio/VoiceRecorder.android.kt` | 16 kHz WAV recording with silence detection; attachment playback |
+| `composeApp/src/commonMain/.../ui/chat/composables/UserMessage.kt` | User bubble with image previews, file and audio chips |
 | `androidApp/src/main/AndroidManifest.xml` | Share-sheet registration for plain text (`ACTION_SEND`) |
 | `androidApp/src/main/kotlin/.../MainActivity.kt` | Reads shared text from `ACTION_SEND` and hands it to chat |

@@ -276,6 +276,22 @@ class AppSettings(internal val settings: Settings) {
         settings.putBoolean(KEY_SCHEDULING_ENABLED, enabled)
     }
 
+    // Voice input
+
+    /** When true, voice messages are transcribed by the model first and land in the composer as text. */
+    fun isVoiceTranscribeFirst(): Boolean = settings.getBoolean(KEY_VOICE_TRANSCRIBE_FIRST, false)
+
+    fun setVoiceTranscribeFirst(enabled: Boolean) {
+        settings.putBoolean(KEY_VOICE_TRANSCRIBE_FIRST, enabled)
+    }
+
+    /** Silence (ms) that ends a talk-mode take. */
+    fun getTalkSilenceMs(): Long = settings.getLong(KEY_TALK_SILENCE_MS, com.inspiredandroid.kai.audio.VadConfig.DEFAULT_SILENCE_MS)
+
+    fun setTalkSilenceMs(ms: Long) {
+        settings.putLong(KEY_TALK_SILENCE_MS, ms)
+    }
+
     // Dynamic UI
     fun isDynamicUiEnabled(): Boolean = settings.getBoolean(KEY_DYNAMIC_UI_ENABLED, true)
 
@@ -567,6 +583,8 @@ class AppSettings(internal val settings: Settings) {
         const val KEY_SCHEDULED_TASKS = "scheduled_tasks"
         const val KEY_SCHEDULING_ENABLED = "scheduling_enabled"
         const val KEY_DYNAMIC_UI_ENABLED = "dynamic_ui_enabled"
+        const val KEY_VOICE_TRANSCRIBE_FIRST = "voice_transcribe_first"
+        const val KEY_TALK_SILENCE_MS = "talk_silence_ms"
         const val KEY_OLED_MODE_ENABLED = "oled_mode_enabled"
         const val KEY_THEME_MODE = "theme_mode"
         const val KEY_DAEMON_ENABLED = "daemon_enabled"
