@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" width="432" height="432">
+  <!-- Adaptive-icon foreground: keep the face inside the 66dp safe zone (21..87) -->
+  <g transform="translate(7.56,9) scale(0.86)">
+  <!-- jacket + wide 70s collar -->
+  <path d="M24,108 C26,90 36,82 54,80 C72,82 82,90 84,108 Z" fill="#2B2B30"/>
+  <path d="M44,80 L54,96 L50,108 L38,108 L34,88 Z" fill="#E9E1D0"/>
+  <path d="M64,80 L54,96 L58,108 L70,108 L74,88 Z" fill="#E9E1D0"/>
+  <path d="M49,82 L54,96 L59,82 Z" fill="#C8906A"/>
+  <!-- neck -->
+  <path d="M46,70 L46,84 L54,92 L62,84 L62,70 Z" fill="#C8906A"/>
+  <!-- ears -->
+  <ellipse cx="34.5" cy="55" rx="3.6" ry="6" fill="#D9A27A"/>
+  <ellipse cx="73.5" cy="55" rx="3.6" ry="6" fill="#D9A27A"/>
+  <!-- face -->
+  <path d="M36,50 C36,34 44,27 54,27 C64,27 72,34 72,50 C72,64 66,76 54,78 C42,76 36,64 36,50 Z" fill="#E4B089"/>
+  <!-- slicked-back salt-and-pepper hair, receding temples (widow's peak) -->
+  <path d="M35,52 C33,36 38,21 54,19.5 C70,21 75,36 73,52 C72,45 71,40 68,36.5 C66,34 63.5,32 61,31.5 C58.5,31.2 56,32.8 54,35 C52,32.8 49.5,31.2 47,31.5 C44.5,32 42,34 40,36.5 C37,40 36,45 35,52 Z" fill="#7F7B77"/>
+  <path d="M37,44 C37,34 43,26 52,24 M40,38 C43,31 48,27.5 55,26.5 M46,31 C50,27.5 56,26.5 62,28 M56,32 C60,29.5 65,30 69,34 M60,27 C65,27.5 69,31 71,38" stroke="#C4C0BA" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+  <!-- eyebrows -->
+  <path d="M40,44.5 C43,42.5 47,42.5 50,44" stroke="#4A4540" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M58,44 C61,42.5 65,42.5 68,44.5" stroke="#4A4540" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <!-- tinted aviator glasses -->
+  <path d="M38.5,47 C38.5,45.5 40,45 42,45 L49.5,45 C51,45 51.8,46 51.5,48 C51,53 48.5,56.5 44.5,56.5 C40.5,56.5 38.5,52 38.5,47 Z" fill="#8A5A2B" fill-opacity="0.85" stroke="#C9A227" stroke-width="1.3"/>
+  <path d="M69.5,47 C69.5,45.5 68,45 66,45 L58.5,45 C57,45 56.2,46 56.5,48 C57,53 59.5,56.5 63.5,56.5 C67.5,56.5 69.5,52 69.5,47 Z" fill="#8A5A2B" fill-opacity="0.85" stroke="#C9A227" stroke-width="1.3"/>
+  <path d="M51.5,46.5 C53,45.3 55,45.3 56.5,46.5" stroke="#C9A227" stroke-width="1.3" fill="none"/>
+  <path d="M38.5,47 L35.5,48.5 M69.5,47 L72.5,48.5" stroke="#C9A227" stroke-width="1.3" fill="none"/>
+  <!-- lens glare -->
+  <path d="M41,47.5 L44,47.5 M59,47.5 L62,47.5" stroke="#E8C79A" stroke-width="1" stroke-linecap="round" opacity="0.8"/>
+  <!-- nose -->
+  <path d="M54,50 C53.5,55 52,59 50.5,61 C52,62.5 56,62.5 57.5,61" stroke="#B57E5A" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- moustache -->
+  <path d="M45.5,66.5 C47,63.5 51,63 54,64.5 C57,63 61,63.5 62.5,66.5 C59.5,66 57,66.5 54,67.3 C51,66.5 48.5,66 45.5,66.5 Z" fill="#5A544E"/>
+  <!-- mouth -->
+  <path d="M49,70.5 C51.5,71.5 56.5,71.5 59,70.5" stroke="#9E5F48" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+  <!-- cheek lines -->
+  <path d="M44,62 C44.5,66 46,69 47.5,71 M64,62 C63.5,66 62,69 60.5,71" stroke="#C8906A" stroke-width="1" fill="none" stroke-linecap="round"/>
+  </g>
+</svg>

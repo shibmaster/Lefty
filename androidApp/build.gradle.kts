@@ -13,7 +13,9 @@ android {
     ndkVersion = "29.0.14206865"
 
     defaultConfig {
-        applicationId = "com.inspiredandroid.kai"
+        // Fork identity: installs alongside upstream Kai. The Kotlin namespace stays
+        // com.inspiredandroid.kai so upstream merges stay conflict-free.
+        applicationId = "ai.shibmaster.lefty"
         minSdk =
             libs.versions.android.minSdk
                 .get()
