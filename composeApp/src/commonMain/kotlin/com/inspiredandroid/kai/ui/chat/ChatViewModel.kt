@@ -522,7 +522,7 @@ class ChatViewModel(
 
     /** Voice needs a model that can hear; say how to enable it rather than hiding the mic. */
     private fun ensureAudioModel(): Boolean {
-        if (dataRepository.supportsAudioInput()) return true
+        if (dataRepository.supportsVoiceInput()) return true
         _state.update { it.copy(snackbarMessage = Res.string.error_audio_input_not_supported) }
         return false
     }
@@ -562,12 +562,19 @@ class ChatViewModel(
     }
 
     /**
-     * Sends a recorded take: as an audio attachment, or — with "transcribe first" — as the
-     * model's transcript (into the composer for editing, or straight out in talk mode).
-     * Suspends until the reply has arrived; returns false when nothing was sent or it failed.
+     * Sends a recorded take. With a speech-to-text model (or "transcribe first") it is turned into
+     * text first; "transcribe first" then puts the transcript in the composer for editing, otherwise
+     * it is sent right away (always in talk mode). Without either, the audio itself goes to the
+     * chat model. Suspends until the reply has arrived; returns false when nothing was sent or it failed.
      */
     private suspend fun sendVoice(file: PlatformFile, inTalkMode: Boolean): Boolean {
-        if (dataRepository.isVoiceTranscribeFirst()) {
+        val reviewTranscript = dataRepository.isVoiceTranscribeFirst()
+        if (dataRepository.hasSpeechToTextModel() || reviewTranscript) {
+            // The transcription request can go to a LAN server before any chat request asked.
+            if (!ensureLocalNetworkPermission()) {
+                _state.update { it.copy(error = UiError.Resource(Res.string.error_local_network_permission)) }
+                return false
+            }
             _state.update { it.copy(voiceState = VoiceState.Transcribing) }
             val transcript = try {
                 dataRepository.transcribeAudio(file)
@@ -581,7 +588,7 @@ class ChatViewModel(
                 _state.update { it.copy(snackbarMessage = Res.string.voice_no_speech) }
                 return inTalkMode // an empty take shouldn't end talk mode
             }
-            if (!inTalkMode) {
+            if (reviewTranscript && !inTalkMode) {
                 _state.update { it.copy(composerPrefill = transcript) }
                 return true
             }

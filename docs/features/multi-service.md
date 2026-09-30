@@ -46,7 +46,8 @@ When Free is the only path and the user hits Free FAST/EXPERT rate or quota limi
 9. Entries whose context window can't fit the current chat history are skipped during the walk (the context window is the instance override if set, otherwise the size the provider reports, otherwise the curated catalog / 100K default)
 10. On-device (Local Model) failures are not silently absorbed — they short-circuit the fallback chain so the user sees the actual error rather than being quietly bumped to a cloud service
 11. On-device entries are also never used as fallback targets: a local model is only tried when it is the primary (first) service in the chain. A cloud-service failure never silently starts a local model load
-12. Certain non-retryable errors (Anthropic's "insufficient credits", quota-exhausted responses from OpenAI-compatible providers, invalid API keys and unknown models) skip further **per-service** retries and fail that service immediately; the fallback chain still continues to the next instance. Only on-device (Local Model) failures short-circuit the entire chain
+12. A llama.cpp server rejecting audio ("audio input is not supported") is not retried, and other entries on the same server are skipped for that message instead of being tried one after another (each would force a model swap on llama-swap). When every tried service failed for the same reason, that reason is shown instead of the generic "all services failed"
+13. Certain non-retryable errors (Anthropic's "insufficient credits", quota-exhausted responses from OpenAI-compatible providers, invalid API keys and unknown models) skip further **per-service** retries and fail that service immediately; the fallback chain still continues to the next instance. Only on-device (Local Model) failures short-circuit the entire chain
 
 ## Advanced Instance Settings
 
@@ -57,6 +58,7 @@ Every remote service card has a collapsible **Advanced** section. Each value is 
 - **Context & compaction** — context size in tokens (overrides the provider-reported and catalog sizes everywhere: the fallback context check, per-request trimming and compaction), the characters-per-token ratio used to estimate size (default 4), and auto-compaction on/off, trigger percentage (default 70 %) and how many recent exchanges stay verbatim (default 4). Compaction follows the first usable entry of the fallback chain, uses its settings, and asks that same entry for the summary.
 - **Sampling** — temperature, top P, max tokens, presence/frequency penalty, seed and stop sequences. Blank values are not sent, so the provider's default applies. Top K is offered for the OpenAI-Compatible API, Gemini and Anthropic; min P and repeat penalty only for the OpenAI-Compatible API (llama.cpp server extensions that strict providers reject). Gemini receives the values as its generation config; Anthropic's max tokens default stays 8192.
 - **Model accepts audio input** — marks the model as audio-capable (used by voice input).
+- **Speech-to-text model / language** — a transcription model on the same endpoint (`/audio/transcriptions`) used for voice messages, with a "Test speech-to-text" button. See [chat.md](chat.md#voice-input).
 - **Detect from server** (OpenAI-Compatible API only) — reads a llama.cpp server's `/props` endpoint (at the server root, or through llama-swap's `/upstream/<model>/` passthrough) and fills in the context size and audio capability. If the server doesn't answer, the fields stay manual.
 - **Reset to defaults** clears every advanced value for the instance.
 

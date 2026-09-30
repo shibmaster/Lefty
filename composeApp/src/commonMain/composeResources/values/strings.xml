@@ -53,6 +53,14 @@
     <string name="settings_advanced_stop">Stop sequences (comma-separated)</string>
     <string name="settings_advanced_audio_input">Model accepts audio input</string>
     <string name="settings_advanced_audio_input_hint">Enables voice messages and audio attachments for this service. Known audio models are detected automatically.</string>
+    <string name="settings_advanced_group_voice">Voice (speech-to-text)</string>
+    <string name="settings_advanced_stt_model">Speech-to-text model</string>
+    <string name="settings_advanced_stt_language">Language</string>
+    <string name="settings_advanced_stt_hint">A transcription model on this endpoint (/audio/transcriptions), e.g. voice-stt or whisper. Voice messages are transcribed with it and the text goes to your chat model. Language is optional (e.g. de, en).</string>
+    <string name="settings_advanced_stt_test">Test speech-to-text</string>
+    <string name="settings_advanced_stt_test_running">Testing…</string>
+    <string name="settings_advanced_stt_test_success">Speech-to-text works</string>
+    <string name="settings_advanced_stt_test_failed">Speech-to-text request failed</string>
     <string name="settings_advanced_reset">Reset to defaults</string>
     <string name="toggle_speech_output_content_description">Toggle speech output</string>
     <string name="settings_content_description">Settings</string>
@@ -181,7 +189,7 @@
     <string name="settings_notifications_clear_queue">Clear queue</string>
     <string name="settings_dynamic_ui">Dynamic UI</string>
     <string name="settings_voice_transcribe_first">Transcribe voice messages first</string>
-    <string name="settings_voice_transcribe_first_description">Recorded messages are transcribed by the model and put in the message box for you to edit. When off, the recording is sent to the model as audio. Talk mode sends transcripts automatically.</string>
+    <string name="settings_voice_transcribe_first_description">Recorded messages are transcribed and put in the message box for you to edit. When off, a speech-to-text model's transcript is sent right away (without one, the recording goes to the chat model as audio). Talk mode always sends right away.</string>
     <string name="settings_talk_silence">Talk mode pause</string>
     <string name="settings_talk_silence_description">How long a pause ends your turn in talk mode.</string>
     <string name="settings_dynamic_ui_description">Allow the AI to create interactive UI elements like buttons, forms and cards inline in responses. Change applies to new conversations.</string>

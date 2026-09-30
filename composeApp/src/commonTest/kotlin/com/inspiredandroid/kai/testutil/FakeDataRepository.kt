@@ -260,6 +260,15 @@ class FakeDataRepository : DataRepository {
 
     override fun supportsAudioInput(): Boolean = audioInputSupported
 
+    var speechToTextConfigured = false
+    var sttTestResult: Result<String> = Result.success("")
+
+    override fun supportsVoiceInput(): Boolean = speechToTextConfigured || audioInputSupported
+
+    override fun hasSpeechToTextModel(): Boolean = speechToTextConfigured
+
+    override suspend fun testSpeechToText(instanceId: String): Result<String> = sttTestResult
+
     override suspend fun transcribeAudio(file: PlatformFile): String {
         transcribedFiles += file
         transcribeException?.let { throw it }

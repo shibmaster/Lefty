@@ -165,6 +165,54 @@ class ChatViewModelVoiceTest {
     }
 
     @Test
+    fun `speech-to-text model sends the transcript as text right away`() = runTest(testDispatcher) {
+        repo.audioInputSupported = false
+        repo.speechToTextConfigured = true
+        repo.transcriptResult = "wie spät ist es"
+        val file = wavFile()
+        val vm = viewModel(FakeVoiceRecorder(RecordingResult.Recorded(file, 1500)))
+
+        vm.state.value.actions.startRecording()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(listOf(file), repo.transcribedFiles)
+        val (question, files) = repo.askCalls.single()
+        assertEquals("wie spät ist es", question)
+        assertTrue(files.isEmpty(), "the chat model gets text, not audio")
+        assertNull(vm.state.value.composerPrefill)
+    }
+
+    @Test
+    fun `speech-to-text with review puts the transcript in the composer`() = runTest(testDispatcher) {
+        repo.audioInputSupported = false
+        repo.speechToTextConfigured = true
+        repo.fakeVoiceTranscribeFirst = true
+        repo.transcriptResult = "draft"
+        val vm = viewModel(FakeVoiceRecorder(RecordingResult.Recorded(wavFile(), 1500)))
+
+        vm.state.value.actions.startRecording()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertTrue(repo.askCalls.isEmpty())
+        assertEquals("draft", vm.state.value.composerPrefill)
+    }
+
+    @Test
+    fun `talk mode with a speech-to-text model sends transcripts`() = runTest(testDispatcher) {
+        repo.audioInputSupported = false
+        repo.speechToTextConfigured = true
+        repo.fakeVoiceTranscribeFirst = true // review is skipped in talk mode
+        repo.transcriptResult = "hallo"
+        val vm = viewModel(FakeVoiceRecorder(RecordingResult.Recorded(wavFile(), 2000), RecordingResult.NoSpeech))
+
+        vm.state.value.actions.toggleTalkMode()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals("hallo" to emptyList<PlatformFile>(), repo.askCalls.single())
+        assertEquals(TalkMode.Off, vm.state.value.talkMode)
+    }
+
+    @Test
     fun `talk mode sends each take and ends when nobody speaks`() = runTest(testDispatcher) {
         repo.fakeTalkSilenceMs = 900
         val recorder = FakeVoiceRecorder(

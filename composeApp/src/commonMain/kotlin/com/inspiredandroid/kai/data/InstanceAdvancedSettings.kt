@@ -37,7 +37,13 @@ data class InstanceAdvancedSettings(
     val stop: List<String>? = null,
     // Capabilities
     val supportsAudio: Boolean? = null,
+    // Voice: a speech-to-text model on this endpoint (OpenAI `/audio/transcriptions`), e.g. Whisper
+    // or Qwen3-ASR. Recordings are transcribed with it and sent to the chat model as text.
+    val speechToTextModel: String? = null,
+    val speechLanguage: String? = null,
 ) {
+    val sttModel: String? get() = speechToTextModel?.trim()?.takeIf { it.isNotEmpty() }
+
     val isEmpty: Boolean get() = this == InstanceAdvancedSettings()
 
     val effectiveMaxRetries: Int get() = (maxRetries ?: DEFAULT_MAX_RETRIES).coerceIn(0, 10)
