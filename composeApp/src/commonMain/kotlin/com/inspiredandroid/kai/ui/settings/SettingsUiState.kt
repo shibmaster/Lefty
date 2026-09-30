@@ -41,6 +41,7 @@ data class ConfiguredServiceEntry(
     val advanced: InstanceAdvancedSettings = InstanceAdvancedSettings(),
     val serverDetectState: ServerDetectState = ServerDetectState.Idle,
     val sttTestState: ServerDetectState = ServerDetectState.Idle,
+    val ttsPreviewState: ServerDetectState = ServerDetectState.Idle,
 )
 
 enum class ConnectionStatus {

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.inspiredandroid.kai.DaemonController
 import com.inspiredandroid.kai.Platform
+import com.inspiredandroid.kai.audio.createAudioPlayer
 import com.inspiredandroid.kai.currentPlatform
 import com.inspiredandroid.kai.data.DataRepository
 import com.inspiredandroid.kai.data.ImportSection
@@ -158,6 +159,7 @@ class SettingsViewModel(
         onChangeAdvancedSettings = ::onChangeAdvancedSettings,
         onDetectServerProps = ::onDetectServerProps,
         onTestSpeechToText = ::onTestSpeechToText,
+        onPreviewTextToSpeech = ::onPreviewTextToSpeech,
         onToggleTool = ::onToggleTool,
         onSaveSoul = ::onSaveSoul,
         onToggleDynamicUi = ::onToggleDynamicUi,
@@ -522,6 +524,26 @@ class SettingsViewModel(
                 false
             }
             updateServiceEntry(instanceId) { it.copy(sttTestState = if (ok) ServerDetectState.Success else ServerDetectState.Failed) }
+        }
+    }
+
+    private val previewPlayer by lazy { createAudioPlayer() }
+
+    private fun onPreviewTextToSpeech(instanceId: String) {
+        updateServiceEntry(instanceId) { it.copy(ttsPreviewState = ServerDetectState.Running) }
+        viewModelScope.launch(getBackgroundDispatcher()) {
+            val audio = try {
+                dataRepository.previewTextToSpeech(instanceId).getOrNull()
+            } catch (e: Exception) {
+                if (e is kotlinx.coroutines.CancellationException) throw e
+                null
+            }
+            if (audio == null) {
+                updateServiceEntry(instanceId) { it.copy(ttsPreviewState = ServerDetectState.Failed) }
+                return@launch
+            }
+            updateServiceEntry(instanceId) { it.copy(ttsPreviewState = ServerDetectState.Success) }
+            previewPlayer.playAndAwait(audio, "audio/mpeg")
         }
     }
 

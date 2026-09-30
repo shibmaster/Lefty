@@ -292,6 +292,13 @@ class AppSettings(internal val settings: Settings) {
         settings.putLong(KEY_TALK_SILENCE_MS, ms)
     }
 
+    /** Whether speech output also reads the model's thinking (reasoning) before the answer. */
+    fun isReadThinkingAloud(): Boolean = settings.getBoolean(KEY_READ_THINKING_ALOUD, false)
+
+    fun setReadThinkingAloud(enabled: Boolean) {
+        settings.putBoolean(KEY_READ_THINKING_ALOUD, enabled)
+    }
+
     // Dynamic UI
     fun isDynamicUiEnabled(): Boolean = settings.getBoolean(KEY_DYNAMIC_UI_ENABLED, true)
 
@@ -585,6 +592,7 @@ class AppSettings(internal val settings: Settings) {
         const val KEY_DYNAMIC_UI_ENABLED = "dynamic_ui_enabled"
         const val KEY_VOICE_TRANSCRIBE_FIRST = "voice_transcribe_first"
         const val KEY_TALK_SILENCE_MS = "talk_silence_ms"
+        const val KEY_READ_THINKING_ALOUD = "read_thinking_aloud"
         const val KEY_OLED_MODE_ENABLED = "oled_mode_enabled"
         const val KEY_THEME_MODE = "theme_mode"
         const val KEY_DAEMON_ENABLED = "daemon_enabled"

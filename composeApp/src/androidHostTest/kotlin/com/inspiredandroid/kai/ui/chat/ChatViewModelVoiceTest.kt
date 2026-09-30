@@ -213,6 +213,19 @@ class ChatViewModelVoiceTest {
     }
 
     @Test
+    fun `read thinking aloud toggle is persisted`() = runTest(testDispatcher) {
+        repo.fakeReadThinkingAloud = true
+        val vm = viewModel(FakeVoiceRecorder())
+        assertTrue(vm.state.value.readThinkingAloud, "initial value comes from settings")
+
+        vm.state.value.actions.toggleReadThinkingAloud()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(false, vm.state.value.readThinkingAloud)
+        assertEquals(false, repo.fakeReadThinkingAloud)
+    }
+
+    @Test
     fun `talk mode sends each take and ends when nobody speaks`() = runTest(testDispatcher) {
         repo.fakeTalkSilenceMs = 900
         val recorder = FakeVoiceRecorder(

@@ -103,6 +103,8 @@ data class ChatUiState(
     val isVoiceInputAvailable: Boolean = false,
     val voiceState: VoiceState = VoiceState.Idle,
     val talkMode: TalkMode = TalkMode.Off,
+    /** Speech output also reads the thinking (reasoning) before each answer. */
+    val readThinkingAloud: Boolean = false,
 ) {
     val heartbeatConversationId: String?
         get() = savedConversations.firstOrNull { it.isHeartbeat }?.id
@@ -131,6 +133,35 @@ data class History(
         TOOL_EXECUTING,
         TOOL,
     }
+}
+
+/**
+ * The thinking behind [answer]: standalone thinking turns and tool-call reasoning since the
+ * preceding user message, plus the answer's own reasoning trace — the same text the chat shows in
+ * the answer's collapsible "Thinking" section.
+ */
+fun List<History>.thinkingFor(answer: History): List<String> {
+    val index = indexOfFirst { it.id == answer.id }
+    if (index < 0) return listOfNotNull(answer.reasoningContent?.takeIf { it.isNotBlank() })
+    val turnStart = subList(0, index).indexOfLast { it.role == History.Role.USER } + 1
+    val turn = subList(turnStart, index)
+    return buildList {
+        for (entry in turn) {
+            if (entry.role != History.Role.ASSISTANT) continue
+            when {
+                entry.isThinking && entry.content.isNotBlank() -> add(entry.content)
+                entry.toolCalls != null -> entry.reasoningContent?.takeIf { it.isNotBlank() }?.let { add(it) }
+            }
+        }
+        answer.reasoningContent?.takeIf { it.isNotBlank() }?.let { add(it) }
+    }
+}
+
+/** Text to read aloud for an answer: its thinking first when [includeThinking], then the answer. */
+fun speechTextFor(answer: String, thinking: List<String>, includeThinking: Boolean): String = if (includeThinking && thinking.isNotEmpty()) {
+    (thinking + answer).joinToString("\n\n")
+} else {
+    answer
 }
 
 /** Latest assistant message that should render in the UI (non-empty content, not a thinking-only entry). */

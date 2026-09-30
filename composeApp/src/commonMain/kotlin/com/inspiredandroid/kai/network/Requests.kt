@@ -43,6 +43,7 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
+import io.ktor.client.statement.readRawBytes
 import io.ktor.http.ContentType
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
@@ -135,6 +136,17 @@ internal fun parseTranscriptionText(body: String): String = try {
 } catch (_: Exception) {
     body.trim()
 }
+
+/** JSON body of an OpenAI `/audio/speech` request. */
+internal fun speechRequestJson(model: String, input: String, voice: String, speed: Double?, format: String): String = JsonObject(
+    buildMap {
+        put("model", JsonPrimitive(model))
+        put("input", JsonPrimitive(input))
+        put("voice", JsonPrimitive(voice))
+        put("response_format", JsonPrimitive(format))
+        speed?.let { put("speed", JsonPrimitive(it)) }
+    },
+).toString()
 
 data class LlamaCppProps(
     val contextTokens: Int?,
@@ -456,12 +468,7 @@ class Requests {
         mimeType: String,
         language: String? = null,
     ): Result<String> = openAICompatibleResult {
-        // Hosted OpenAI-format providers (OpenAI, Groq, ...) serve it next to chat completions.
-        val url = if (service == Service.OpenAICompatible) {
-            resolveUrl(service, credentials, "/audio/transcriptions")
-        } else {
-            service.chatUrl.substringBeforeLast("/chat/completions") + "/audio/transcriptions"
-        }
+        val url = audioUrl(service, credentials, "/audio/transcriptions")
         val apiKey = credentials.apiKey.ifEmpty { null }
         val response: HttpResponse = defaultClient.submitFormWithBinaryData(
             url = url,
@@ -487,6 +494,37 @@ class Requests {
         } else {
             handleOpenAICompatibleError(service, credentials, response)
         }
+    }
+
+    /** OpenAI-style text-to-speech (`POST <base>/audio/speech`); returns the encoded audio (mp3 by default). */
+    suspend fun synthesizeSpeech(
+        service: Service,
+        credentials: ServiceCredentials,
+        model: String,
+        input: String,
+        voice: String,
+        speed: Double? = null,
+        format: String = "mp3",
+    ): Result<ByteArray> = openAICompatibleResult {
+        val url = audioUrl(service, credentials, "/audio/speech")
+        val response: HttpResponse = defaultClient.post(url) {
+            applyTimeout(null, credentials.advanced)
+            credentials.apiKey.ifEmpty { null }?.let { bearerAuth(it) }
+            // TextContent avoids ContentNegotiation re-encoding the prepared JSON.
+            setBody(TextContent(speechRequestJson(model, input, voice, speed, format), ContentType.Application.Json))
+        }
+        if (response.status.isSuccess()) {
+            Result.success(response.readRawBytes())
+        } else {
+            handleOpenAICompatibleError(service, credentials, response)
+        }
+    }
+
+    /** Audio endpoints live next to chat completions; hosted providers use their fixed base. */
+    private fun audioUrl(service: Service, credentials: ServiceCredentials, path: String): String = if (service == Service.OpenAICompatible) {
+        resolveUrl(service, credentials, path)
+    } else {
+        service.chatUrl.substringBeforeLast("/chat/completions") + path
     }
 
     suspend fun validateOpenRouterApiKey(credentials: ServiceCredentials): Result<Unit> = openAICompatibleResult {

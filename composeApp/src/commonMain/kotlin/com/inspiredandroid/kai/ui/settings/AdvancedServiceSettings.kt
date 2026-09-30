@@ -78,6 +78,13 @@ import kai.composeapp.generated.resources.settings_advanced_temperature
 import kai.composeapp.generated.resources.settings_advanced_title
 import kai.composeapp.generated.resources.settings_advanced_top_k
 import kai.composeapp.generated.resources.settings_advanced_top_p
+import kai.composeapp.generated.resources.settings_advanced_tts_hint
+import kai.composeapp.generated.resources.settings_advanced_tts_model
+import kai.composeapp.generated.resources.settings_advanced_tts_preview
+import kai.composeapp.generated.resources.settings_advanced_tts_preview_failed
+import kai.composeapp.generated.resources.settings_advanced_tts_preview_running
+import kai.composeapp.generated.resources.settings_advanced_tts_speed
+import kai.composeapp.generated.resources.settings_advanced_tts_voice
 import kai.composeapp.generated.resources.settings_advanced_use_as_fallback
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -96,6 +103,8 @@ internal fun AdvancedServiceSettings(
     onDetect: () -> Unit,
     sttTestState: ServerDetectState = ServerDetectState.Idle,
     onTestSpeechToText: () -> Unit = {},
+    ttsPreviewState: ServerDetectState = ServerDetectState.Idle,
+    onPreviewTextToSpeech: () -> Unit = {},
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
     val isLlamaCppCapable = service == Service.OpenAICompatible
@@ -295,6 +304,42 @@ internal fun AdvancedServiceSettings(
                 }
             }
         }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            TextSettingField(Res.string.settings_advanced_tts_model, advanced.textToSpeechModel, Modifier.weight(2f)) {
+                onChange(advanced.copy(textToSpeechModel = it))
+            }
+            TextSettingField(Res.string.settings_advanced_tts_voice, advanced.ttsVoice, Modifier.weight(1f), placeholder = InstanceAdvancedSettings.DEFAULT_TTS_VOICE) {
+                onChange(advanced.copy(ttsVoice = it))
+            }
+        }
+        DoubleField(Res.string.settings_advanced_tts_speed, advanced.ttsSpeed, "1.0") {
+            onChange(advanced.copy(ttsSpeed = it))
+        }
+        Hint(Res.string.settings_advanced_tts_hint)
+        if (advanced.ttsModel != null) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                OutlinedButton(
+                    onClick = onPreviewTextToSpeech,
+                    enabled = ttsPreviewState != ServerDetectState.Running,
+                    modifier = Modifier.handCursor(),
+                ) {
+                    Text(stringResource(Res.string.settings_advanced_tts_preview))
+                }
+                Spacer(Modifier.width(12.dp))
+                val statusRes = when (ttsPreviewState) {
+                    ServerDetectState.Idle, ServerDetectState.Success -> null
+                    ServerDetectState.Running -> Res.string.settings_advanced_tts_preview_running
+                    ServerDetectState.Failed -> Res.string.settings_advanced_tts_preview_failed
+                }
+                if (statusRes != null) {
+                    Text(
+                        text = stringResource(statusRes),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (ttsPreviewState == ServerDetectState.Failed) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
 
         if (!advanced.isEmpty) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
@@ -396,7 +441,7 @@ private fun DoubleField(labelRes: StringResource, value: Double?, placeholder: S
 
 /** Free-text setting; blank commits null (default). */
 @Composable
-private fun TextSettingField(labelRes: StringResource, value: String?, modifier: Modifier = Modifier, onCommit: (String?) -> Unit) {
+private fun TextSettingField(labelRes: StringResource, value: String?, modifier: Modifier = Modifier, placeholder: String? = null, onCommit: (String?) -> Unit) {
     var text by remember { mutableStateOf(value.orEmpty()) }
     LaunchedEffect(value) {
         if (text.trim().ifEmpty { null } != value) text = value.orEmpty()
@@ -409,6 +454,7 @@ private fun TextSettingField(labelRes: StringResource, value: String?, modifier:
         },
         modifier = modifier.fillMaxWidth(),
         label = { Text(stringResource(labelRes), color = MaterialTheme.colorScheme.onBackground) },
+        placeholder = placeholder?.let { { Text(it, color = MaterialTheme.colorScheme.onSurfaceVariant) } },
         singleLine = true,
     )
 }

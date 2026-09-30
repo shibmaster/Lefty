@@ -12,11 +12,13 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import org.koin.java.KoinJavaComponent.inject
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
+import kotlin.coroutines.resume
 import kotlin.io.encoding.Base64
 import kotlin.math.sqrt
 
@@ -200,12 +202,56 @@ private class AndroidAudioPlayer : AudioPlayer {
         }
     }
 
+    override suspend fun playAndAwait(bytes: ByteArray, mimeType: String) {
+        stop()
+        val file = File.createTempFile("speech-", ".${extensionFor(mimeType)}", context.cacheDir)
+        try {
+            file.writeBytes(bytes)
+            suspendCancellableCoroutine { cont ->
+                val mp = MediaPlayer()
+                player = mp
+                fun finish() {
+                    if (player === mp) player = null
+                    runCatching { mp.release() }
+                    if (cont.isActive) cont.resume(Unit)
+                }
+                try {
+                    mp.setDataSource(file.absolutePath)
+                    mp.setOnCompletionListener { finish() }
+                    mp.setOnErrorListener { _, _, _ ->
+                        finish()
+                        true
+                    }
+                    mp.prepare()
+                    mp.start()
+                } catch (_: Exception) {
+                    finish()
+                }
+                cont.invokeOnCancellation {
+                    runCatching { mp.stop() }
+                    if (player === mp) player = null
+                    runCatching { mp.release() }
+                }
+            }
+        } finally {
+            file.delete()
+        }
+    }
+
     override fun stop() {
         player?.let {
             runCatching { it.stop() }
-            it.release()
+            runCatching { it.release() }
         }
         player = null
         _playingKey.value = null
     }
+}
+
+private fun extensionFor(mimeType: String): String = when {
+    mimeType.contains("wav") -> "wav"
+    mimeType.contains("mpeg") || mimeType.contains("mp3") -> "mp3"
+    mimeType.contains("ogg") -> "ogg"
+    mimeType.contains("flac") -> "flac"
+    else -> "m4a"
 }

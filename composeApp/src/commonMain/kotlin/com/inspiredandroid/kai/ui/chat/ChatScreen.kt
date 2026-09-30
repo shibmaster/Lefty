@@ -75,6 +75,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.inspiredandroid.kai.BackIcon
 import com.inspiredandroid.kai.TerminalLine
+import com.inspiredandroid.kai.audio.Speaker
 import com.inspiredandroid.kai.data.Service
 import com.inspiredandroid.kai.data.supportsAgenticFlows
 import com.inspiredandroid.kai.getBackgroundDispatcher
@@ -123,7 +124,6 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
-import nl.marc_apps.tts.TextToSpeechInstance
 import nl.marc_apps.tts.errors.TextToSpeechSynthesisInterruptedError
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
@@ -132,7 +132,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun ChatScreen(
     viewModel: ChatViewModel = koinViewModel(),
-    textToSpeech: TextToSpeechInstance?,
+    textToSpeech: Speaker?,
     onNavigateToSettings: () -> Unit,
     isSandboxAvailable: Boolean = false,
     isKaiBuildAvailable: Boolean = false,
@@ -153,7 +153,7 @@ fun ChatScreen(
 @Composable
 fun ChatScreenContent(
     uiState: ChatUiState,
-    textToSpeech: TextToSpeechInstance? = null,
+    textToSpeech: Speaker? = null,
     onNavigateToSettings: () -> Unit = {},
     isSandboxAvailable: Boolean = false,
     isKaiBuildAvailable: Boolean = false,
@@ -493,7 +493,7 @@ private fun InteractiveModeContent(
 @Composable
 private fun ChatModeScreen(
     uiState: ChatUiState,
-    textToSpeech: TextToSpeechInstance?,
+    textToSpeech: Speaker?,
     onNavigateToSettings: () -> Unit,
     isSandboxAvailable: Boolean,
     onOpenKaiBuild: (() -> Unit)?,
@@ -560,6 +560,7 @@ private fun ChatModeScreen(
                 isSpeechOutputEnabled = uiState.isSpeechOutputEnabled,
                 isSpeaking = uiState.isSpeaking,
                 actions = uiState.actions,
+                readThinkingAloud = uiState.readThinkingAloud,
                 isChatHistoryEmpty = uiState.history.isEmpty(),
                 hasSavedConversations = filteredConversations.any { it.id != uiState.currentConversationId },
                 onNavigateToSettings = onNavigateToSettings,
@@ -682,7 +683,13 @@ private fun ChatModeScreen(
                                             textToSpeech?.stop()
                                             uiState.actions.setIsSpeaking(true, lastMessage.id)
                                             try {
-                                                textToSpeech?.say(lastMessage.content.toSpeakableText())
+                                                textToSpeech?.say(
+                                                    speechTextFor(
+                                                        answer = lastMessage.content.toSpeakableText(),
+                                                        thinking = history.thinkingFor(lastMessage).map { it.toSpeakableText() },
+                                                        includeThinking = uiState.readThinkingAloud,
+                                                    ),
+                                                )
                                             } catch (_: TextToSpeechSynthesisInterruptedError) {
                                                 // Speech was interrupted by user
                                             } catch (_: Exception) {
@@ -833,6 +840,7 @@ private fun ChatModeScreen(
                                                     BotMessage(
                                                         message = history.content,
                                                         textToSpeech = textToSpeech,
+                                                        readThinkingAloud = uiState.readThinkingAloud,
                                                         isSpeaking = uiState.isSpeaking && uiState.isSpeakingContentId == history.id,
                                                         setIsSpeaking = {
                                                             uiState.actions.setIsSpeaking(it, history.id)

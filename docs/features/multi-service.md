@@ -59,6 +59,7 @@ Every remote service card has a collapsible **Advanced** section. Each value is 
 - **Sampling** — temperature, top P, max tokens, presence/frequency penalty, seed and stop sequences. Blank values are not sent, so the provider's default applies. Top K is offered for the OpenAI-Compatible API, Gemini and Anthropic; min P and repeat penalty only for the OpenAI-Compatible API (llama.cpp server extensions that strict providers reject). Gemini receives the values as its generation config; Anthropic's max tokens default stays 8192.
 - **Model accepts audio input** — marks the model as audio-capable (used by voice input).
 - **Speech-to-text model / language** — a transcription model on the same endpoint (`/audio/transcriptions`) used for voice messages, with a "Test speech-to-text" button. See [chat.md](chat.md#voice-input).
+- **Text-to-speech model / voice / speed** — a speech model on the same endpoint (`/audio/speech`) that reads replies aloud, with a "Preview voice" button. See [chat.md](chat.md#speech-output-tts).
 - **Detect from server** (OpenAI-Compatible API only) — reads a llama.cpp server's `/props` endpoint (at the server root, or through llama-swap's `/upstream/<model>/` passthrough) and fills in the context size and audio capability. If the server doesn't answer, the fields stay manual.
 - **Reset to defaults** clears every advanced value for the instance.
 

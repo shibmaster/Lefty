@@ -39,7 +39,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.inspiredandroid.kai.audio.Speaker
 import com.inspiredandroid.kai.getBackgroundDispatcher
+import com.inspiredandroid.kai.ui.chat.speechTextFor
 import com.inspiredandroid.kai.ui.dynamicui.FrozenSubmission
 import com.inspiredandroid.kai.ui.dynamicui.toSpeakableText
 import com.inspiredandroid.kai.ui.handCursor
@@ -64,14 +66,13 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
-import nl.marc_apps.tts.TextToSpeechInstance
 import nl.marc_apps.tts.errors.TextToSpeechSynthesisInterruptedError
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun BotMessage(
     message: String,
-    textToSpeech: TextToSpeechInstance?,
+    textToSpeech: Speaker?,
     isSpeaking: Boolean,
     setIsSpeaking: (Boolean) -> Unit,
     onRegenerate: (() -> Unit)? = null,
@@ -80,6 +81,7 @@ internal fun BotMessage(
     frozen: FrozenSubmission? = null,
     onResubmit: ((event: String, data: Map<String, String>) -> Unit)? = null,
     reasoningSegments: ImmutableList<String> = persistentListOf(),
+    readThinkingAloud: Boolean = false,
 ) {
     val document = remember(message) { parseMarkdown(message) }
     var isEditing by remember(frozen) { mutableStateOf(false) }
@@ -160,7 +162,13 @@ internal fun BotMessage(
                         } else {
                             setIsSpeaking(true)
                             try {
-                                textToSpeech.say(text = message.toSpeakableText())
+                                textToSpeech.say(
+                                    text = speechTextFor(
+                                        answer = message.toSpeakableText(),
+                                        thinking = reasoningSegments.map { it.toSpeakableText() },
+                                        includeThinking = readThinkingAloud,
+                                    ),
+                                )
                             } catch (ignore: TextToSpeechSynthesisInterruptedError) {
                                 // Expected interruption - no action needed
                             } catch (e: Exception) {

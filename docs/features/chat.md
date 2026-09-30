@@ -120,6 +120,10 @@ Speech is recognised by a model, not by the platform's speech recognizer — eit
 
 ## Speech Output (TTS)
 
+- **Remote voice (optional):** set "Text-to-speech model" (e.g. `voice-tts`), "Voice" (default `alloy`) and optionally "Speech speed" in a service's Advanced settings. Replies, the per-message play button and talk mode then use that endpoint's OpenAI-style `/audio/speech` (mp3) instead of the phone's voice. The first configured service with such a model is used. "Preview voice" plays a short sample with the current settings
+- Remote speech is split into sentence chunks (a short first chunk, then up to ~360 characters) and pipelined, so the next chunk is synthesized while the current one plays and long replies start speaking after their first sentence
+- If the remote endpoint fails mid-message, the rest of that message is read with the phone's voice. Stopping (top-bar toggle, play button, mic, leaving talk mode) cancels synthesis and playback
+
 - Toggle in the top bar enables auto-play of new assistant messages
 - Per-message play button on assistant messages
 - Markdown is stripped before speaking
@@ -164,6 +168,7 @@ Speech is recognised by a model, not by the platform's speech recognizer — eit
 | `composeApp/src/commonMain/.../ui/chat/composables/TopBar.kt` | Top bar with new chat, history, TTS, and settings icons |
 | `composeApp/src/commonMain/.../ui/chat/composables/QuestionInput.kt` | Text input with send/stop button, mic and talk-mode button |
 | `composeApp/src/commonMain/.../audio/VoiceRecorder.kt` | Recorder / player interfaces and silence-detection config |
+| `composeApp/src/commonMain/.../audio/Speaker.kt` | Speaker abstraction: remote text-to-speech with sentence chunking, falling back to the system voice |
 | `composeApp/src/androidMain/.../audio/VoiceRecorder.android.kt` | 16 kHz WAV recording with silence detection; attachment playback |
 | `composeApp/src/commonMain/.../ui/chat/composables/UserMessage.kt` | User bubble with image previews, file and audio chips |
 | `androidApp/src/main/AndroidManifest.xml` | Share-sheet registration for plain text (`ACTION_SEND`) |

@@ -3,24 +3,36 @@ package com.inspiredandroid.kai.ui.chat.composables
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Dns
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import com.inspiredandroid.kai.audio.Speaker
 import com.inspiredandroid.kai.ui.chat.ChatActions
 import com.inspiredandroid.kai.ui.handCursor
 import kai.composeapp.generated.resources.Res
@@ -33,17 +45,18 @@ import kai.composeapp.generated.resources.ic_volume_up
 import kai.composeapp.generated.resources.new_chat_content_description
 import kai.composeapp.generated.resources.sandbox_content_description
 import kai.composeapp.generated.resources.settings_content_description
+import kai.composeapp.generated.resources.speech_read_thinking_aloud
 import kai.composeapp.generated.resources.toggle_speech_output_content_description
-import nl.marc_apps.tts.TextToSpeechInstance
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 
 @Composable
 internal fun TopBar(
-    textToSpeech: TextToSpeechInstance? = null,
+    textToSpeech: Speaker? = null,
     isSpeechOutputEnabled: Boolean,
     isSpeaking: Boolean,
     actions: ChatActions,
+    readThinkingAloud: Boolean = false,
     isChatHistoryEmpty: Boolean,
     hasSavedConversations: Boolean,
     onNavigateToSettings: () -> Unit,
@@ -66,7 +79,7 @@ internal fun TopBar(
             }
             Row(modifier = Modifier.align(Alignment.CenterEnd)) {
                 if (textToSpeech != null) {
-                    SpeechToggleButton(textToSpeech, isSpeechOutputEnabled, isSpeaking, actions)
+                    SpeechToggleButton(textToSpeech, isSpeechOutputEnabled, isSpeaking, actions, readThinkingAloud)
                 }
             }
         }
@@ -75,7 +88,7 @@ internal fun TopBar(
             LeadingButtons(textToSpeech, isSpeechOutputEnabled, isSpeaking, actions, isChatHistoryEmpty, hasSavedConversations, onShowHistory, isSandboxAvailable, isSandboxOpen, isShellExecuting, onToggleSandbox)
             Spacer(Modifier.weight(1f))
             if (textToSpeech != null) {
-                SpeechToggleButton(textToSpeech, isSpeechOutputEnabled, isSpeaking, actions)
+                SpeechToggleButton(textToSpeech, isSpeechOutputEnabled, isSpeaking, actions, readThinkingAloud)
             }
             IconButton(
                 modifier = Modifier.handCursor(),
@@ -93,7 +106,7 @@ internal fun TopBar(
 
 @Composable
 private fun LeadingButtons(
-    textToSpeech: TextToSpeechInstance?,
+    textToSpeech: Speaker?,
     isSpeechOutputEnabled: Boolean,
     isSpeaking: Boolean,
     actions: ChatActions,
@@ -172,31 +185,50 @@ private fun LeadingButtons(
     }
 }
 
+/** Tap toggles speech output; long-press opens speech options (read the thinking aloud). */
 @Composable
 private fun SpeechToggleButton(
-    textToSpeech: TextToSpeechInstance,
+    textToSpeech: Speaker,
     isSpeechOutputEnabled: Boolean,
     isSpeaking: Boolean,
     actions: ChatActions,
+    readThinkingAloud: Boolean,
 ) {
-    IconButton(
-        modifier = Modifier.handCursor(),
-        onClick = {
-            if (isSpeechOutputEnabled && isSpeaking) {
-                actions.setIsSpeaking(false, "")
-                textToSpeech.stop()
-            }
-            actions.toggleSpeechOutput()
-        },
-    ) {
-        Icon(
-            imageVector = if (isSpeechOutputEnabled) {
-                vectorResource(Res.drawable.ic_volume_up)
-            } else {
-                vectorResource(Res.drawable.ic_volume_off)
-            },
-            contentDescription = stringResource(Res.string.toggle_speech_output_content_description),
-            tint = MaterialTheme.colorScheme.onBackground,
-        )
+    var menuOpen by remember { mutableStateOf(false) }
+    Box {
+        Box(
+            modifier = Modifier
+                .size(48.dp)
+                .clip(CircleShape)
+                .handCursor()
+                .combinedClickable(
+                    onClick = {
+                        if (isSpeechOutputEnabled && isSpeaking) {
+                            actions.setIsSpeaking(false, "")
+                            textToSpeech.stop()
+                        }
+                        actions.toggleSpeechOutput()
+                    },
+                    onLongClick = { menuOpen = true },
+                ),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = if (isSpeechOutputEnabled) {
+                    vectorResource(Res.drawable.ic_volume_up)
+                } else {
+                    vectorResource(Res.drawable.ic_volume_off)
+                },
+                contentDescription = stringResource(Res.string.toggle_speech_output_content_description),
+                tint = MaterialTheme.colorScheme.onBackground,
+            )
+        }
+        DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+            DropdownMenuItem(
+                text = { Text(stringResource(Res.string.speech_read_thinking_aloud)) },
+                leadingIcon = { Checkbox(checked = readThinkingAloud, onCheckedChange = null) },
+                onClick = { actions.toggleReadThinkingAloud() },
+            )
+        }
     }
 }
