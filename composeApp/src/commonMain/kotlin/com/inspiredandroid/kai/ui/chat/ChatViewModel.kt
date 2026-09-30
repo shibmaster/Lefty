@@ -94,6 +94,7 @@ class ChatViewModel(
         stopRecording = ::stopRecording,
         cancelRecording = ::cancelRecording,
         toggleTalkMode = ::toggleTalkMode,
+        toggleReadThinkingAloud = ::toggleReadThinkingAloud,
     )
     private val freeModeNames: Map<FreeMode, String> = FreeMode.entries.associateWith { "Free ${it.modelId.replaceFirstChar { c -> c.uppercase() }}" }
     private var currentJob: Job? = null
@@ -103,6 +104,7 @@ class ChatViewModel(
             actions = actions,
             showPrivacyInfo = dataRepository.isUsingSharedKey(),
             isVoiceInputAvailable = voiceRecorder.isSupported(),
+            readThinkingAloud = dataRepository.isReadThinkingAloud(),
         ),
     )
 
@@ -391,6 +393,12 @@ class ChatViewModel(
 
     private fun retry() {
         ask(null)
+    }
+
+    private fun toggleReadThinkingAloud() {
+        val enabled = !_state.value.readThinkingAloud
+        dataRepository.setReadThinkingAloud(enabled)
+        _state.update { it.copy(readThinkingAloud = enabled) }
     }
 
     private fun toggleSpeechOutput() {

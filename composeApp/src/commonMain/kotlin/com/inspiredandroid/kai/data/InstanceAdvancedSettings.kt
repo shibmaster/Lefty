@@ -41,8 +41,14 @@ data class InstanceAdvancedSettings(
     // or Qwen3-ASR. Recordings are transcribed with it and sent to the chat model as text.
     val speechToTextModel: String? = null,
     val speechLanguage: String? = null,
+    // Voice: a text-to-speech model on this endpoint (OpenAI `/audio/speech`) that reads replies aloud.
+    val textToSpeechModel: String? = null,
+    val ttsVoice: String? = null,
+    val ttsSpeed: Double? = null,
 ) {
     val sttModel: String? get() = speechToTextModel?.trim()?.takeIf { it.isNotEmpty() }
+    val ttsModel: String? get() = textToSpeechModel?.trim()?.takeIf { it.isNotEmpty() }
+    val effectiveTtsVoice: String get() = ttsVoice?.trim()?.takeIf { it.isNotEmpty() } ?: DEFAULT_TTS_VOICE
 
     val isEmpty: Boolean get() = this == InstanceAdvancedSettings()
 
@@ -70,5 +76,6 @@ data class InstanceAdvancedSettings(
         const val DEFAULT_COMPACTION_THRESHOLD_PCT = 70
         const val DEFAULT_COMPACTION_KEEP_RECENT = 4
         const val DEFAULT_ANTHROPIC_MAX_TOKENS = 8192
+        const val DEFAULT_TTS_VOICE = "alloy"
     }
 }

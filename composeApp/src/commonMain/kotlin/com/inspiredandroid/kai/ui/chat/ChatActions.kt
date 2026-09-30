@@ -33,4 +33,5 @@ data class ChatActions(
     val stopRecording: () -> Unit = {},
     val cancelRecording: () -> Unit = {},
     val toggleTalkMode: () -> Unit = {},
+    val toggleReadThinkingAloud: () -> Unit = {},
 )

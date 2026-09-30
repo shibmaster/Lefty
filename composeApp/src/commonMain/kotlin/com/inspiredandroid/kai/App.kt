@@ -34,7 +34,11 @@ import coil3.PlatformContext
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import coil3.svg.SvgDecoder
+import com.inspiredandroid.kai.audio.Speaker
+import com.inspiredandroid.kai.audio.SwitchingSpeaker
+import com.inspiredandroid.kai.audio.createAudioPlayer
 import com.inspiredandroid.kai.data.AppSettings
+import com.inspiredandroid.kai.data.DataRepository
 import com.inspiredandroid.kai.data.ThemeMode
 import com.inspiredandroid.kai.tools.AppPermission
 import com.inspiredandroid.kai.tools.PermissionController
@@ -112,6 +116,20 @@ private fun AppContent(
     onAppOpens: ((Int) -> Unit)?,
 ) {
     val appSettings = koinInject<AppSettings>()
+    val dataRepository = koinInject<DataRepository>()
+    // Replies are read by the remote text-to-speech model when one is configured, else by the system voice.
+    val speaker: Speaker? = remember(textToSpeech) {
+        textToSpeech?.let { system ->
+            val player = createAudioPlayer()
+            SwitchingSpeaker(
+                system = system,
+                remoteEnabled = { dataRepository.hasTextToSpeechModel() },
+                synthesize = { dataRepository.synthesizeSpeech(it) },
+                play = { player.playAndAwait(it, "audio/mpeg") },
+                stopPlayback = { player.stop() },
+            )
+        }
+    }
 
     // Track app opens after Koin is initialized
     onAppOpens?.let { callback ->
@@ -210,7 +228,7 @@ private fun AppContent(
                     composable<Home> {
                         ChatScreen(
                             viewModel = chatViewModel,
-                            textToSpeech = textToSpeech,
+                            textToSpeech = speaker,
                             onNavigateToSettings = {
                                 navController.navigate(Settings)
                             },

@@ -61,6 +61,9 @@ interface AudioPlayer {
 
     fun play(key: String, base64Data: String, mimeType: String)
 
+    /** Plays [bytes] and suspends until playback finished; cancelling stops playback. */
+    suspend fun playAndAwait(bytes: ByteArray, mimeType: String)
+
     fun stop()
 }
 
@@ -81,5 +84,6 @@ internal class UnsupportedVoiceRecorder : VoiceRecorder {
 internal class UnsupportedAudioPlayer : AudioPlayer {
     override val playingKey: StateFlow<String?> = kotlinx.coroutines.flow.MutableStateFlow(null)
     override fun play(key: String, base64Data: String, mimeType: String) = Unit
+    override suspend fun playAndAwait(bytes: ByteArray, mimeType: String) = Unit
     override fun stop() = Unit
 }

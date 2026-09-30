@@ -83,6 +83,15 @@ interface DataRepository {
     /** True when a speech-to-text model is configured, so recordings are always transcribed. */
     fun hasSpeechToTextModel(): Boolean
 
+    /** True when a text-to-speech model is configured, so replies are read with it instead of the system voice. */
+    fun hasTextToSpeechModel(): Boolean
+
+    /** Synthesizes [text] with the first configured text-to-speech model; returns mp3 audio. */
+    suspend fun synthesizeSpeech(text: String): ByteArray
+
+    /** Synthesizes a short sample with the instance's text-to-speech settings, for previewing the voice. */
+    suspend fun previewTextToSpeech(instanceId: String): Result<ByteArray>
+
     // Conversation management
     val savedConversations: StateFlow<List<Conversation>>
     fun loadConversations()
@@ -138,6 +147,8 @@ interface DataRepository {
     fun setVoiceTranscribeFirst(enabled: Boolean)
     fun getTalkSilenceMs(): Long
     fun setTalkSilenceMs(ms: Long)
+    fun isReadThinkingAloud(): Boolean
+    fun setReadThinkingAloud(enabled: Boolean)
     fun isDynamicUiEnabled(): Boolean
     fun setDynamicUiEnabled(enabled: Boolean)
 

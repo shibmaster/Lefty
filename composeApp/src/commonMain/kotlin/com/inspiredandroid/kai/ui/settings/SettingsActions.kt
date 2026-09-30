@@ -24,6 +24,7 @@ data class SettingsActions(
     val onChangeAdvancedSettings: (String, InstanceAdvancedSettings) -> Unit,
     val onDetectServerProps: (String) -> Unit,
     val onTestSpeechToText: (String) -> Unit = {},
+    val onPreviewTextToSpeech: (String) -> Unit = {},
     val onToggleTool: (String, Boolean) -> Unit,
     val onSaveSoul: (String) -> Unit,
     val onToggleDynamicUi: (Boolean) -> Unit,

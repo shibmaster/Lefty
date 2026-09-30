@@ -101,6 +101,7 @@ private const val MAX_TOOL_ITERATIONS = 15
 private const val MIN_TOOL_DISPLAY_MS = 2000L
 private const val MAX_REPEATED_TOOL_CALLS = 3
 private const val MAX_HEARTBEAT_MESSAGES = 50
+private const val TTS_PREVIEW_TEXT = "Hey, it's Lefty. Fuhgeddaboudit."
 
 // Explicit allowlist of tools exposed to the on-device (LiteRT) model. We use a
 // hardcoded name list rather than a structural filter because small Gemma models hit
@@ -1557,6 +1558,37 @@ class RemoteDataRepository(
 
     override fun hasSpeechToTextModel(): Boolean = speechToTextEntry() != null
 
+    /** First configured entry with a text-to-speech model, in the user's order. */
+    private fun textToSpeechEntry(): Pair<FallbackEntry, ServiceCredentials>? = getConfiguredServiceInstances()
+        .asSequence()
+        .map { FallbackEntry(it.instanceId, Service.fromId(it.serviceId)) }
+        .filter { !it.service.isOnDevice && it.service != Service.Free && hasValidInstanceApiKey(it.instanceId, it.service) }
+        .map { it to instanceCredentials(it.instanceId, it.service) }
+        .firstOrNull { (_, creds) -> creds.advanced.ttsModel != null }
+
+    override fun hasTextToSpeechModel(): Boolean = textToSpeechEntry() != null
+
+    override suspend fun synthesizeSpeech(text: String): ByteArray {
+        val (entry, creds) = textToSpeechEntry() ?: throw IllegalStateException("No text-to-speech model set")
+        return requests.synthesizeSpeech(
+            service = entry.service,
+            credentials = creds,
+            model = creds.advanced.ttsModel!!,
+            input = text,
+            voice = creds.advanced.effectiveTtsVoice,
+            speed = creds.advanced.ttsSpeed,
+        ).getOrThrow()
+    }
+
+    override suspend fun previewTextToSpeech(instanceId: String): Result<ByteArray> {
+        val instance = getConfiguredServiceInstances().find { it.instanceId == instanceId }
+            ?: return Result.failure(IllegalArgumentException("Unknown service"))
+        val service = Service.fromId(instance.serviceId)
+        val creds = instanceCredentials(instanceId, service)
+        val model = creds.advanced.ttsModel ?: return Result.failure(IllegalStateException("No text-to-speech model set"))
+        return requests.synthesizeSpeech(service, creds, model, TTS_PREVIEW_TEXT, creds.advanced.effectiveTtsVoice, creds.advanced.ttsSpeed)
+    }
+
     override fun supportsVoiceInput(): Boolean = hasSpeechToTextModel() || supportsAudioInput()
 
     override suspend fun transcribeAudio(file: PlatformFile): String {
@@ -1896,6 +1928,12 @@ class RemoteDataRepository(
 
     override fun setTalkSilenceMs(ms: Long) {
         appSettings.setTalkSilenceMs(ms)
+    }
+
+    override fun isReadThinkingAloud(): Boolean = appSettings.isReadThinkingAloud()
+
+    override fun setReadThinkingAloud(enabled: Boolean) {
+        appSettings.setReadThinkingAloud(enabled)
     }
 
     override fun isDynamicUiEnabled(): Boolean = appSettings.isDynamicUiEnabled()

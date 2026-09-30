@@ -267,6 +267,18 @@ class FakeDataRepository : DataRepository {
 
     override fun hasSpeechToTextModel(): Boolean = speechToTextConfigured
 
+    var textToSpeechConfigured = false
+    var synthesizedTexts = mutableListOf<String>()
+
+    override fun hasTextToSpeechModel(): Boolean = textToSpeechConfigured
+
+    override suspend fun synthesizeSpeech(text: String): ByteArray {
+        synthesizedTexts += text
+        return ByteArray(0)
+    }
+
+    override suspend fun previewTextToSpeech(instanceId: String): Result<ByteArray> = Result.success(ByteArray(0))
+
     override suspend fun testSpeechToText(instanceId: String): Result<String> = sttTestResult
 
     override suspend fun transcribeAudio(file: PlatformFile): String {
@@ -433,6 +445,14 @@ class FakeDataRepository : DataRepository {
 
     override fun setTalkSilenceMs(ms: Long) {
         fakeTalkSilenceMs = ms
+    }
+
+    var fakeReadThinkingAloud = false
+
+    override fun isReadThinkingAloud(): Boolean = fakeReadThinkingAloud
+
+    override fun setReadThinkingAloud(enabled: Boolean) {
+        fakeReadThinkingAloud = enabled
     }
 
     override fun isDynamicUiEnabled(): Boolean = dynamicUiEnabled
