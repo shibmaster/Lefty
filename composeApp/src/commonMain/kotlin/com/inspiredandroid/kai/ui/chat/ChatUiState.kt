@@ -99,7 +99,7 @@ data class ChatUiState(
     val isRestoring: Boolean = true,
     val installedSkills: ImmutableList<com.inspiredandroid.kai.skills.SkillManifest> = persistentListOf(),
     val composerPrefill: String? = null,
-    /** Mic button shown: the platform can record and the target model accepts audio. */
+    /** Mic button shown: the platform can record. Whether the model can hear is checked on tap. */
     val isVoiceInputAvailable: Boolean = false,
     val voiceState: VoiceState = VoiceState.Idle,
     val talkMode: TalkMode = TalkMode.Off,
