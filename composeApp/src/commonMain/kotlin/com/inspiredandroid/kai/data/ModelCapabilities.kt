@@ -94,6 +94,34 @@ internal fun modelSupportsImages(modelId: String): Boolean {
     return key !in TEXT_ONLY_IMAGE_MODELS
 }
 
+/** Model-id fragments of families known to accept audio input (omni / speech-LLM models). */
+private val AUDIO_MODEL_MARKERS = listOf(
+    "omni",
+    "voxtral",
+    "gemma-3n",
+    "gemma3n",
+    "ultravox",
+    "gpt-audio",
+    "gpt-4o-audio",
+    "audio-preview",
+    "phi-4-multimodal",
+    "minicpm-o",
+    "granite-speech",
+    "kimi-audio",
+)
+
+/**
+ * Best-guess audio-input support from the model id, used when the user hasn't set the
+ * per-instance "model accepts audio input" flag. Gemini's native API takes audio on every
+ * current model, so the Gemini service is always treated as audio-capable.
+ */
+internal fun modelSupportsAudio(service: Service, modelId: String): Boolean {
+    if (service.isOnDevice || service == Service.Free || service == Service.Anthropic) return false
+    if (service == Service.Gemini) return true
+    val key = modelId.substringAfterLast('/').lowercase()
+    return AUDIO_MODEL_MARKERS.any { key.contains(it) }
+}
+
 /**
  * True if a service+model combo is suitable for autonomous/agentic flows —
  * heartbeat, interactive mode, and any future background feature that runs a

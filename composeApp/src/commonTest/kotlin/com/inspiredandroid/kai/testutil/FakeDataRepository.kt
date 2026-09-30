@@ -253,6 +253,19 @@ class FakeDataRepository : DataRepository {
 
     var fileAttachmentSupported = true
 
+    var audioInputSupported = false
+    var transcriptResult: String = ""
+    var transcribeException: Exception? = null
+    val transcribedFiles = mutableListOf<PlatformFile>()
+
+    override fun supportsAudioInput(): Boolean = audioInputSupported
+
+    override suspend fun transcribeAudio(file: PlatformFile): String {
+        transcribedFiles += file
+        transcribeException?.let { throw it }
+        return transcriptResult
+    }
+
     // Conversation management
     override val savedConversations: MutableStateFlow<List<Conversation>> = MutableStateFlow(emptyList())
 
@@ -397,6 +410,21 @@ class FakeDataRepository : DataRepository {
     override fun getEmailSyncStates(): Map<String, EmailSyncState> = emptyMap()
 
     override suspend fun pollEmailAccount(accountId: String) {}
+
+    var fakeVoiceTranscribeFirst = false
+    var fakeTalkSilenceMs = 1200L
+
+    override fun isVoiceTranscribeFirst(): Boolean = fakeVoiceTranscribeFirst
+
+    override fun setVoiceTranscribeFirst(enabled: Boolean) {
+        fakeVoiceTranscribeFirst = enabled
+    }
+
+    override fun getTalkSilenceMs(): Long = fakeTalkSilenceMs
+
+    override fun setTalkSilenceMs(ms: Long) {
+        fakeTalkSilenceMs = ms
+    }
 
     override fun isDynamicUiEnabled(): Boolean = dynamicUiEnabled
 

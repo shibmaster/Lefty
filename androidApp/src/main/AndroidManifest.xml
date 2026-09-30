@@ -8,6 +8,8 @@
    <uses-permission android:name="android.permission.READ_CALENDAR"/>
    <uses-permission android:name="android.permission.WRITE_CALENDAR"/>
    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+   <!-- Voice messages and talk mode (speech is recognized by the chat model itself). -->
+   <uses-permission android:name="android.permission.RECORD_AUDIO"/>
    <uses-permission android:name="com.android.alarm.permission.SET_ALARM"/>
    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>

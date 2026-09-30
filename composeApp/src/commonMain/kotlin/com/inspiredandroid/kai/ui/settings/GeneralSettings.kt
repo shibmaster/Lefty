@@ -6,7 +6,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
@@ -22,6 +24,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.inspiredandroid.kai.Platform
+import com.inspiredandroid.kai.currentPlatform
 import com.inspiredandroid.kai.data.ThemeMode
 import com.inspiredandroid.kai.ui.KaiOutlinedTextField
 import com.inspiredandroid.kai.ui.components.KaiSlider
@@ -32,6 +36,8 @@ import kai.composeapp.generated.resources.settings_daemon_mode
 import kai.composeapp.generated.resources.settings_daemon_mode_description
 import kai.composeapp.generated.resources.settings_dynamic_ui
 import kai.composeapp.generated.resources.settings_dynamic_ui_description
+import kai.composeapp.generated.resources.settings_talk_silence
+import kai.composeapp.generated.resources.settings_talk_silence_description
 import kai.composeapp.generated.resources.settings_theme
 import kai.composeapp.generated.resources.settings_theme_dark
 import kai.composeapp.generated.resources.settings_theme_description
@@ -39,6 +45,8 @@ import kai.composeapp.generated.resources.settings_theme_light
 import kai.composeapp.generated.resources.settings_theme_oled
 import kai.composeapp.generated.resources.settings_theme_system
 import kai.composeapp.generated.resources.settings_ui_scale
+import kai.composeapp.generated.resources.settings_voice_transcribe_first
+import kai.composeapp.generated.resources.settings_voice_transcribe_first_description
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import kotlin.math.roundToInt
@@ -60,6 +68,16 @@ internal fun GeneralContent(uiState: SettingsUiState, actions: SettingsActions) 
                     isDynamicUiEnabled = uiState.isDynamicUiEnabled,
                     onToggleDynamicUi = actions.onToggleDynamicUi,
                 )
+            }
+            if (currentPlatform is Platform.Mobile) {
+                SettingsCard {
+                    VoiceInputSection(
+                        transcribeFirst = uiState.isVoiceTranscribeFirst,
+                        onToggleTranscribeFirst = actions.onToggleVoiceTranscribeFirst,
+                        talkSilenceMs = uiState.talkSilenceMs,
+                        onChangeTalkSilenceMs = actions.onChangeTalkSilenceMs,
+                    )
+                }
             }
             SettingsCard {
                 ThemeModePicker(
@@ -114,6 +132,53 @@ private fun DynamicUiToggle(
             description = stringResource(Res.string.settings_dynamic_ui_description),
             checked = isDynamicUiEnabled,
             onCheckedChange = onToggleDynamicUi,
+        )
+    }
+}
+
+@Composable
+private fun VoiceInputSection(
+    transcribeFirst: Boolean,
+    onToggleTranscribeFirst: (Boolean) -> Unit,
+    talkSilenceMs: Long,
+    onChangeTalkSilenceMs: (Long) -> Unit,
+) {
+    var sliderValue by remember(talkSilenceMs) { mutableStateOf(talkSilenceMs / 1000f) }
+    Column(modifier = Modifier.fillMaxWidth()) {
+        ToggleableHeadline(
+            title = stringResource(Res.string.settings_voice_transcribe_first),
+            description = stringResource(Res.string.settings_voice_transcribe_first_description),
+            checked = transcribeFirst,
+            onCheckedChange = onToggleTranscribeFirst,
+        )
+        Spacer(Modifier.height(12.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = stringResource(Res.string.settings_talk_silence),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+            Text(
+                text = "${(sliderValue * 10).roundToInt() / 10.0} s",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+        }
+        KaiSlider(
+            value = sliderValue,
+            onValueChange = { sliderValue = it },
+            onValueChangeFinished = { onChangeTalkSilenceMs((sliderValue * 1000).roundToInt().toLong()) },
+            valueRange = 0.5f..3.0f,
+            steps = 24,
+        )
+        Text(
+            text = stringResource(Res.string.settings_talk_silence_description),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }

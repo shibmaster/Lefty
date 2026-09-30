@@ -65,6 +65,12 @@ interface DataRepository {
     fun isUsingSharedKey(): Boolean
     fun supportedFileExtensions(): List<String>
 
+    /** True when the service a new message goes to accepts audio input (voice messages, audio files). */
+    fun supportsAudioInput(): Boolean
+
+    /** Asks the first audio-capable service to transcribe [file] verbatim; returns the transcript. */
+    suspend fun transcribeAudio(file: PlatformFile): String
+
     // Conversation management
     val savedConversations: StateFlow<List<Conversation>>
     fun loadConversations()
@@ -116,6 +122,10 @@ interface DataRepository {
     suspend fun cancelScheduledTask(id: String)
 
     // Dynamic UI
+    fun isVoiceTranscribeFirst(): Boolean
+    fun setVoiceTranscribeFirst(enabled: Boolean)
+    fun getTalkSilenceMs(): Long
+    fun setTalkSilenceMs(ms: Long)
     fun isDynamicUiEnabled(): Boolean
     fun setDynamicUiEnabled(enabled: Boolean)
 

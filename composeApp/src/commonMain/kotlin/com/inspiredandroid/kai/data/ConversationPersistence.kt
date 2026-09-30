@@ -20,6 +20,9 @@ internal val ConversationJson = Json {
  */
 private const val MAX_MESSAGE_JSON_BYTES = 1_000_000L
 
+/** Stands in for a voice message whose audio was too large to persist. */
+internal const val VOICE_MESSAGE_MARKER = "[voice message — audio not saved]"
+
 /** Head of the text kept when a message is still oversized after its files are dropped. */
 private const val MAX_MESSAGE_TEXT_CHARS = 200_000
 
@@ -148,7 +151,18 @@ class SqlConversationPersistence(
         val encoded = ConversationJson.encodeToString(message)
         if (!encoded.exceedsUtf8Budget(MAX_MESSAGE_JSON_BYTES)) return encoded
 
+        // Audio is the likeliest oversized payload (a voice message holds ~23 s of 16 kHz WAV per
+        // MB). Drop it first and leave a marker, so any images on the message survive.
+        val audio = message.attachments.filter { it.mimeType.startsWith("audio/") }
+        val marker = if (audio.isNotEmpty()) voiceMessageMarker(message.content) else message.content
+        if (audio.isNotEmpty()) {
+            val withoutAudio = message.copy(attachments = message.attachments - audio.toSet(), content = marker)
+            val withoutAudioJson = ConversationJson.encodeToString(withoutAudio)
+            if (!withoutAudioJson.exceedsUtf8Budget(MAX_MESSAGE_JSON_BYTES)) return withoutAudioJson
+        }
+
         val withoutFiles = message.copy(
+            content = marker,
             attachments = emptyList(),
             mimeType = null,
             data = null,
@@ -167,6 +181,8 @@ class SqlConversationPersistence(
         )
         return ConversationJson.encodeToString(trimmed)
     }
+
+    private fun voiceMessageMarker(content: String): String = if (content.isBlank()) VOICE_MESSAGE_MARKER else "$VOICE_MESSAGE_MARKER $content"
 
     private fun decodeMessage(json: String): Conversation.Message? = try {
         ConversationJson.decodeFromString<Conversation.Message>(json)

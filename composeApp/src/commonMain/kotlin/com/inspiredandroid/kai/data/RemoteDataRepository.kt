@@ -27,6 +27,7 @@ import com.inspiredandroid.kai.linux.LinuxDistro
 import com.inspiredandroid.kai.mcp.McpServerConfig
 import com.inspiredandroid.kai.mcp.McpServerManager
 import com.inspiredandroid.kai.network.AllServicesFailedException
+import com.inspiredandroid.kai.network.AudioInputNotSupportedException
 import com.inspiredandroid.kai.network.ContextWindowExceededException
 import com.inspiredandroid.kai.network.FileTooLargeException
 import com.inspiredandroid.kai.network.LlamaCppProps
@@ -236,6 +237,9 @@ class RemoteDataRepository(
         reported?.takeIf { it in 1..Int.MAX_VALUE }?.let { return it.toInt() }
         return ModelCatalog.estimateContextWindow(credentials.modelId)
     }
+
+    /** Whether requests with these credentials may carry audio: the per-instance flag, else the model-id heuristic. */
+    private fun supportsAudio(service: Service, credentials: ServiceCredentials): Boolean = credentials.advanced.supportsAudio ?: modelSupportsAudio(service, credentials.modelId)
 
     /** Character budget for a request: context window x the instance's chars-per-token ratio. */
     private fun contextBudgetChars(credentials: ServiceCredentials): Int {
@@ -800,7 +804,7 @@ class RemoteDataRepository(
                 // No tools on this request — strip any historic tool_calls so Groq's strict
                 // validator doesn't see calls to tools we no longer declare.
                 val openAIMessages = trimMessagesToBudget(
-                    buildOpenAIMessages(service, messages, systemPrompt, credentials.modelId, declaredToolNames = emptySet()),
+                    buildOpenAIMessages(service, messages, systemPrompt, credentials.modelId, declaredToolNames = emptySet(), supportsAudio = supportsAudio(service, credentials)),
                     contextBudgetChars(credentials),
                 )
                 if (requiresResponsesApi(service, credentials.modelId, credentials.baseUrl)) {
@@ -912,6 +916,7 @@ class RemoteDataRepository(
                 FileCategory.TEXT -> MAX_TEXT_FILE_BYTES.toLong()
                 FileCategory.PDF -> MAX_PDF_BYTES.toLong()
                 FileCategory.IMAGE -> MAX_RAW_IMAGE_BYTES.toLong()
+                FileCategory.AUDIO -> MAX_AUDIO_BYTES.toLong()
                 FileCategory.UNSUPPORTED -> 0L
             }
             if (file.size() > rawSizeLimit) throw FileTooLargeException()
@@ -943,6 +948,12 @@ class RemoteDataRepository(
                     fileName = fileName,
                 )
 
+                FileCategory.AUDIO -> Attachment(
+                    data = Base64.encode(rawBytes),
+                    mimeType = audioMimeType(fileMimeType, fileName),
+                    fileName = fileName,
+                )
+
                 FileCategory.UNSUPPORTED -> throw UnsupportedFileTypeException()
             }
         }.toImmutableList()
@@ -970,6 +981,8 @@ class RemoteDataRepository(
         val fallbackEntries = getOrderedFallbackEntries().filter { hasValidInstanceApiKey(it.instanceId, it.service) }
 
         val historyChars = messages.sumOf { it.content.length } + (systemPrompt?.length ?: 0)
+        // A voice message must reach a model that can hear it; text-only entries would silently drop the audio.
+        val needsAudio = messages.lastOrNull { it.role == History.Role.USER }?.attachments?.any { it.mimeType.startsWith("audio/") } == true
 
         var lastException: Exception? = null
         var fallbackServiceName: String? = null
@@ -978,6 +991,15 @@ class RemoteDataRepository(
             for ((index, entry) in fallbackEntries.withIndex()) {
                 // Skip fallback services whose context window is too small for the current history
                 // On-device models handle their own context limits, so skip this check for them
+                if (needsAudio && (entry.service.isOnDevice || !supportsAudio(entry.service, instanceCredentials(entry.instanceId, entry.service)))) {
+                    lastException = AudioInputNotSupportedException()
+                    _fallbackStatus.value = FallbackStatus(
+                        serviceName = entry.service.displayName,
+                        errorReason = AudioInputNotSupportedException().toUiError(),
+                        nextServiceName = fallbackEntries.getOrNull(index + 1)?.service?.displayName,
+                    )
+                    continue
+                }
                 if (!entry.service.isOnDevice) {
                     val creds = instanceCredentials(entry.instanceId, entry.service)
                     val entryWindowChars = contextBudgetChars(creds)
@@ -1047,6 +1069,7 @@ class RemoteDataRepository(
         history: MutableStateFlow<List<History>> = chatHistory,
     ): AssistantTurn {
         val budgetChars = contextBudgetChars(credentials)
+        val audioSupported = supportsAudio(service, credentials)
         val declaredToolNames = tools.map { it.schema.name }.toSet()
         // GPT-5.6 and friends reject function tools on chat completions; the same messages are
         // translated to Responses API items instead. Everything before the wire call — prompt
@@ -1054,7 +1077,7 @@ class RemoteDataRepository(
         val useResponsesApi = requiresResponsesApi(service, credentials.modelId, credentials.baseUrl)
         val strategy = object : ToolLoopStrategy {
             override suspend fun chat(history: List<History>, systemPrompt: String?): LoopChatResult {
-                val msgs = trimMessagesToBudget(buildOpenAIMessages(service, history, systemPrompt, credentials.modelId, declaredToolNames), budgetChars)
+                val msgs = trimMessagesToBudget(buildOpenAIMessages(service, history, systemPrompt, credentials.modelId, declaredToolNames, audioSupported), budgetChars)
                 if (useResponsesApi) {
                     val response = retryWithPolicy(credentials.advanced) {
                         requests.openAIResponses(service, credentials, toResponsesInput(msgs), tools).getOrThrow()
@@ -1107,7 +1130,7 @@ class RemoteDataRepository(
 
             override suspend fun bailout(history: List<History>, systemPrompt: String?, reason: BailoutReason): String {
                 // Bailout sends no tools — strip historic tool_calls to satisfy strict validators.
-                val msgs = trimMessagesToBudget(buildOpenAIMessages(service, history, systemPrompt, credentials.modelId, declaredToolNames = emptySet()), budgetChars)
+                val msgs = trimMessagesToBudget(buildOpenAIMessages(service, history, systemPrompt, credentials.modelId, declaredToolNames = emptySet(), supportsAudio = audioSupported), budgetChars)
                 return makeFinalCallWithoutTools(service, credentials, msgs, reason, useResponsesApi)
             }
         }
@@ -1498,7 +1521,45 @@ class RemoteDataRepository(
         // mixed services (e.g. Z.AI) pair text-only models with multimodal ones.
         val imagesSupported = service.supportsImages && modelSupportsImages(currentModelId())
         val base = if (imagesSupported) supportedFileExtensions else supportedFileExtensions - imageExtensions
-        return if (service.supportsPdf) base + "pdf" else base
+        val withPdf = if (service.supportsPdf) base + "pdf" else base
+        return if (supportsAudioInput()) withPdf + audioExtensions else withPdf
+    }
+
+    /** The first usable entry of the fallback chain — the one a new message goes to. */
+    private fun primaryEntry(): FallbackEntry? = getOrderedFallbackEntries().firstOrNull { hasValidInstanceApiKey(it.instanceId, it.service) }
+
+    override fun supportsAudioInput(): Boolean {
+        val primary = primaryEntry() ?: return false
+        if (primary.service.isOnDevice) return false
+        return supportsAudio(primary.service, instanceCredentials(primary.instanceId, primary.service))
+    }
+
+    override suspend fun transcribeAudio(file: PlatformFile): String {
+        val bytes = file.readBytes()
+        if (bytes.size > MAX_AUDIO_BYTES) throw FileTooLargeException()
+        val attachment = Attachment(
+            data = Base64.encode(bytes),
+            mimeType = audioMimeType(file.mimeType()?.toString(), file.name),
+            fileName = file.name,
+        )
+        val message = History(
+            role = History.Role.USER,
+            content = "Transcribe this audio.",
+            attachments = persistentListOf(attachment),
+        )
+        val prompt = "You are a speech-to-text engine. Transcribe the audio verbatim in the language that is spoken. Output only the transcript, with no commentary, quotes or labels."
+        var lastException: Exception? = null
+        for (entry in getOrderedFallbackEntries().filter { hasValidInstanceApiKey(it.instanceId, it.service) && !it.service.isOnDevice }) {
+            val creds = instanceCredentials(entry.instanceId, entry.service)
+            if (!supportsAudio(entry.service, creds)) continue
+            try {
+                return plainChat(entry.service, creds, listOf(message), prompt, strictEmptyResponse = true).content.trim()
+            } catch (e: Exception) {
+                if (e is kotlinx.coroutines.CancellationException) throw e
+                lastException = e
+            }
+        }
+        throw lastException ?: AudioInputNotSupportedException()
     }
 
     override fun currentService(): Service {
@@ -1777,6 +1838,18 @@ class RemoteDataRepository(
             uiMode = uiMode,
             activeSkill = activeSkill,
         ).ifEmpty { null }
+    }
+
+    override fun isVoiceTranscribeFirst(): Boolean = appSettings.isVoiceTranscribeFirst()
+
+    override fun setVoiceTranscribeFirst(enabled: Boolean) {
+        appSettings.setVoiceTranscribeFirst(enabled)
+    }
+
+    override fun getTalkSilenceMs(): Long = appSettings.getTalkSilenceMs()
+
+    override fun setTalkSilenceMs(ms: Long) {
+        appSettings.setTalkSilenceMs(ms)
     }
 
     override fun isDynamicUiEnabled(): Boolean = appSettings.isDynamicUiEnabled()

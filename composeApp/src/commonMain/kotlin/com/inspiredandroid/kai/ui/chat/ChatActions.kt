@@ -29,4 +29,8 @@ data class ChatActions(
     val sendSmsDraft: (String) -> Unit,
     val discardSmsDraft: (String) -> Unit,
     val consumeComposerPrefill: () -> Unit,
+    val startRecording: () -> Unit = {},
+    val stopRecording: () -> Unit = {},
+    val cancelRecording: () -> Unit = {},
+    val toggleTalkMode: () -> Unit = {},
 )

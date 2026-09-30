@@ -959,7 +959,20 @@ private fun ChatModeScreen(
                     availableServices = uiState.availableServices,
                     onSelectService = uiState.actions.selectService,
                     installedSkills = uiState.installedSkills,
+                    isVoiceInputAvailable = uiState.isVoiceInputAvailable,
+                    voiceState = uiState.voiceState,
+                    talkMode = uiState.talkMode,
+                    onStartRecording = uiState.actions.startRecording,
+                    onStopRecording = uiState.actions.stopRecording,
+                    onCancelRecording = uiState.actions.cancelRecording,
+                    onToggleTalkMode = uiState.actions.toggleTalkMode,
                 )
+                // Silence any reply still being read out when the user starts talking or leaves
+                // talk mode — the mic must not pick up the speaker.
+                LaunchedEffect(uiState.talkMode, uiState.voiceState) {
+                    val micActive = uiState.voiceState == VoiceState.Recording || uiState.talkMode == TalkMode.Listening
+                    if (micActive || uiState.talkMode == TalkMode.Off) textToSpeech?.stop()
+                }
             }
         }
         SnackbarHost(

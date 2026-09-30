@@ -83,6 +83,8 @@ class SettingsViewModel(
         tools = dataRepository.getToolDefinitions().toImmutableList(),
         soulText = dataRepository.getSoulText(),
         isDynamicUiEnabled = dataRepository.isDynamicUiEnabled(),
+        isVoiceTranscribeFirst = dataRepository.isVoiceTranscribeFirst(),
+        talkSilenceMs = dataRepository.getTalkSilenceMs(),
         themeMode = dataRepository.getThemeMode(),
         isMemoryEnabled = dataRepository.isMemoryEnabled(),
         memories = dataRepository.getMemories().toImmutableList(),
@@ -158,6 +160,8 @@ class SettingsViewModel(
         onToggleTool = ::onToggleTool,
         onSaveSoul = ::onSaveSoul,
         onToggleDynamicUi = ::onToggleDynamicUi,
+        onToggleVoiceTranscribeFirst = ::onToggleVoiceTranscribeFirst,
+        onChangeTalkSilenceMs = ::onChangeTalkSilenceMs,
         onChangeThemeMode = ::onChangeThemeMode,
         onToggleMemory = ::onToggleMemory,
         onDeleteMemory = ::onDeleteMemory,
@@ -533,6 +537,16 @@ class SettingsViewModel(
     private fun onSaveSoul(text: String) {
         dataRepository.setSoulText(text)
         _state.update { it.copy(soulText = text) }
+    }
+
+    private fun onToggleVoiceTranscribeFirst(enabled: Boolean) {
+        dataRepository.setVoiceTranscribeFirst(enabled)
+        _state.update { it.copy(isVoiceTranscribeFirst = enabled) }
+    }
+
+    private fun onChangeTalkSilenceMs(ms: Long) {
+        dataRepository.setTalkSilenceMs(ms)
+        _state.update { it.copy(talkSilenceMs = ms) }
     }
 
     private fun onToggleDynamicUi(enabled: Boolean) {

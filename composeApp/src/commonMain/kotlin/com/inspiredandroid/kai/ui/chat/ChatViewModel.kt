@@ -2,6 +2,10 @@ package com.inspiredandroid.kai.ui.chat
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.inspiredandroid.kai.audio.RecordingResult
+import com.inspiredandroid.kai.audio.VadConfig
+import com.inspiredandroid.kai.audio.VoiceRecorder
+import com.inspiredandroid.kai.audio.createVoiceRecorder
 import com.inspiredandroid.kai.data.Conversation
 import com.inspiredandroid.kai.data.DataRepository
 import com.inspiredandroid.kai.data.FreeMode
@@ -24,8 +28,11 @@ import io.github.vinceglb.filekit.extension
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.conversation_untitled
 import kai.composeapp.generated.resources.error_local_network_permission
+import kai.composeapp.generated.resources.error_microphone_permission
+import kai.composeapp.generated.resources.error_recording_failed
 import kai.composeapp.generated.resources.error_unsupported_file_type
 import kai.composeapp.generated.resources.litert_no_model_warning
+import kai.composeapp.generated.resources.voice_no_speech
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CancellationException
@@ -39,9 +46,11 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import org.jetbrains.compose.resources.getString
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration.Companion.seconds
@@ -51,6 +60,8 @@ class ChatViewModel(
     private val taskScheduler: TaskScheduler,
     private val backgroundDispatcher: CoroutineContext = getBackgroundDispatcher(),
     private val localNetworkPermissionController: PermissionController = PermissionController(AppPermission.LOCAL_NETWORK),
+    private val requestMicPermission: suspend () -> Boolean = { PermissionController(AppPermission.RECORD_AUDIO).requestPermission() },
+    private val voiceRecorder: VoiceRecorder = createVoiceRecorder(),
 ) : ViewModel() {
 
     private val actions = ChatActions(
@@ -78,6 +89,10 @@ class ChatViewModel(
         sendSmsDraft = ::sendSmsDraft,
         discardSmsDraft = ::discardSmsDraft,
         consumeComposerPrefill = ::consumeComposerPrefill,
+        startRecording = ::startRecording,
+        stopRecording = ::stopRecording,
+        cancelRecording = ::cancelRecording,
+        toggleTalkMode = ::toggleTalkMode,
     )
     private val freeModeNames: Map<FreeMode, String> = FreeMode.entries.associateWith { "Free ${it.modelId.replaceFirstChar { c -> c.uppercase() }}" }
     private var currentJob: Job? = null
@@ -182,6 +197,7 @@ class ChatViewModel(
         state.copy(
             history = history.toImmutableList(),
             supportedFileExtensions = dataRepository.supportedFileExtensions().toImmutableList(),
+            isVoiceInputAvailable = voiceRecorder.isSupported() && dataRepository.supportsAudioInput(),
             savedConversations = summaries.toImmutableList(),
             currentConversationId = conversationId,
             hasUnreadHeartbeat = hasUnreadHeartbeat,
@@ -211,12 +227,12 @@ class ChatViewModel(
         askInternal(question, null)
     }
 
-    private fun askInternal(question: String?, uiSubmission: UiSubmission?) {
+    private fun askInternal(question: String?, uiSubmission: UiSubmission?, extraFiles: List<PlatformFile> = emptyList()) {
         // Prevent concurrent requests
         if (_state.value.isLoading) return
 
         // Capture files before launching coroutine to avoid race with files being cleared
-        val files = _state.value.files
+        val files = _state.value.files + extraFiles
 
         val (strippedQuestion, activeSkillId) = parseSkillInvocation(question)
 
@@ -333,6 +349,7 @@ class ChatViewModel(
     }
 
     private fun setIsSpeaking(isSpeaking: Boolean, contentId: String) {
+        if (isSpeaking) speechStarts.update { it + 1 } else speechEnds.update { it + 1 }
         _state.update {
             it.copy(
                 isSpeaking = isSpeaking,
@@ -492,7 +509,138 @@ class ChatViewModel(
         }
     }
 
+    // region Voice input
+
+    private var recordingJob: Job? = null
+    private var talkJob: Job? = null
+
+    // Counters bumped by the chat screen's auto-speak effect, so the talk loop can wait for the
+    // reply to be spoken without racing the effect.
+    private val speechStarts = MutableStateFlow(0)
+    private val speechEnds = MutableStateFlow(0)
+
+    private suspend fun ensureMicPermission(): Boolean {
+        if (requestMicPermission()) return true
+        _state.update { it.copy(snackbarMessage = Res.string.error_microphone_permission) }
+        return false
+    }
+
+    private fun startRecording() {
+        val state = _state.value
+        if (state.isLoading || state.voiceState != VoiceState.Idle || state.talkMode != TalkMode.Off) return
+        recordingJob = viewModelScope.launch(backgroundDispatcher) {
+            if (!ensureMicPermission()) return@launch
+            _state.update { it.copy(voiceState = VoiceState.Recording) }
+            val result = try {
+                voiceRecorder.record(vad = null)
+            } finally {
+                _state.update { it.copy(voiceState = VoiceState.Idle) }
+            }
+            when (result) {
+                is RecordingResult.Recorded -> sendVoice(result.file, inTalkMode = false)
+                is RecordingResult.Failed -> _state.update { it.copy(snackbarMessage = Res.string.error_recording_failed) }
+                RecordingResult.NoSpeech, RecordingResult.Cancelled -> Unit
+            }
+        }
+    }
+
+    private fun stopRecording() {
+        voiceRecorder.stop()
+    }
+
+    private fun cancelRecording() {
+        voiceRecorder.cancel()
+    }
+
+    /**
+     * Sends a recorded take: as an audio attachment, or — with "transcribe first" — as the
+     * model's transcript (into the composer for editing, or straight out in talk mode).
+     * Suspends until the reply has arrived; returns false when nothing was sent or it failed.
+     */
+    private suspend fun sendVoice(file: PlatformFile, inTalkMode: Boolean): Boolean {
+        if (dataRepository.isVoiceTranscribeFirst()) {
+            _state.update { it.copy(voiceState = VoiceState.Transcribing) }
+            val transcript = try {
+                dataRepository.transcribeAudio(file)
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                _state.update { it.copy(error = e.toUiError(), voiceState = VoiceState.Idle) }
+                return false
+            }
+            _state.update { it.copy(voiceState = VoiceState.Idle) }
+            if (transcript.isBlank()) {
+                _state.update { it.copy(snackbarMessage = Res.string.voice_no_speech) }
+                return inTalkMode // an empty take shouldn't end talk mode
+            }
+            if (!inTalkMode) {
+                _state.update { it.copy(composerPrefill = transcript) }
+                return true
+            }
+            askInternal(transcript, null)
+        } else {
+            askInternal("", null, extraFiles = listOf(file))
+        }
+        currentJob?.join()
+        return _state.value.error == null
+    }
+
+    private fun toggleTalkMode() {
+        if (_state.value.talkMode != TalkMode.Off) stopTalkMode() else startTalkMode()
+    }
+
+    private fun startTalkMode() {
+        val state = _state.value
+        if (state.isLoading || state.voiceState != VoiceState.Idle || talkJob?.isActive == true) return
+        talkJob = viewModelScope.launch(backgroundDispatcher) {
+            if (!ensureMicPermission()) return@launch
+            _state.update { it.copy(talkMode = TalkMode.Listening, isSpeechOutputEnabled = true) }
+            try {
+                while (true) {
+                    currentCoroutineContext().ensureActive()
+                    _state.update { it.copy(talkMode = TalkMode.Listening) }
+                    val take = voiceRecorder.record(VadConfig(silenceMs = dataRepository.getTalkSilenceMs()))
+                    when (take) {
+                        is RecordingResult.Recorded -> Unit
+
+                        is RecordingResult.Failed -> {
+                            _state.update { it.copy(snackbarMessage = Res.string.error_recording_failed) }
+                            break
+                        }
+
+                        // Nobody spoke within the timeout, or the user left talk mode.
+                        RecordingResult.NoSpeech, RecordingResult.Cancelled -> break
+                    }
+                    _state.update { it.copy(talkMode = TalkMode.Thinking) }
+                    val startsBefore = speechStarts.value
+                    val endsBefore = speechEnds.value
+                    if (!sendVoice(take.file, inTalkMode = true)) break
+                    _state.update { it.copy(talkMode = TalkMode.Speaking) }
+                    // Wait for the reply to be read out before listening again, so the mic never
+                    // records the speaker. If speech never starts (no TTS), just carry on.
+                    val started = withTimeoutOrNull(5.seconds) { speechStarts.first { it > startsBefore } } != null
+                    if (started) speechEnds.first { it > endsBefore }
+                }
+            } finally {
+                _state.update { it.copy(talkMode = TalkMode.Off, voiceState = VoiceState.Idle) }
+            }
+        }
+    }
+
+    private fun stopTalkMode() {
+        val wasThinking = _state.value.talkMode == TalkMode.Thinking
+        voiceRecorder.cancel()
+        talkJob?.cancel()
+        talkJob = null
+        if (wasThinking) cancel()
+        _state.update { it.copy(talkMode = TalkMode.Off, voiceState = VoiceState.Idle) }
+    }
+
+    // endregion
+
     override fun onCleared() {
+        voiceRecorder.cancel()
+        talkJob?.cancel()
+        recordingJob?.cancel()
         commitPendingConversationDeletion()
         // The scheduler lives longer than this ViewModel (it's a singleton driving the
         // Android foreground service). Reset the predicate so the daemon path keeps

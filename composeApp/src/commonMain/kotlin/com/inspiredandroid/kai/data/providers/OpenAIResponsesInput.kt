@@ -63,7 +63,16 @@ internal fun toResponsesInput(messages: List<OpenAICompatibleChatRequestDto.Mess
             message.role == "user" && message.content is JsonArray -> add(
                 buildJsonObject {
                     put("role", message.role)
-                    put("content", JsonArray((message.content as JsonArray).map { it.toResponsesContentPart() }))
+                    // input_audio parts have no Responses equivalent here; drop them rather than
+                    // degrading to an empty text part.
+                    put(
+                        "content",
+                        JsonArray(
+                            (message.content as JsonArray)
+                                .filterNot { ((it as? JsonObject)?.get("type") as? JsonPrimitive)?.contentOrNull == "input_audio" }
+                                .map { it.toResponsesContentPart() },
+                        ),
+                    )
                 },
             )
 
