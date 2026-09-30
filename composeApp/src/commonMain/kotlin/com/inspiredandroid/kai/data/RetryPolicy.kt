@@ -2,6 +2,7 @@ package com.inspiredandroid.kai.data
 
 import com.inspiredandroid.kai.network.AnthropicInsufficientCreditsException
 import com.inspiredandroid.kai.network.AnthropicInvalidApiKeyException
+import com.inspiredandroid.kai.network.AudioInputNotSupportedException
 import com.inspiredandroid.kai.network.GeminiInvalidApiKeyException
 import com.inspiredandroid.kai.network.OpenAICompatibleConnectionException
 import com.inspiredandroid.kai.network.OpenAICompatibleInvalidApiKeyException
@@ -17,7 +18,8 @@ internal fun isNonRetryableException(e: Exception): Boolean = e is AnthropicInsu
     e is OpenAICompatibleInvalidApiKeyException ||
     e is GeminiInvalidApiKeyException ||
     e is AnthropicInvalidApiKeyException ||
-    e is OpenAICompatibleModelNotFoundException
+    e is OpenAICompatibleModelNotFoundException ||
+    e is AudioInputNotSupportedException
 
 /** Timeouts and unreachable servers — the failures "fail over on timeout" skips retries for. */
 internal fun isTimeoutOrConnectionException(e: Throwable): Boolean {

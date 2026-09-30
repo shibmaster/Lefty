@@ -76,4 +76,36 @@ class AudioAttachmentTest {
         assertFalse(modelSupportsAudio(Service.OpenAICompatible, "llama-3.1-8b"))
         assertFalse(modelSupportsAudio(Service.Anthropic, "claude-omni"))
     }
+
+    @Test
+    fun `transcription response parsing`() {
+        assertEquals("hello world", com.inspiredandroid.kai.network.parseTranscriptionText("""{"text":" hello world ","language":"en"}"""))
+        assertEquals("plain text", com.inspiredandroid.kai.network.parseTranscriptionText("plain text\n"))
+    }
+
+    @Test
+    fun `stt model is trimmed and blank means none`() {
+        assertNull(InstanceAdvancedSettings(speechToTextModel = "  ").sttModel)
+        assertEquals("voice-stt", InstanceAdvancedSettings(speechToTextModel = " voice-stt ").sttModel)
+    }
+
+    @Test
+    fun `silent wav has a valid header`() {
+        val wav = com.inspiredandroid.kai.audio.silentWav(durationMs = 500)
+        assertEquals("RIFF", wav.copyOfRange(0, 4).decodeToString())
+        assertEquals("WAVE", wav.copyOfRange(8, 12).decodeToString())
+        assertEquals(44 + 16_000, wav.size)
+    }
+
+    @Test
+    fun `audio not supported is never retried`() = kotlinx.coroutines.test.runTest {
+        var calls = 0
+        kotlin.test.assertFailsWith<com.inspiredandroid.kai.network.AudioInputNotSupportedException> {
+            retryWithPolicy(InstanceAdvancedSettings(), sleep = {}) {
+                calls++
+                throw com.inspiredandroid.kai.network.AudioInputNotSupportedException()
+            }
+        }
+        assertEquals(1, calls)
+    }
 }

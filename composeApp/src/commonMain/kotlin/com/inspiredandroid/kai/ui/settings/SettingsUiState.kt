@@ -40,6 +40,7 @@ data class ConfiguredServiceEntry(
     val customModelId: String = "",
     val advanced: InstanceAdvancedSettings = InstanceAdvancedSettings(),
     val serverDetectState: ServerDetectState = ServerDetectState.Idle,
+    val sttTestState: ServerDetectState = ServerDetectState.Idle,
 )
 
 enum class ConnectionStatus {

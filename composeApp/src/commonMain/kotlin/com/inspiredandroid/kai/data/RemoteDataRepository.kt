@@ -3,6 +3,7 @@
 package com.inspiredandroid.kai.data
 
 import com.inspiredandroid.kai.SandboxController
+import com.inspiredandroid.kai.audio.silentWav
 import com.inspiredandroid.kai.compressImageBytes
 import com.inspiredandroid.kai.currentPlatform
 import com.inspiredandroid.kai.data.providers.buildAnthropicMessages
@@ -985,10 +986,17 @@ class RemoteDataRepository(
         val needsAudio = messages.lastOrNull { it.role == History.Role.USER }?.attachments?.any { it.mimeType.startsWith("audio/") } == true
 
         var lastException: Exception? = null
+        val failures = mutableListOf<Exception>()
         var fallbackServiceName: String? = null
+        // Servers that already rejected audio: every entry behind them would fail the same way,
+        // and on llama-swap each attempt costs a model swap.
+        val audioRejectingBaseUrls = mutableSetOf<String>()
 
         try {
             for ((index, entry) in fallbackEntries.withIndex()) {
+                if (needsAudio && getInstanceBaseUrl(entry.instanceId, entry.service) in audioRejectingBaseUrls) {
+                    continue
+                }
                 // Skip fallback services whose context window is too small for the current history
                 // On-device models handle their own context limits, so skip this check for them
                 if (needsAudio && (entry.service.isOnDevice || !supportsAudio(entry.service, instanceCredentials(entry.instanceId, entry.service)))) {
@@ -1024,6 +1032,8 @@ class RemoteDataRepository(
                     // On-device services should not silently fall back — surface the error
                     if (entry.service.isOnDevice) throw e
                     lastException = e
+                    failures += e
+                    if (e is AudioInputNotSupportedException) audioRejectingBaseUrls += getInstanceBaseUrl(entry.instanceId, entry.service)
                     _fallbackStatus.value = FallbackStatus(
                         serviceName = entry.service.displayName,
                         errorReason = e.toUiError(),
@@ -1050,10 +1060,13 @@ class RemoteDataRepository(
                 return
             }
 
-            throw if (fallbackEntries.size > 1 && lastException != null) {
-                AllServicesFailedException()
-            } else {
-                lastException ?: OpenAICompatibleEmptyResponseException()
+            // Several services failing for the same reason is still that reason — surface it
+            // instead of a generic "all services failed" that hides e.g. an audio/model problem.
+            val sameCause = failures.isNotEmpty() && failures.all { it::class == failures.first()::class }
+            throw when {
+                sameCause -> failures.first()
+                fallbackEntries.size > 1 && lastException != null -> AllServicesFailedException()
+                else -> lastException ?: OpenAICompatibleEmptyResponseException()
             }
         } finally {
             _fallbackStatus.value = null
@@ -1534,14 +1547,38 @@ class RemoteDataRepository(
         return supportsAudio(primary.service, instanceCredentials(primary.instanceId, primary.service))
     }
 
+    /** First configured entry with a speech-to-text model, in the user's order. */
+    private fun speechToTextEntry(): Pair<FallbackEntry, ServiceCredentials>? = getConfiguredServiceInstances()
+        .asSequence()
+        .map { FallbackEntry(it.instanceId, Service.fromId(it.serviceId)) }
+        .filter { !it.service.isOnDevice && it.service != Service.Free && hasValidInstanceApiKey(it.instanceId, it.service) }
+        .map { it to instanceCredentials(it.instanceId, it.service) }
+        .firstOrNull { (_, creds) -> creds.advanced.sttModel != null }
+
+    override fun hasSpeechToTextModel(): Boolean = speechToTextEntry() != null
+
+    override fun supportsVoiceInput(): Boolean = hasSpeechToTextModel() || supportsAudioInput()
+
     override suspend fun transcribeAudio(file: PlatformFile): String {
         val bytes = file.readBytes()
         if (bytes.size > MAX_AUDIO_BYTES) throw FileTooLargeException()
-        val attachment = Attachment(
-            data = Base64.encode(bytes),
-            mimeType = audioMimeType(file.mimeType()?.toString(), file.name),
-            fileName = file.name,
-        )
+        val mimeType = audioMimeType(file.mimeType()?.toString(), file.name)
+
+        // Preferred: a dedicated speech-to-text model on its transcription endpoint.
+        speechToTextEntry()?.let { (entry, creds) ->
+            return requests.transcribeAudio(
+                service = entry.service,
+                credentials = creds,
+                model = creds.advanced.sttModel!!,
+                audio = bytes,
+                fileName = file.name,
+                mimeType = mimeType,
+                language = creds.advanced.speechLanguage,
+            ).getOrThrow()
+        }
+
+        // Otherwise ask a chat model that accepts audio input to transcribe verbatim.
+        val attachment = Attachment(data = Base64.encode(bytes), mimeType = mimeType, fileName = file.name)
         val message = History(
             role = History.Role.USER,
             content = "Transcribe this audio.",
@@ -1560,6 +1597,15 @@ class RemoteDataRepository(
             }
         }
         throw lastException ?: AudioInputNotSupportedException()
+    }
+
+    override suspend fun testSpeechToText(instanceId: String): Result<String> {
+        val instance = getConfiguredServiceInstances().find { it.instanceId == instanceId }
+            ?: return Result.failure(IllegalArgumentException("Unknown service"))
+        val service = Service.fromId(instance.serviceId)
+        val creds = instanceCredentials(instanceId, service)
+        val model = creds.advanced.sttModel ?: return Result.failure(IllegalStateException("No speech-to-text model set"))
+        return requests.transcribeAudio(service, creds, model, silentWav(), "test.wav", "audio/wav", creds.advanced.speechLanguage)
     }
 
     override fun currentService(): Service {

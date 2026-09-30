@@ -68,8 +68,20 @@ interface DataRepository {
     /** True when the service a new message goes to accepts audio input (voice messages, audio files). */
     fun supportsAudioInput(): Boolean
 
-    /** Asks the first audio-capable service to transcribe [file] verbatim; returns the transcript. */
+    /** True when recordings can be turned into text: a speech-to-text model is set, or the chat model hears audio. */
+    fun supportsVoiceInput(): Boolean
+
+    /**
+     * Transcribes [file]: with the first speech-to-text model configured on a service, otherwise by
+     * asking an audio-capable chat model to transcribe verbatim.
+     */
     suspend fun transcribeAudio(file: PlatformFile): String
+
+    /** Sends a short silent clip to the instance's speech-to-text model; success means the endpoint works. */
+    suspend fun testSpeechToText(instanceId: String): Result<String>
+
+    /** True when a speech-to-text model is configured, so recordings are always transcribed. */
+    fun hasSpeechToTextModel(): Boolean
 
     // Conversation management
     val savedConversations: StateFlow<List<Conversation>>

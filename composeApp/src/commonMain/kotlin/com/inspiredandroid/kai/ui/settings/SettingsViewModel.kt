@@ -157,6 +157,7 @@ class SettingsViewModel(
         onChangeCustomModelId = ::onChangeCustomModelId,
         onChangeAdvancedSettings = ::onChangeAdvancedSettings,
         onDetectServerProps = ::onDetectServerProps,
+        onTestSpeechToText = ::onTestSpeechToText,
         onToggleTool = ::onToggleTool,
         onSaveSoul = ::onSaveSoul,
         onToggleDynamicUi = ::onToggleDynamicUi,
@@ -509,6 +510,19 @@ class SettingsViewModel(
     private fun onChangeAdvancedSettings(instanceId: String, advanced: InstanceAdvancedSettings) {
         dataRepository.updateInstanceAdvancedSettings(instanceId, advanced)
         updateServiceEntry(instanceId) { it.copy(advanced = advanced) }
+    }
+
+    private fun onTestSpeechToText(instanceId: String) {
+        updateServiceEntry(instanceId) { it.copy(sttTestState = ServerDetectState.Running) }
+        viewModelScope.launch(getBackgroundDispatcher()) {
+            val ok = try {
+                dataRepository.testSpeechToText(instanceId).isSuccess
+            } catch (e: Exception) {
+                if (e is kotlinx.coroutines.CancellationException) throw e
+                false
+            }
+            updateServiceEntry(instanceId) { it.copy(sttTestState = if (ok) ServerDetectState.Success else ServerDetectState.Failed) }
+        }
     }
 
     private fun onDetectServerProps(instanceId: String) {

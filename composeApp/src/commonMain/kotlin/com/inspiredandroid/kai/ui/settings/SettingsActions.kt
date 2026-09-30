@@ -23,6 +23,7 @@ data class SettingsActions(
     val onChangeCustomModelId: (String, String) -> Unit,
     val onChangeAdvancedSettings: (String, InstanceAdvancedSettings) -> Unit,
     val onDetectServerProps: (String) -> Unit,
+    val onTestSpeechToText: (String) -> Unit = {},
     val onToggleTool: (String, Boolean) -> Unit,
     val onSaveSoul: (String) -> Unit,
     val onToggleDynamicUi: (Boolean) -> Unit,

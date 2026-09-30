@@ -35,6 +35,8 @@ import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.timeout
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.bearerAuth
+import io.ktor.client.request.forms.formData
+import io.ktor.client.request.forms.submitFormWithBinaryData
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -42,6 +44,8 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
 import io.ktor.http.content.TextContent
 import io.ktor.http.contentType
 import io.ktor.http.encodeURLParameter
@@ -123,6 +127,13 @@ private inline fun <T> openAICompatibleResult(block: () -> Result<T>): Result<T>
     Result.failure(e)
 } catch (e: Exception) {
     Result.failure(OpenAICompatibleConnectionException())
+}
+
+/** Text of an `/audio/transcriptions` JSON response (`{"text": ...}`), or the raw body for text formats. */
+internal fun parseTranscriptionText(body: String): String = try {
+    Json.parseToJsonElement(body).jsonObject["text"]?.jsonPrimitive?.contentOrNull?.trim().orEmpty()
+} catch (_: Exception) {
+    body.trim()
 }
 
 data class LlamaCppProps(
@@ -432,6 +443,52 @@ class Requests {
         return null
     }
 
+    /**
+     * OpenAI-style speech-to-text (`POST <base>/audio/transcriptions`, multipart) against the
+     * instance's endpoint, e.g. a Whisper / Qwen3-ASR model behind llama-swap or LiteLLM.
+     */
+    suspend fun transcribeAudio(
+        service: Service,
+        credentials: ServiceCredentials,
+        model: String,
+        audio: ByteArray,
+        fileName: String,
+        mimeType: String,
+        language: String? = null,
+    ): Result<String> = openAICompatibleResult {
+        // Hosted OpenAI-format providers (OpenAI, Groq, ...) serve it next to chat completions.
+        val url = if (service == Service.OpenAICompatible) {
+            resolveUrl(service, credentials, "/audio/transcriptions")
+        } else {
+            service.chatUrl.substringBeforeLast("/chat/completions") + "/audio/transcriptions"
+        }
+        val apiKey = credentials.apiKey.ifEmpty { null }
+        val response: HttpResponse = defaultClient.submitFormWithBinaryData(
+            url = url,
+            formData = formData {
+                append("model", model)
+                append("response_format", "json")
+                language?.trim()?.takeIf { it.isNotEmpty() }?.let { append("language", it) }
+                append(
+                    "file",
+                    audio,
+                    Headers.build {
+                        append(HttpHeaders.ContentType, mimeType)
+                        append(HttpHeaders.ContentDisposition, "filename=\"$fileName\"")
+                    },
+                )
+            },
+        ) {
+            applyTimeout(null, credentials.advanced)
+            apiKey?.let { bearerAuth(it) }
+        }
+        if (response.status.isSuccess()) {
+            Result.success(parseTranscriptionText(response.bodyAsText()))
+        } else {
+            handleOpenAICompatibleError(service, credentials, response)
+        }
+    }
+
     suspend fun validateOpenRouterApiKey(credentials: ServiceCredentials): Result<Unit> = openAICompatibleResult {
         val apiKey = credentials.apiKey.ifEmpty { throw OpenAICompatibleInvalidApiKeyException() }
         val response: HttpResponse = defaultClient.get("https://openrouter.ai/api/v1/auth/key") {
@@ -610,7 +667,13 @@ class Requests {
 
             429 -> throw OpenAICompatibleRateLimitExceededException()
 
-            500, 502 -> throw OpenAICompatibleProviderErrorException(parsed.message)
+            500, 502 -> {
+                // llama.cpp answers input_audio for a model without an audio projector with a 500.
+                if (parsed.message.orEmpty().contains("audio input is not supported", ignoreCase = true)) {
+                    throw AudioInputNotSupportedException()
+                }
+                throw OpenAICompatibleProviderErrorException(parsed.message)
+            }
 
             503 -> throw OpenAICompatibleServiceUnavailableException()
 

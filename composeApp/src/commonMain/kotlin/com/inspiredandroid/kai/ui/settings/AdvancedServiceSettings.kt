@@ -54,6 +54,7 @@ import kai.composeapp.generated.resources.settings_advanced_group_context
 import kai.composeapp.generated.resources.settings_advanced_group_fallback
 import kai.composeapp.generated.resources.settings_advanced_group_sampling
 import kai.composeapp.generated.resources.settings_advanced_group_timeouts
+import kai.composeapp.generated.resources.settings_advanced_group_voice
 import kai.composeapp.generated.resources.settings_advanced_max_retries
 import kai.composeapp.generated.resources.settings_advanced_max_tokens
 import kai.composeapp.generated.resources.settings_advanced_min_p
@@ -66,6 +67,13 @@ import kai.composeapp.generated.resources.settings_advanced_sampling_hint
 import kai.composeapp.generated.resources.settings_advanced_seed
 import kai.composeapp.generated.resources.settings_advanced_socket_timeout
 import kai.composeapp.generated.resources.settings_advanced_stop
+import kai.composeapp.generated.resources.settings_advanced_stt_hint
+import kai.composeapp.generated.resources.settings_advanced_stt_language
+import kai.composeapp.generated.resources.settings_advanced_stt_model
+import kai.composeapp.generated.resources.settings_advanced_stt_test
+import kai.composeapp.generated.resources.settings_advanced_stt_test_failed
+import kai.composeapp.generated.resources.settings_advanced_stt_test_running
+import kai.composeapp.generated.resources.settings_advanced_stt_test_success
 import kai.composeapp.generated.resources.settings_advanced_temperature
 import kai.composeapp.generated.resources.settings_advanced_title
 import kai.composeapp.generated.resources.settings_advanced_top_k
@@ -86,6 +94,8 @@ internal fun AdvancedServiceSettings(
     detectState: ServerDetectState,
     onChange: (InstanceAdvancedSettings) -> Unit,
     onDetect: () -> Unit,
+    sttTestState: ServerDetectState = ServerDetectState.Idle,
+    onTestSpeechToText: () -> Unit = {},
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
     val isLlamaCppCapable = service == Service.OpenAICompatible
@@ -249,6 +259,43 @@ internal fun AdvancedServiceSettings(
         }
         Hint(Res.string.settings_advanced_audio_input_hint)
 
+        // Voice
+        GroupHeader(Res.string.settings_advanced_group_voice)
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            TextSettingField(Res.string.settings_advanced_stt_model, advanced.speechToTextModel, Modifier.weight(2f)) {
+                onChange(advanced.copy(speechToTextModel = it))
+            }
+            TextSettingField(Res.string.settings_advanced_stt_language, advanced.speechLanguage, Modifier.weight(1f)) {
+                onChange(advanced.copy(speechLanguage = it))
+            }
+        }
+        Hint(Res.string.settings_advanced_stt_hint)
+        if (advanced.sttModel != null) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                OutlinedButton(
+                    onClick = onTestSpeechToText,
+                    enabled = sttTestState != ServerDetectState.Running,
+                    modifier = Modifier.handCursor(),
+                ) {
+                    Text(stringResource(Res.string.settings_advanced_stt_test))
+                }
+                Spacer(Modifier.width(12.dp))
+                val statusRes = when (sttTestState) {
+                    ServerDetectState.Idle -> null
+                    ServerDetectState.Running -> Res.string.settings_advanced_stt_test_running
+                    ServerDetectState.Success -> Res.string.settings_advanced_stt_test_success
+                    ServerDetectState.Failed -> Res.string.settings_advanced_stt_test_failed
+                }
+                if (statusRes != null) {
+                    Text(
+                        text = stringResource(statusRes),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (sttTestState == ServerDetectState.Failed) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
+
         if (!advanced.isEmpty) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                 TextButton(onClick = { onChange(InstanceAdvancedSettings()) }, modifier = Modifier.handCursor()) {
@@ -346,6 +393,25 @@ private fun LongField(labelRes: StringResource, value: Long?, placeholder: Strin
 
 @Composable
 private fun DoubleField(labelRes: StringResource, value: Double?, placeholder: String, modifier: Modifier = Modifier, onCommit: (Double?) -> Unit) = NullableNumberField(labelRes, value, placeholder, { it.trim().replace(',', '.').toDoubleOrNull() }, KeyboardType.Decimal, modifier, onCommit)
+
+/** Free-text setting; blank commits null (default). */
+@Composable
+private fun TextSettingField(labelRes: StringResource, value: String?, modifier: Modifier = Modifier, onCommit: (String?) -> Unit) {
+    var text by remember { mutableStateOf(value.orEmpty()) }
+    LaunchedEffect(value) {
+        if (text.trim().ifEmpty { null } != value) text = value.orEmpty()
+    }
+    KaiOutlinedTextField(
+        value = text,
+        onValueChange = { input ->
+            text = input
+            onCommit(input.trim().ifEmpty { null })
+        },
+        modifier = modifier.fillMaxWidth(),
+        label = { Text(stringResource(labelRes), color = MaterialTheme.colorScheme.onBackground) },
+        singleLine = true,
+    )
+}
 
 /** Comma-separated stop sequences; blank clears them. */
 @Composable

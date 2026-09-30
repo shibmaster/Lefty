@@ -106,11 +106,14 @@ Multiple files can be attached to a single prompt. Each file is added one at a t
 
 ## Voice Input
 
-Speech is recognised by the chat model itself (audio input), not by the platform's speech recognizer. Voice input is Android-only and needs the microphone permission, which is requested on first use; a denial shows a snackbar.
+Speech is recognised by a model, not by the platform's speech recognizer — either a dedicated **speech-to-text model** or a chat model that accepts audio. Voice input is Android-only and needs the microphone permission, which is requested on first use; a denial shows a snackbar.
+
+- **Speech-to-text model** (preferred): set "Speech-to-text model" (and optionally a language such as `de`) in a service's Advanced settings. Recordings are sent to that endpoint's OpenAI-style `/audio/transcriptions` (Whisper, Qwen3-ASR, … — e.g. behind llama-swap or LiteLLM), and the transcript goes to the chat model as ordinary text, so the chat model does not need audio input. The first configured service with such a model is used, independent of the fallback order; "Test speech-to-text" sends a short silent clip to check the endpoint
+- Without a speech-to-text model, recordings go to a chat model that accepts audio (see [Audio](#audio))
 
 - **Mic button** — appears in place of the send button whenever the input is empty and nothing is loading. If the target model doesn't accept audio (see [Audio](#audio)), tapping it shows how to enable audio input instead of recording
 - **Tap** records a voice message (16 kHz mono WAV). The button pulses and turns into a send button, with a ✕ next to it to discard. Recording stops after 2 minutes at the latest
-- **Send mode** (Settings > General > "Transcribe voice messages first"): off (default) sends the recording as an audio attachment; on asks the first audio-capable service to transcribe it verbatim and puts the transcript into the message box for editing
+- **Send mode** (Settings > General > "Transcribe voice messages first"): on puts the transcript into the message box for editing. Off sends the speech-to-text transcript right away — or, without a speech-to-text model, sends the recording itself as an audio attachment
 - **Long-press** starts **talk mode**, a hands-free loop: listen → the take ends after a pause (Settings > General > "Talk mode pause", default 1.2 s) → send (audio, or the transcript when transcribe-first is on) → the reply is read aloud → listen again. The button shows the talk-mode icon and pulses while listening; the input placeholder shows listening / thinking / speaking
 - Talk mode turns speech output on, never records while a reply is being spoken, and ends when the user taps the button, nobody speaks for 15 seconds, recording fails, or a request fails. Leaving talk mode stops any speech and cancels a request still in flight
 - Silence detection is an energy gate relative to the background noise measured in the first ~300 ms of each take
