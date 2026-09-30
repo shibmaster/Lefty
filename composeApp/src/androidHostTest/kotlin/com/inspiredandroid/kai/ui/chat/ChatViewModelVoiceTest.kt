@@ -149,6 +149,22 @@ class ChatViewModelVoiceTest {
     }
 
     @Test
+    fun `mic shows even without an audio model and explains on tap`() = runTest(testDispatcher) {
+        repo.audioInputSupported = false
+        val recorder = FakeVoiceRecorder(null)
+        val vm = viewModel(recorder)
+        assertTrue(vm.state.value.isVoiceInputAvailable)
+
+        vm.state.value.actions.startRecording()
+        vm.state.value.actions.toggleTalkMode()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertTrue(recorder.vadConfigs.isEmpty(), "nothing is recorded for a model that can't hear")
+        assertEquals(TalkMode.Off, vm.state.value.talkMode)
+        assertNotNull(vm.state.value.snackbarMessage)
+    }
+
+    @Test
     fun `talk mode sends each take and ends when nobody speaks`() = runTest(testDispatcher) {
         repo.fakeTalkSilenceMs = 900
         val recorder = FakeVoiceRecorder(

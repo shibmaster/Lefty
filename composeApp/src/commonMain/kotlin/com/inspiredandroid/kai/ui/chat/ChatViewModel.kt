@@ -27,6 +27,7 @@ import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.extension
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.conversation_untitled
+import kai.composeapp.generated.resources.error_audio_input_not_supported
 import kai.composeapp.generated.resources.error_local_network_permission
 import kai.composeapp.generated.resources.error_microphone_permission
 import kai.composeapp.generated.resources.error_recording_failed
@@ -101,6 +102,7 @@ class ChatViewModel(
         ChatUiState(
             actions = actions,
             showPrivacyInfo = dataRepository.isUsingSharedKey(),
+            isVoiceInputAvailable = voiceRecorder.isSupported(),
         ),
     )
 
@@ -197,7 +199,6 @@ class ChatViewModel(
         state.copy(
             history = history.toImmutableList(),
             supportedFileExtensions = dataRepository.supportedFileExtensions().toImmutableList(),
-            isVoiceInputAvailable = voiceRecorder.isSupported() && dataRepository.supportsAudioInput(),
             savedConversations = summaries.toImmutableList(),
             currentConversationId = conversationId,
             hasUnreadHeartbeat = hasUnreadHeartbeat,
@@ -519,6 +520,13 @@ class ChatViewModel(
     private val speechStarts = MutableStateFlow(0)
     private val speechEnds = MutableStateFlow(0)
 
+    /** Voice needs a model that can hear; say how to enable it rather than hiding the mic. */
+    private fun ensureAudioModel(): Boolean {
+        if (dataRepository.supportsAudioInput()) return true
+        _state.update { it.copy(snackbarMessage = Res.string.error_audio_input_not_supported) }
+        return false
+    }
+
     private suspend fun ensureMicPermission(): Boolean {
         if (requestMicPermission()) return true
         _state.update { it.copy(snackbarMessage = Res.string.error_microphone_permission) }
@@ -528,6 +536,7 @@ class ChatViewModel(
     private fun startRecording() {
         val state = _state.value
         if (state.isLoading || state.voiceState != VoiceState.Idle || state.talkMode != TalkMode.Off) return
+        if (!ensureAudioModel()) return
         recordingJob = viewModelScope.launch(backgroundDispatcher) {
             if (!ensureMicPermission()) return@launch
             _state.update { it.copy(voiceState = VoiceState.Recording) }
@@ -591,6 +600,7 @@ class ChatViewModel(
     private fun startTalkMode() {
         val state = _state.value
         if (state.isLoading || state.voiceState != VoiceState.Idle || talkJob?.isActive == true) return
+        if (!ensureAudioModel()) return
         talkJob = viewModelScope.launch(backgroundDispatcher) {
             if (!ensureMicPermission()) return@launch
             _state.update { it.copy(talkMode = TalkMode.Listening, isSpeechOutputEnabled = true) }
