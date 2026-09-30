@@ -68,6 +68,7 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
+import com.inspiredandroid.kai.data.InstanceAdvancedSettings
 import com.inspiredandroid.kai.data.Service
 import com.inspiredandroid.kai.formatFileSize
 import com.inspiredandroid.kai.inference.DevicePerformance
@@ -340,6 +341,8 @@ internal fun ServicesContent(uiState: SettingsUiState, actions: SettingsActions)
                     onSelectModel = { modelId -> actions.onSelectModel(entry.instanceId, modelId) },
                     onToggleUseCustomModel = { use -> actions.onToggleUseCustomModel(entry.instanceId, use) },
                     onChangeCustomModelId = { id -> actions.onChangeCustomModelId(entry.instanceId, id) },
+                    onChangeAdvancedSettings = { advanced -> actions.onChangeAdvancedSettings(entry.instanceId, advanced) },
+                    onDetectServerProps = { actions.onDetectServerProps(entry.instanceId) },
                     onRemove = { actions.onRemoveService(entry.instanceId) },
                     isDragging = isDragging,
                     dragHandleModifier = if (entries.size >= 2) Modifier.draggableHandle() else null,
@@ -491,6 +494,8 @@ private fun ConfiguredServiceCardContent(
     modelContextTokens: ImmutableMap<String, Int> = persistentMapOf(),
     onOpenAppPermissionSettings: () -> Unit = {},
     onRecheckLocalNetworkPermission: () -> Unit = {},
+    onChangeAdvancedSettings: (InstanceAdvancedSettings) -> Unit = {},
+    onDetectServerProps: () -> Unit = {},
 ) {
     // Clear a stale denied status when the user returns from granting the permission in
     // system settings; the recheck never re-prompts, so this is a no-op while still denied.
@@ -625,6 +630,17 @@ private fun ConfiguredServiceCardContent(
                         onSelectModel = onSelectModel,
                         connectionStatus = entry.connectionStatus,
                         onOpenAppPermissionSettings = onOpenAppPermissionSettings,
+                    )
+                }
+
+                if (!entry.service.isOnDevice) {
+                    Spacer(Modifier.height(8.dp))
+                    AdvancedServiceSettings(
+                        service = entry.service,
+                        advanced = entry.advanced,
+                        detectState = entry.serverDetectState,
+                        onChange = onChangeAdvancedSettings,
+                        onDetect = onDetectServerProps,
                     )
                 }
 

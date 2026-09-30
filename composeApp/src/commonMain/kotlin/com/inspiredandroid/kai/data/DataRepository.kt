@@ -8,6 +8,7 @@ import com.inspiredandroid.kai.inference.ModelImportError
 import com.inspiredandroid.kai.inference.ModelImportResult
 import com.inspiredandroid.kai.linux.LinuxDistro
 import com.inspiredandroid.kai.mcp.McpServerConfig
+import com.inspiredandroid.kai.network.LlamaCppProps
 import com.inspiredandroid.kai.network.tools.ToolInfo
 import com.inspiredandroid.kai.skills.RegistrySkillEntry
 import com.inspiredandroid.kai.skills.SkillManifest
@@ -45,6 +46,11 @@ interface DataRepository {
     fun updateInstanceUseCustomModel(instanceId: String, useCustom: Boolean)
     fun getInstanceCustomModelId(instanceId: String): String
     fun updateInstanceCustomModelId(instanceId: String, modelId: String)
+    fun getInstanceAdvancedSettings(instanceId: String): InstanceAdvancedSettings
+    fun updateInstanceAdvancedSettings(instanceId: String, advanced: InstanceAdvancedSettings)
+
+    /** Reads context size / modalities from a llama.cpp server behind an OpenAI-compatible instance; null if unavailable. */
+    suspend fun detectLlamaCppProps(instanceId: String): LlamaCppProps?
     fun clearInstanceModels(instanceId: String, service: Service)
     suspend fun validateConnection(service: Service, instanceId: String)
 

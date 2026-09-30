@@ -7,6 +7,7 @@ import com.inspiredandroid.kai.Platform
 import com.inspiredandroid.kai.currentPlatform
 import com.inspiredandroid.kai.data.DataRepository
 import com.inspiredandroid.kai.data.ImportSection
+import com.inspiredandroid.kai.data.InstanceAdvancedSettings
 import com.inspiredandroid.kai.data.Service
 import com.inspiredandroid.kai.data.TaskScheduler
 import com.inspiredandroid.kai.data.ThemeMode
@@ -152,6 +153,8 @@ class SettingsViewModel(
         onSelectModel = ::onSelectModel,
         onToggleUseCustomModel = ::onToggleUseCustomModel,
         onChangeCustomModelId = ::onChangeCustomModelId,
+        onChangeAdvancedSettings = ::onChangeAdvancedSettings,
+        onDetectServerProps = ::onDetectServerProps,
         onToggleTool = ::onToggleTool,
         onSaveSoul = ::onSaveSoul,
         onToggleDynamicUi = ::onToggleDynamicUi,
@@ -325,6 +328,7 @@ class SettingsViewModel(
             models = models.toImmutableList(),
             useCustomModel = dataRepository.getInstanceUseCustomModel(instance.instanceId),
             customModelId = dataRepository.getInstanceCustomModelId(instance.instanceId),
+            advanced = dataRepository.getInstanceAdvancedSettings(instance.instanceId),
         )
     }
 
@@ -485,6 +489,44 @@ class SettingsViewModel(
                     if (e.instanceId == instanceId) e.copy(customModelId = modelId) else e
                 }.toImmutableList(),
             )
+        }
+    }
+
+    private fun updateServiceEntry(instanceId: String, transform: (ConfiguredServiceEntry) -> ConfiguredServiceEntry) {
+        _state.update { state ->
+            state.copy(
+                configuredServices = state.configuredServices.map { e ->
+                    if (e.instanceId == instanceId) transform(e) else e
+                }.toImmutableList(),
+            )
+        }
+    }
+
+    private fun onChangeAdvancedSettings(instanceId: String, advanced: InstanceAdvancedSettings) {
+        dataRepository.updateInstanceAdvancedSettings(instanceId, advanced)
+        updateServiceEntry(instanceId) { it.copy(advanced = advanced) }
+    }
+
+    private fun onDetectServerProps(instanceId: String) {
+        updateServiceEntry(instanceId) { it.copy(serverDetectState = ServerDetectState.Running) }
+        viewModelScope.launch(getBackgroundDispatcher()) {
+            val props = try {
+                dataRepository.detectLlamaCppProps(instanceId)
+            } catch (e: Exception) {
+                if (e is kotlinx.coroutines.CancellationException) throw e
+                null
+            }
+            if (props == null) {
+                updateServiceEntry(instanceId) { it.copy(serverDetectState = ServerDetectState.Failed) }
+                return@launch
+            }
+            val current = dataRepository.getInstanceAdvancedSettings(instanceId)
+            val updated = current.copy(
+                contextWindowTokens = props.contextTokens ?: current.contextWindowTokens,
+                supportsAudio = props.supportsAudio ?: current.supportsAudio,
+            )
+            dataRepository.updateInstanceAdvancedSettings(instanceId, updated)
+            updateServiceEntry(instanceId) { it.copy(advanced = updated, serverDetectState = ServerDetectState.Success) }
         }
     }
 

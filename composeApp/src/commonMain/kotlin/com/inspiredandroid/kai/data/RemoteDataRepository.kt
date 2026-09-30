@@ -27,12 +27,11 @@ import com.inspiredandroid.kai.linux.LinuxDistro
 import com.inspiredandroid.kai.mcp.McpServerConfig
 import com.inspiredandroid.kai.mcp.McpServerManager
 import com.inspiredandroid.kai.network.AllServicesFailedException
-import com.inspiredandroid.kai.network.AnthropicInsufficientCreditsException
 import com.inspiredandroid.kai.network.ContextWindowExceededException
 import com.inspiredandroid.kai.network.FileTooLargeException
+import com.inspiredandroid.kai.network.LlamaCppProps
 import com.inspiredandroid.kai.network.OpenAICompatibleEmptyResponseException
 import com.inspiredandroid.kai.network.OpenAICompatibleGenericException
-import com.inspiredandroid.kai.network.OpenAICompatibleQuotaExhaustedException
 import com.inspiredandroid.kai.network.Requests
 import com.inspiredandroid.kai.network.ServiceCredentials
 import com.inspiredandroid.kai.network.UnsupportedFileTypeException
@@ -99,11 +98,7 @@ import kotlin.uuid.Uuid
 private const val MAX_TOOL_ITERATIONS = 15
 private const val MIN_TOOL_DISPLAY_MS = 2000L
 private const val MAX_REPEATED_TOOL_CALLS = 3
-private const val MAX_API_RETRIES = 2
 private const val MAX_HEARTBEAT_MESSAGES = 50
-private const val ESTIMATED_CHARS_PER_TOKEN = 4
-private const val COMPACTION_THRESHOLD = 0.7 // Compact when history exceeds 70% of context window
-private const val COMPACTION_KEEP_RECENT = 4 // Number of recent user exchanges to keep verbatim
 
 // Explicit allowlist of tools exposed to the on-device (LiteRT) model. We use a
 // hardcoded name list rather than a structural filter because small Gemma models hit
@@ -162,7 +157,7 @@ private interface ToolLoopStrategy {
      * history as-is (Gemini, Anthropic) declare their window here; the OpenAI-compatible
      * strategy trims the built message list inside [chat] instead and leaves this null.
      */
-    val historyContextWindowTokens: Int? get() = null
+    val historyBudgetChars: Int? get() = null
 }
 
 class RemoteDataRepository(
@@ -226,7 +221,27 @@ class RemoteDataRepository(
             appSettings.getInstanceEffectiveModelId(instanceId).ifEmpty { appSettings.getSelectedModelId(service) }
         },
         baseUrl = getInstanceBaseUrl(instanceId, service),
+        advanced = if (service == Service.Free) InstanceAdvancedSettings() else appSettings.getInstanceAdvancedSettings(instanceId),
     )
+
+    /**
+     * Context window in tokens for a request: the instance override wins, then the size the
+     * provider reported in its model list, then the curated catalog / default.
+     */
+    private fun contextWindowTokensFor(credentials: ServiceCredentials): Int {
+        credentials.advanced.contextWindowTokens?.takeIf { it > 0 }?.let { return it }
+        val reported = modelsByInstance.values.firstNotNullOfOrNull { flow ->
+            flow.value.firstOrNull { it.id == credentials.modelId }?.contextWindow
+        }
+        reported?.takeIf { it in 1..Int.MAX_VALUE }?.let { return it.toInt() }
+        return ModelCatalog.estimateContextWindow(credentials.modelId)
+    }
+
+    /** Character budget for a request: context window x the instance's chars-per-token ratio. */
+    private fun contextBudgetChars(credentials: ServiceCredentials): Int {
+        val chars = contextWindowTokensFor(credentials).toLong() * credentials.advanced.effectiveCharsPerToken
+        return chars.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
+    }
 
     override val chatHistory: MutableStateFlow<List<History>> = MutableStateFlow(emptyList())
 
@@ -368,6 +383,19 @@ class RemoteDataRepository(
 
     override fun updateInstanceCustomModelId(instanceId: String, modelId: String) {
         appSettings.setInstanceCustomModelId(instanceId, modelId)
+    }
+
+    override fun getInstanceAdvancedSettings(instanceId: String): InstanceAdvancedSettings = appSettings.getInstanceAdvancedSettings(instanceId)
+
+    override fun updateInstanceAdvancedSettings(instanceId: String, advanced: InstanceAdvancedSettings) {
+        appSettings.setInstanceAdvancedSettings(instanceId, advanced)
+    }
+
+    override suspend fun detectLlamaCppProps(instanceId: String): LlamaCppProps? {
+        val instance = getConfiguredServiceInstances().find { it.instanceId == instanceId } ?: return null
+        val service = Service.fromId(instance.serviceId)
+        if (service != Service.OpenAICompatible) return null
+        return requests.getLlamaCppProps(instanceCredentials(instanceId, service))
     }
 
     override fun clearInstanceModels(instanceId: String, service: Service) {
@@ -727,7 +755,7 @@ class RemoteDataRepository(
      * needing a plain completion — the no-tools path above, the silent asks, and the
      * Gemini/Anthropic tool-loop bailouts — funnels through here.
      *
-     * [retry] wraps the call in [retryApiCall]; silent callers skip it because they run on a
+     * [retry] wraps the call in [retryWithPolicy]; silent callers skip it because they run on a
      * caller-supplied deadline. [strictEmptyResponse] turns a missing OpenAI-compatible message
      * or content into [OpenAICompatibleEmptyResponseException] — the visible chat path wants that
      * error surfaced, silent callers prefer empty text.
@@ -741,14 +769,14 @@ class RemoteDataRepository(
         retry: Boolean = true,
         strictEmptyResponse: Boolean = false,
     ): AssistantTurn {
-        suspend fun <T> call(block: suspend () -> T): T = if (retry) retryApiCall(block) else block()
+        suspend fun <T> call(block: suspend () -> T): T = if (retry) retryWithPolicy(credentials.advanced, block = block) else block()
 
         return when (service) {
             Service.Gemini -> {
                 val response = call {
                     requests.geminiChat(
                         credentials = credentials,
-                        messages = messages.map { it.toGeminiMessageDto() },
+                        messages = trimHistoryToBudget(messages, systemPrompt?.length ?: 0, contextBudgetChars(credentials)).map { it.toGeminiMessageDto() },
                         systemInstruction = systemPrompt,
                         requestTimeoutMs = requestTimeoutMs,
                     ).getOrThrow()
@@ -760,7 +788,7 @@ class RemoteDataRepository(
                 val response = call {
                     requests.anthropicChat(
                         credentials = credentials,
-                        messages = buildAnthropicMessages(messages),
+                        messages = buildAnthropicMessages(trimHistoryToBudget(messages, systemPrompt?.length ?: 0, contextBudgetChars(credentials))),
                         systemInstruction = systemPrompt,
                         requestTimeoutMs = requestTimeoutMs,
                     ).getOrThrow()
@@ -771,7 +799,10 @@ class RemoteDataRepository(
             else -> {
                 // No tools on this request — strip any historic tool_calls so Groq's strict
                 // validator doesn't see calls to tools we no longer declare.
-                val openAIMessages = buildOpenAIMessages(service, messages, systemPrompt, credentials.modelId, declaredToolNames = emptySet())
+                val openAIMessages = trimMessagesToBudget(
+                    buildOpenAIMessages(service, messages, systemPrompt, credentials.modelId, declaredToolNames = emptySet()),
+                    contextBudgetChars(credentials),
+                )
                 if (requiresResponsesApi(service, credentials.modelId, credentials.baseUrl)) {
                     val response = call {
                         requests.openAIResponses(service, credentials, toResponsesInput(openAIMessages), requestTimeoutMs = requestTimeoutMs).getOrThrow()
@@ -823,6 +854,10 @@ class RemoteDataRepository(
         // didn't ask for (mirrors the guard that keeps on-device errors from silently
         // falling back to cloud services).
         return ordered.filterIndexed { index, entry -> index == 0 || !entry.service.isOnDevice }
+            // Entries the user opted out of fallback are only ever used as the primary.
+            .filterIndexed { index, entry ->
+                index == 0 || entry.service == Service.Free || appSettings.getInstanceAdvancedSettings(entry.instanceId).effectiveUseAsFallback
+            }
     }
 
     override suspend fun ask(question: String?, files: List<PlatformFile>, uiSubmission: UiSubmission?, activeSkillId: String?) {
@@ -945,7 +980,7 @@ class RemoteDataRepository(
                 // On-device models handle their own context limits, so skip this check for them
                 if (!entry.service.isOnDevice) {
                     val creds = instanceCredentials(entry.instanceId, entry.service)
-                    val entryWindowChars = ModelCatalog.estimateContextWindow(creds.modelId) * ESTIMATED_CHARS_PER_TOKEN
+                    val entryWindowChars = contextBudgetChars(creds)
                     if (historyChars > entryWindowChars) {
                         lastException = ContextWindowExceededException()
                         _fallbackStatus.value = FallbackStatus(
@@ -1011,7 +1046,7 @@ class RemoteDataRepository(
         systemPrompt: String? = null,
         history: MutableStateFlow<List<History>> = chatHistory,
     ): AssistantTurn {
-        val contextWindowTokens = ModelCatalog.estimateContextWindow(credentials.modelId)
+        val budgetChars = contextBudgetChars(credentials)
         val declaredToolNames = tools.map { it.schema.name }.toSet()
         // GPT-5.6 and friends reject function tools on chat completions; the same messages are
         // translated to Responses API items instead. Everything before the wire call — prompt
@@ -1019,9 +1054,9 @@ class RemoteDataRepository(
         val useResponsesApi = requiresResponsesApi(service, credentials.modelId, credentials.baseUrl)
         val strategy = object : ToolLoopStrategy {
             override suspend fun chat(history: List<History>, systemPrompt: String?): LoopChatResult {
-                val msgs = trimMessagesForContext(buildOpenAIMessages(service, history, systemPrompt, credentials.modelId, declaredToolNames), contextWindowTokens)
+                val msgs = trimMessagesToBudget(buildOpenAIMessages(service, history, systemPrompt, credentials.modelId, declaredToolNames), budgetChars)
                 if (useResponsesApi) {
-                    val response = retryApiCall {
+                    val response = retryWithPolicy(credentials.advanced) {
                         requests.openAIResponses(service, credentials, toResponsesInput(msgs), tools).getOrThrow()
                     }
                     response.throwIfFailed(service)
@@ -1041,7 +1076,7 @@ class RemoteDataRepository(
                     )
                 }
                 val sessionId = activeConversationId()
-                val response = retryApiCall {
+                val response = retryWithPolicy(credentials.advanced) {
                     requests.openAICompatibleChat(service, credentials, msgs, tools, sessionId = sessionId).getOrThrow()
                 }
                 val message = response.choices.firstOrNull()?.message ?: throw OpenAICompatibleEmptyResponseException()
@@ -1072,7 +1107,7 @@ class RemoteDataRepository(
 
             override suspend fun bailout(history: List<History>, systemPrompt: String?, reason: BailoutReason): String {
                 // Bailout sends no tools — strip historic tool_calls to satisfy strict validators.
-                val msgs = trimMessagesForContext(buildOpenAIMessages(service, history, systemPrompt, credentials.modelId, declaredToolNames = emptySet()), contextWindowTokens)
+                val msgs = trimMessagesToBudget(buildOpenAIMessages(service, history, systemPrompt, credentials.modelId, declaredToolNames = emptySet()), budgetChars)
                 return makeFinalCallWithoutTools(service, credentials, msgs, reason, useResponsesApi)
             }
         }
@@ -1086,11 +1121,11 @@ class RemoteDataRepository(
         systemPrompt: String? = null,
         history: MutableStateFlow<List<History>> = chatHistory,
     ): AssistantTurn {
-        val contextWindowTokens = ModelCatalog.estimateContextWindow(credentials.modelId)
+        val budgetChars = contextBudgetChars(credentials)
         val strategy = object : ToolLoopStrategy {
             override suspend fun chat(history: List<History>, systemPrompt: String?): LoopChatResult {
                 val geminiMessages = history.map { it.toGeminiMessageDto() }
-                val response = retryApiCall {
+                val response = retryWithPolicy(credentials.advanced) {
                     requests.geminiChat(
                         credentials = credentials,
                         messages = geminiMessages,
@@ -1116,7 +1151,7 @@ class RemoteDataRepository(
 
             override suspend fun bailout(history: List<History>, systemPrompt: String?, reason: BailoutReason): String = plainChat(Service.Gemini, credentials, history, "${bailoutPrompt(reason)} $systemPrompt").content
 
-            override val historyContextWindowTokens = contextWindowTokens
+            override val historyBudgetChars = budgetChars
         }
         return runToolLoop(strategy, systemPrompt, history)
     }
@@ -1128,11 +1163,11 @@ class RemoteDataRepository(
         systemPrompt: String? = null,
         history: MutableStateFlow<List<History>> = chatHistory,
     ): AssistantTurn {
-        val contextWindowTokens = ModelCatalog.estimateContextWindow(credentials.modelId)
+        val budgetChars = contextBudgetChars(credentials)
         val strategy = object : ToolLoopStrategy {
             override suspend fun chat(history: List<History>, systemPrompt: String?): LoopChatResult {
                 val msgs = buildAnthropicMessages(history)
-                val response = retryApiCall {
+                val response = retryWithPolicy(credentials.advanced) {
                     requests.anthropicChat(
                         credentials = credentials,
                         messages = msgs,
@@ -1155,7 +1190,7 @@ class RemoteDataRepository(
 
             override suspend fun bailout(history: List<History>, systemPrompt: String?, reason: BailoutReason): String = plainChat(Service.Anthropic, credentials, history, "${bailoutPrompt(reason)} $systemPrompt").content
 
-            override val historyContextWindowTokens = contextWindowTokens
+            override val historyBudgetChars = budgetChars
         }
         return runToolLoop(strategy, systemPrompt, history)
     }
@@ -1221,8 +1256,8 @@ class RemoteDataRepository(
                         )
                     }
                 }
-                strategy.historyContextWindowTokens
-                    ?.let { trimHistoryForContext(merged, systemPrompt?.length ?: 0, it) }
+                strategy.historyBudgetChars
+                    ?.let { trimHistoryToBudget(merged, systemPrompt?.length ?: 0, it) }
                     ?: merged
             }
         }
@@ -1269,14 +1304,14 @@ class RemoteDataRepository(
             )
         }
         if (useResponsesApi) {
-            val response = retryApiCall {
+            val response = retryWithPolicy(credentials.advanced) {
                 requests.openAIResponses(service, credentials, toResponsesInput(bailoutMessages)).getOrThrow()
             }
             response.throwIfFailed(service)
             return response.outputText.orEmpty()
         }
         val sessionId = activeConversationId()
-        val response = retryApiCall {
+        val response = retryWithPolicy(credentials.advanced) {
             requests.openAICompatibleChat(service, credentials, bailoutMessages, sessionId = sessionId).getOrThrow()
         }
         return response.choices.firstOrNull()?.message?.effectiveContent ?: ""
@@ -1336,160 +1371,31 @@ class RemoteDataRepository(
         }
     }
 
-    private fun isNonRetryableException(e: Exception): Boolean = e is AnthropicInsufficientCreditsException || e is OpenAICompatibleQuotaExhaustedException
-
-    /**
-     * Retries an API call with simple exponential backoff.
-     */
-    private suspend fun <T> retryApiCall(block: suspend () -> T): T {
-        var lastException: Exception? = null
-        for (attempt in 0..MAX_API_RETRIES) {
-            try {
-                return block()
-            } catch (e: Exception) {
-                if (e is kotlinx.coroutines.CancellationException) throw e
-                if (isNonRetryableException(e)) throw e
-                lastException = e
-                if (attempt < MAX_API_RETRIES) {
-                    delay((attempt + 1).seconds)
-                }
-            }
-        }
-        throw lastException!!
-    }
-
-    private fun estimateMessageChars(msg: com.inspiredandroid.kai.network.dtos.openaicompatible.OpenAICompatibleChatRequestDto.Message): Int {
-        val contentChars = when (val content = msg.content) {
-            is JsonArray -> {
-                // Vision messages: only count text parts, not base64 image data
-                content.sumOf { element ->
-                    val obj = element as? JsonObject
-                    val type = (obj?.get("type") as? JsonPrimitive)?.content
-                    if (type == "text") {
-                        (obj["text"] as? JsonPrimitive)?.content?.length ?: 0
-                    } else {
-                        100 // Fixed small cost for image references
-                    }
-                }
-            }
-
-            is JsonPrimitive -> content.content.length
-
-            else -> content?.toString()?.length ?: 0
-        }
-        return contentChars + msg.role.length
-    }
-
-    /**
-     * Trims messages to fit within the estimated context window by dropping oldest messages
-     * (keeping the system prompt and most recent messages).
-     */
-    private fun trimMessagesForContext(
-        messages: List<com.inspiredandroid.kai.network.dtos.openaicompatible.OpenAICompatibleChatRequestDto.Message>,
-        contextWindowTokens: Int = ModelCatalog.DEFAULT_CONTEXT_WINDOW_TOKENS,
-    ): List<com.inspiredandroid.kai.network.dtos.openaicompatible.OpenAICompatibleChatRequestDto.Message> {
-        val maxChars = contextWindowTokens * ESTIMATED_CHARS_PER_TOKEN
-        val totalChars = messages.sumOf { estimateMessageChars(it) }
-        if (totalChars <= maxChars) return messages
-
-        // Keep system prompt (first message if role is "system") and trim from oldest non-system
-        val systemMessages = messages.takeWhile { it.role == "system" }
-        val nonSystemMessages = messages.drop(systemMessages.size)
-
-        val systemChars = systemMessages.sumOf { estimateMessageChars(it) }
-        val availableChars = maxChars - systemChars
-
-        // Group each assistant tool-call turn together with the tool responses that follow it so
-        // trimming never strands one without the other. Strict OpenAI-compatible providers (e.g.
-        // DeepSeek via OpenCode Zen) reject an assistant `tool_calls` message that isn't followed
-        // by its tool responses, and a `tool` message without a preceding `tool_calls`.
-        val groups = mutableListOf<List<com.inspiredandroid.kai.network.dtos.openaicompatible.OpenAICompatibleChatRequestDto.Message>>()
-        var index = 0
-        while (index < nonSystemMessages.size) {
-            val msg = nonSystemMessages[index]
-            if (msg.role == "assistant" && !msg.tool_calls.isNullOrEmpty()) {
-                var end = index + 1
-                while (end < nonSystemMessages.size && nonSystemMessages[end].role == "tool") {
-                    end++
-                }
-                groups.add(nonSystemMessages.subList(index, end).toList())
-                index = end
-            } else {
-                groups.add(listOf(msg))
-                index++
-            }
-        }
-
-        // Keep whole groups from the end until we exceed the budget.
-        val kept = mutableListOf<com.inspiredandroid.kai.network.dtos.openaicompatible.OpenAICompatibleChatRequestDto.Message>()
-        var usedChars = 0
-        for (group in groups.asReversed()) {
-            val groupChars = group.sumOf { estimateMessageChars(it) }
-            if (usedChars + groupChars > availableChars) break
-            kept.addAll(0, group)
-            usedChars += groupChars
-        }
-
-        return systemMessages + kept
-    }
-
-    /**
-     * Trims History entries to fit within the estimated context window by dropping oldest messages
-     * (keeping the most recent). Used by Gemini and Anthropic tool loops where the system prompt
-     * is sent separately (not as a message).
-     */
-    private fun trimHistoryForContext(
-        history: List<History>,
-        systemPromptChars: Int = 0,
-        contextWindowTokens: Int = ModelCatalog.DEFAULT_CONTEXT_WINDOW_TOKENS,
-    ): List<History> {
-        val maxChars = contextWindowTokens * ESTIMATED_CHARS_PER_TOKEN
-        val totalChars = history.sumOf { it.content.length } + systemPromptChars
-        if (totalChars <= maxChars) return history
-
-        val availableChars = maxChars - systemPromptChars
-
-        // Keep messages from the end until we exceed the budget
-        val kept = mutableListOf<History>()
-        var usedChars = 0
-        for (msg in history.reversed()) {
-            val msgChars = msg.content.length
-            if (usedChars + msgChars > availableChars) break
-            kept.add(0, msg)
-            usedChars += msgChars
-        }
-
-        return kept
-    }
-
     /**
      * Compacts chat history by summarizing older messages via an LLM call when the history
      * exceeds a percentage of the context window. Keeps recent exchanges verbatim and replaces
      * older ones with a single summary. Falls back to simple drop-oldest trimming on failure.
      */
     private suspend fun compactHistoryIfNeeded() {
-        // Use primary service's context window for compaction decisions
-        val firstInstance = getConfiguredServiceInstances().firstOrNull() ?: return
-        val service = Service.fromId(firstInstance.serviceId)
-        val modelId = appSettings.getSelectedModelId(service)
-        val contextWindowTokens = ModelCatalog.estimateContextWindow(modelId)
+        // Compaction decisions follow the primary entry of the fallback chain — its context
+        // window, its compaction settings, and it also writes the summary.
+        val primary = getOrderedFallbackEntries().firstOrNull { hasValidInstanceApiKey(it.instanceId, it.service) } ?: return
+        if (primary.service.isOnDevice) return
+        val creds = instanceCredentials(primary.instanceId, primary.service)
+        val advanced = creds.advanced
+        if (!advanced.effectiveCompactionEnabled) return
 
         val history = chatHistory.value.filter { it.role != History.Role.TOOL_EXECUTING }
-        val systemPromptChars = getActiveSystemPrompt()?.length ?: 0
-        val totalChars = history.sumOf { it.content.length } + systemPromptChars
-        val maxChars = contextWindowTokens * ESTIMATED_CHARS_PER_TOKEN
-        if (totalChars <= (maxChars * COMPACTION_THRESHOLD).toInt()) return
-
-        // Split history: older messages to summarize, recent to keep verbatim
-        val userIndices = history.mapIndexedNotNull { index, h ->
-            if (h.role == History.Role.USER) index else null
-        }
-        if (userIndices.size <= COMPACTION_KEEP_RECENT) return
-        val cutoffIndex = userIndices[userIndices.size - COMPACTION_KEEP_RECENT]
+        val systemPrompt = getActiveSystemPrompt()
+        val cutoffIndex = compactionCutoffIndex(
+            history = history,
+            systemPromptChars = systemPrompt?.length ?: 0,
+            maxChars = contextBudgetChars(creds),
+            threshold = advanced.effectiveCompactionThreshold,
+            keepRecent = advanced.effectiveCompactionKeepRecent,
+        ) ?: return
         val olderMessages = history.subList(0, cutoffIndex)
         val recentMessages = history.subList(cutoffIndex, history.size)
-
-        if (olderMessages.isEmpty()) return
 
         // Build a transcript of the older messages for summarization
         val transcript = buildString {
@@ -1504,8 +1410,15 @@ class RemoteDataRepository(
         val summaryPrompt = "Summarize this conversation concisely, preserving key facts, decisions, and any information the assistant would need to continue helping. Be brief but complete:\n\n$transcript"
 
         val summary = try {
-            askSilently(summaryPrompt)
-        } catch (_: Exception) {
+            plainChat(
+                service = primary.service,
+                credentials = creds,
+                messages = listOf(History(role = History.Role.USER, content = summaryPrompt)),
+                systemPrompt = systemPrompt,
+                retry = false,
+            ).content
+        } catch (e: Exception) {
+            if (e is kotlinx.coroutines.CancellationException) throw e
             // Summarization failed — fall back to dropping old messages
             chatHistory.value = recentMessages
             return

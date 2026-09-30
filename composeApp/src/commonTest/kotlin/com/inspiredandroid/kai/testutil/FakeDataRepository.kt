@@ -9,6 +9,7 @@ import com.inspiredandroid.kai.data.FreeMode
 import com.inspiredandroid.kai.data.HeartbeatConfig
 import com.inspiredandroid.kai.data.HeartbeatLogEntry
 import com.inspiredandroid.kai.data.ImportSection
+import com.inspiredandroid.kai.data.InstanceAdvancedSettings
 import com.inspiredandroid.kai.data.MemoryEntry
 import com.inspiredandroid.kai.data.ScheduledTask
 import com.inspiredandroid.kai.data.Service
@@ -27,6 +28,7 @@ import com.inspiredandroid.kai.inference.ModelImportError
 import com.inspiredandroid.kai.inference.ModelImportResult
 import com.inspiredandroid.kai.linux.LinuxDistro
 import com.inspiredandroid.kai.mcp.McpServerConfig
+import com.inspiredandroid.kai.network.LlamaCppProps
 import com.inspiredandroid.kai.network.tools.ToolInfo
 import com.inspiredandroid.kai.tools.CommonTools
 import com.inspiredandroid.kai.ui.chat.History
@@ -175,6 +177,17 @@ class FakeDataRepository : DataRepository {
     override fun updateInstanceCustomModelId(instanceId: String, modelId: String) {
         instanceCustomModelIds[instanceId] = modelId
     }
+
+    val instanceAdvancedSettings = mutableMapOf<String, InstanceAdvancedSettings>()
+    var llamaCppPropsResult: LlamaCppProps? = null
+
+    override fun getInstanceAdvancedSettings(instanceId: String): InstanceAdvancedSettings = instanceAdvancedSettings[instanceId] ?: InstanceAdvancedSettings()
+
+    override fun updateInstanceAdvancedSettings(instanceId: String, advanced: InstanceAdvancedSettings) {
+        instanceAdvancedSettings[instanceId] = advanced
+    }
+
+    override suspend fun detectLlamaCppProps(instanceId: String): LlamaCppProps? = llamaCppPropsResult
 
     override fun clearInstanceModels(instanceId: String, service: Service) {
         instanceModels[instanceId]?.value = emptyList()

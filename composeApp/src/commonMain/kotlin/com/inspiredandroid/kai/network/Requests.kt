@@ -4,6 +4,7 @@ package com.inspiredandroid.kai.network
 
 import com.inspiredandroid.kai.Version
 import com.inspiredandroid.kai.currentPlatform
+import com.inspiredandroid.kai.data.InstanceAdvancedSettings
 import com.inspiredandroid.kai.data.Service
 import com.inspiredandroid.kai.httpClient
 import com.inspiredandroid.kai.isDebugBuild
@@ -43,6 +44,8 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.content.TextContent
 import io.ktor.http.contentType
+import io.ktor.http.encodeURLParameter
+import io.ktor.http.encodeURLPathPart
 import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
@@ -60,14 +63,23 @@ data class ServiceCredentials(
     val apiKey: String = "",
     val modelId: String = "",
     val baseUrl: String = "",
+    val advanced: InstanceAdvancedSettings = InstanceAdvancedSettings(),
 )
 
-/** Applies a per-request override of the client-wide timeouts, when the caller supplied one. */
-private fun HttpRequestBuilder.applyTimeout(requestTimeoutMs: Long?) {
-    requestTimeoutMs ?: return
+/**
+ * Applies per-request timeouts. An explicit [requestTimeoutMs] from the caller wins for the
+ * request/socket timeout; otherwise the instance's advanced settings are used. Anything left unset
+ * keeps the client-wide default.
+ */
+private fun HttpRequestBuilder.applyTimeout(requestTimeoutMs: Long?, advanced: InstanceAdvancedSettings = InstanceAdvancedSettings()) {
+    val requestMs = requestTimeoutMs ?: advanced.requestTimeoutSec?.takeIf { it > 0 }?.let { it * 1000L }
+    val socketMs = requestTimeoutMs ?: advanced.socketTimeoutSec?.takeIf { it > 0 }?.let { it * 1000L }
+    val connectMs = advanced.connectTimeoutSec?.takeIf { it > 0 }?.let { it * 1000L }
+    if (requestMs == null && socketMs == null && connectMs == null) return
     timeout {
-        requestTimeoutMillis = requestTimeoutMs
-        socketTimeoutMillis = requestTimeoutMs
+        requestMs?.let { requestTimeoutMillis = it }
+        socketMs?.let { socketTimeoutMillis = it }
+        connectMs?.let { connectTimeoutMillis = it }
     }
 }
 
@@ -111,6 +123,59 @@ private inline fun <T> openAICompatibleResult(block: () -> Result<T>): Result<T>
     Result.failure(e)
 } catch (e: Exception) {
     Result.failure(OpenAICompatibleConnectionException())
+}
+
+data class LlamaCppProps(
+    val contextTokens: Int?,
+    val supportsAudio: Boolean?,
+    val supportsVision: Boolean?,
+)
+
+/** Strips a trailing `/v1` (and slashes) from an OpenAI-compatible base URL to get the llama.cpp server root. */
+internal fun llamaCppRootUrl(baseUrl: String): String = baseUrl.trim().trimEnd('/').removeSuffix("/v1").trimEnd('/')
+
+/** Parses a llama.cpp `/props` body; null when it carries neither a context size nor modalities. */
+internal fun parseLlamaCppProps(body: String): LlamaCppProps? = try {
+    val root = Json.parseToJsonElement(body).jsonObject
+    val nCtx = (root["default_generation_settings"] as? JsonObject)?.get("n_ctx")?.jsonPrimitive?.contentOrNull?.toIntOrNull()
+        ?: root["n_ctx"]?.jsonPrimitive?.contentOrNull?.toIntOrNull()
+    val modalities = root["modalities"] as? JsonObject
+    val audio = modalities?.get("audio")?.jsonPrimitive?.contentOrNull?.toBooleanStrictOrNull()
+    val vision = modalities?.get("vision")?.jsonPrimitive?.contentOrNull?.toBooleanStrictOrNull()
+    if (nCtx == null && audio == null && vision == null) null else LlamaCppProps(nCtx?.takeIf { it > 0 }, audio, vision)
+} catch (_: Exception) {
+    null
+}
+
+/** Copies the instance's sampling settings onto the request; llama.cpp-only fields are opt-in. */
+internal fun OpenAICompatibleChatRequestDto.withSampling(
+    advanced: InstanceAdvancedSettings,
+    includeLlamaCppExtras: Boolean,
+): OpenAICompatibleChatRequestDto = copy(
+    temperature = advanced.temperature,
+    top_p = advanced.topP,
+    max_tokens = advanced.maxTokens,
+    presence_penalty = advanced.presencePenalty,
+    frequency_penalty = advanced.frequencyPenalty,
+    seed = advanced.seed,
+    stop = advanced.stop?.ifEmpty { null },
+    top_k = if (includeLlamaCppExtras) advanced.topK else null,
+    min_p = if (includeLlamaCppExtras) advanced.minP else null,
+    repeat_penalty = if (includeLlamaCppExtras) advanced.repeatPenalty else null,
+)
+
+internal fun InstanceAdvancedSettings.toGeminiGenerationConfig(): GeminiChatRequestDto.GenerationConfig? {
+    if (!hasSampling) return null
+    return GeminiChatRequestDto.GenerationConfig(
+        temperature = temperature,
+        topP = topP,
+        topK = topK,
+        maxOutputTokens = maxTokens,
+        stopSequences = stop?.ifEmpty { null },
+        seed = seed,
+        presencePenalty = presencePenalty,
+        frequencyPenalty = frequencyPenalty,
+    )
 }
 
 class Requests {
@@ -192,13 +257,14 @@ class Requests {
         val response: HttpResponse =
             defaultClient.post("${Service.Gemini.chatUrl}$selectedModelId:generateContent") {
                 header("x-goog-api-key", apiKey)
-                applyTimeout(requestTimeoutMs)
+                applyTimeout(requestTimeoutMs, credentials.advanced)
                 contentType(ContentType.Application.Json)
                 setBody(
                     GeminiChatRequestDto(
                         contents = messages,
                         tools = tools.toRequestTools { it.toGeminiTool() },
                         systemInstruction = systemContent,
+                        generationConfig = credentials.advanced.toGeminiGenerationConfig(),
                     ),
                 )
             }
@@ -242,7 +308,7 @@ class Requests {
         val url = resolveUrl(service, credentials, service.chatUrl)
         val response: HttpResponse =
             defaultClient.post(url) {
-                applyTimeout(requestTimeoutMs)
+                applyTimeout(requestTimeoutMs, credentials.advanced)
                 contentType(ContentType.Application.Json)
                 apiKey?.let { bearerAuth(it) }
                 applySessionHeader(service, sessionId)
@@ -252,7 +318,7 @@ class Requests {
                         messages = messages,
                         model = model,
                         tools = tools.toRequestTools { it.toRequestTool() },
-                    ),
+                    ).withSampling(credentials.advanced, includeLlamaCppExtras = service == Service.OpenAICompatible),
                 )
             }
         if (response.status.isSuccess()) {
@@ -286,7 +352,7 @@ class Requests {
         val url = resolveUrl(service, credentials, responsesUrl)
         val response: HttpResponse =
             defaultClient.post(url) {
-                applyTimeout(requestTimeoutMs)
+                applyTimeout(requestTimeoutMs, credentials.advanced)
                 contentType(ContentType.Application.Json)
                 apiKey?.let { bearerAuth(it) }
                 setBody(
@@ -294,6 +360,9 @@ class Requests {
                         input = input,
                         model = credentials.modelId.ifEmpty { null },
                         tools = tools.toRequestTools { it.toResponsesTool() },
+                        temperature = credentials.advanced.temperature,
+                        top_p = credentials.advanced.topP,
+                        max_output_tokens = credentials.advanced.maxTokens,
                     ),
                 )
             }
@@ -319,6 +388,7 @@ class Requests {
         val url = resolveUrl(service, credentials, modelsUrl)
         val apiKey = getOptionalApiKey(service, credentials)
         val response: HttpResponse = defaultClient.get(url) {
+            applyTimeout(null, credentials.advanced)
             apiKey?.let { bearerAuth(it) }
             applySessionHeader(service, sessionId = null)
         }
@@ -332,6 +402,34 @@ class Requests {
         } else {
             handleOpenAICompatibleError(service, credentials, response)
         }
+    }
+
+    /**
+     * Best-effort read of a llama.cpp server's `/props` (context size and input modalities) for the
+     * generic OpenAI-compatible service. Tries the server root first, then llama-swap's
+     * `/upstream/<model>/props` passthrough. Returns null when neither answers with usable data.
+     */
+    suspend fun getLlamaCppProps(credentials: ServiceCredentials): LlamaCppProps? {
+        val root = llamaCppRootUrl(credentials.baseUrl.ifEmpty { Service.DEFAULT_OPENAI_COMPATIBLE_BASE_URL })
+        val model = credentials.modelId.trim()
+        val candidates = buildList {
+            if (model.isNotEmpty()) add("$root/upstream/${model.encodeURLPathPart()}/props")
+            add(if (model.isNotEmpty()) "$root/props?model=${model.encodeURLParameter()}" else "$root/props")
+        }
+        for (url in candidates) {
+            val props = try {
+                val response = defaultClient.get(url) {
+                    timeout { requestTimeoutMillis = 15_000 }
+                    credentials.apiKey.ifEmpty { null }?.let { bearerAuth(it) }
+                }
+                if (response.status.isSuccess()) parseLlamaCppProps(response.bodyAsText()) else null
+            } catch (e: Exception) {
+                if (e is kotlinx.coroutines.CancellationException) throw e
+                null
+            }
+            if (props != null) return props
+        }
+        return null
     }
 
     suspend fun validateOpenRouterApiKey(credentials: ServiceCredentials): Result<Unit> = openAICompatibleResult {
@@ -408,7 +506,7 @@ class Requests {
         val apiKey = credentials.apiKey.ifEmpty { throw AnthropicInvalidApiKeyException() }
         val response: HttpResponse =
             defaultClient.post(Service.Anthropic.chatUrl) {
-                applyTimeout(requestTimeoutMs)
+                applyTimeout(requestTimeoutMs, credentials.advanced)
                 contentType(ContentType.Application.Json)
                 header("x-api-key", apiKey)
                 header("anthropic-version", "2023-06-01")
@@ -416,9 +514,13 @@ class Requests {
                     AnthropicChatRequestDto(
                         model = credentials.modelId,
                         messages = messages,
-                        max_tokens = 8192,
+                        max_tokens = credentials.advanced.maxTokens ?: InstanceAdvancedSettings.DEFAULT_ANTHROPIC_MAX_TOKENS,
                         system = systemInstruction,
                         tools = tools.toRequestTools { it.toAnthropicTool() },
+                        temperature = credentials.advanced.temperature,
+                        top_p = credentials.advanced.topP,
+                        top_k = credentials.advanced.topK,
+                        stop_sequences = credentials.advanced.stop?.ifEmpty { null },
                     ),
                 )
             }

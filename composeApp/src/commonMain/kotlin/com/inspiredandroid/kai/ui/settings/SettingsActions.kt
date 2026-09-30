@@ -2,6 +2,7 @@ package com.inspiredandroid.kai.ui.settings
 
 import androidx.compose.runtime.Immutable
 import com.inspiredandroid.kai.data.ImportSection
+import com.inspiredandroid.kai.data.InstanceAdvancedSettings
 import com.inspiredandroid.kai.data.Service
 import com.inspiredandroid.kai.data.ThemeMode
 import com.inspiredandroid.kai.inference.LocalModel
@@ -20,6 +21,8 @@ data class SettingsActions(
     val onSelectModel: (String, String) -> Unit,
     val onToggleUseCustomModel: (String, Boolean) -> Unit,
     val onChangeCustomModelId: (String, String) -> Unit,
+    val onChangeAdvancedSettings: (String, InstanceAdvancedSettings) -> Unit,
+    val onDetectServerProps: (String) -> Unit,
     val onToggleTool: (String, Boolean) -> Unit,
     val onSaveSoul: (String) -> Unit,
     val onToggleDynamicUi: (Boolean) -> Unit,
@@ -84,6 +87,8 @@ data class SettingsActions(
             onSelectModel = { _, _ -> },
             onToggleUseCustomModel = { _, _ -> },
             onChangeCustomModelId = { _, _ -> },
+            onChangeAdvancedSettings = { _, _ -> },
+            onDetectServerProps = {},
             onToggleTool = { _, _ -> },
             onSaveSoul = {},
             onToggleDynamicUi = {},
