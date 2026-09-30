@@ -1,6 +1,6 @@
 # Multi-Service
 
-**Last verified:** 2026-09-07
+**Last verified:** 2026-09-30
 
 Kai supports 29 LLM providers (plus a built-in Free tier). Each provider uses one of three API formats: **OpenAI-compatible** (most services), **Gemini native**, or **Anthropic native** -- plus **LiteRT on-device** for local inference. A handful of OpenAI models additionally require OpenAI's **Responses API**; Kai switches to it per model, transparently. Users can configure multiple service instances, reorder them, and Kai automatically falls back through the chain on failure.
 
@@ -22,6 +22,7 @@ A configured connection to a service. Users can add multiple instances of the sa
 - API key
 - Selected model
 - Base URL (relevant for the OpenAI-Compatible API service)
+- Advanced request settings (see [Advanced Instance Settings](#advanced-instance-settings))
 
 ### Free Tier
 
@@ -35,17 +36,31 @@ When Free is the only path and the user hits Free FAST/EXPERT rate or quota limi
 ## Fallback Chain
 
 1. Configured instances are tried in the order the user arranged them
-2. Only instances with valid API keys are considered
+2. Only instances with valid API keys are considered. Instances whose "Use as fallback" advanced setting is off are only used when they are first in the chain
 3. If no instances are configured, the Free tier is used as the only service
 4. If instances exist and "Use as fallback" is enabled (default), the Free tier is appended as the last resort
-5. Each individual API request retries up to 2 times with increasing delays before the service is considered failed. During a tool-use loop, each request inside the loop retries independently — a failure mid-loop never replays the loop (and its tool executions) from the start. On-device (Local Model) attempts are not retried, since their failures are deterministic rather than transient
+5. Each individual API request retries up to 2 times with increasing delays (1 s, 2 s) before the service is considered failed. Both the retry count and the delay can be changed per instance, and "fail over immediately on timeout" skips the retries when the server is unreachable or times out. During a tool-use loop, each request inside the loop retries independently — a failure mid-loop never replays the loop (and its tool executions) from the start. On-device (Local Model) attempts are not retried, since their failures are deterministic rather than transient
 6. On failure, the next instance in the chain is tried; if all fail, the last error is shown
 7. If a fallback succeeds, the response indicates which service answered
 8. While the chain is being walked, the thinking indicator shows per-attempt status — the name of the service currently being tried, or the reason the previous one failed before moving on — so silent fallbacks are visible to the user
-9. Entries whose context window can't fit the current chat history are skipped during the walk
+9. Entries whose context window can't fit the current chat history are skipped during the walk (the context window is the instance override if set, otherwise the size the provider reports, otherwise the curated catalog / 100K default)
 10. On-device (Local Model) failures are not silently absorbed — they short-circuit the fallback chain so the user sees the actual error rather than being quietly bumped to a cloud service
 11. On-device entries are also never used as fallback targets: a local model is only tried when it is the primary (first) service in the chain. A cloud-service failure never silently starts a local model load
-12. Certain non-retryable errors (notably Anthropic's "insufficient credits" and quota-exhausted responses from OpenAI-compatible providers) skip further **per-service** retries and fail that service immediately; the fallback chain still continues to the next instance. Only on-device (Local Model) failures short-circuit the entire chain
+12. Certain non-retryable errors (Anthropic's "insufficient credits", quota-exhausted responses from OpenAI-compatible providers, invalid API keys and unknown models) skip further **per-service** retries and fail that service immediately; the fallback chain still continues to the next instance. Only on-device (Local Model) failures short-circuit the entire chain
+
+## Advanced Instance Settings
+
+Every remote service card has a collapsible **Advanced** section. Each value is stored per instance; a blank field means "use the default", so an instance nobody touched behaves exactly as before.
+
+- **Timeouts** — request, idle-socket and connect timeouts in seconds. The request and idle-socket defaults are 180 s. Slow self-hosted models usually need these raised.
+- **Retries & fallback** — retry count (default 2), a fixed retry delay (default linear 1 s, 2 s, …), "fail over immediately on timeout or connection error", and "use as fallback when another service fails" (default on).
+- **Context & compaction** — context size in tokens (overrides the provider-reported and catalog sizes everywhere: the fallback context check, per-request trimming and compaction), the characters-per-token ratio used to estimate size (default 4), and auto-compaction on/off, trigger percentage (default 70 %) and how many recent exchanges stay verbatim (default 4). Compaction follows the first usable entry of the fallback chain, uses its settings, and asks that same entry for the summary.
+- **Sampling** — temperature, top P, max tokens, presence/frequency penalty, seed and stop sequences. Blank values are not sent, so the provider's default applies. Top K is offered for the OpenAI-Compatible API, Gemini and Anthropic; min P and repeat penalty only for the OpenAI-Compatible API (llama.cpp server extensions that strict providers reject). Gemini receives the values as its generation config; Anthropic's max tokens default stays 8192.
+- **Model accepts audio input** — marks the model as audio-capable (used by voice input).
+- **Detect from server** (OpenAI-Compatible API only) — reads a llama.cpp server's `/props` endpoint (at the server root, or through llama-swap's `/upstream/<model>/` passthrough) and fills in the context size and audio capability. If the server doesn't answer, the fields stay manual.
+- **Reset to defaults** clears every advanced value for the instance.
+
+The no-tools request path is trimmed to the context budget as well, the same as tool-using requests.
 
 ## API Formats
 
@@ -183,6 +198,10 @@ Users manage services through the settings screen:
 | `composeApp/src/commonMain/.../data/ModelTransformations.kt` | Maps provider model DTOs to `SettingsModel`, merges with catalog and free-tier flags |
 | `composeApp/src/commonMain/.../data/AppSettings.kt` | Service instance storage, credential persistence, migration |
 | `composeApp/src/commonMain/.../data/RemoteDataRepository.kt` | Fallback chain, request orchestration |
+| `composeApp/src/commonMain/.../data/InstanceAdvancedSettings.kt` | Per-instance timeouts, retries, context, compaction, sampling (defaults when unset) |
+| `composeApp/src/commonMain/.../data/RetryPolicy.kt` | Per-instance retry policy and non-retryable error classification |
+| `composeApp/src/commonMain/.../data/ContextBudget.kt` | Context-size estimation, trimming and compaction cut-off |
+| `composeApp/src/commonMain/.../ui/settings/AdvancedServiceSettings.kt` | Advanced section of a service card |
 | `composeApp/src/commonMain/.../network/Requests.kt` | HTTP clients for all API formats |
 | `composeApp/src/commonMain/.../data/ModelCapabilities.kt` | Per-model gates: tool support, image support, Responses API routing |
 | `composeApp/src/commonMain/.../data/providers/OpenAIResponsesInput.kt` | Translates chat-completions messages into Responses API input items |

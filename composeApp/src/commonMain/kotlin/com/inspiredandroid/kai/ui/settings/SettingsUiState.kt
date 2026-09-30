@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import com.inspiredandroid.kai.data.EmailAccount
 import com.inspiredandroid.kai.data.EmailSyncState
 import com.inspiredandroid.kai.data.HeartbeatLogEntry
+import com.inspiredandroid.kai.data.InstanceAdvancedSettings
 import com.inspiredandroid.kai.data.MemoryEntry
 import com.inspiredandroid.kai.data.ScheduledTask
 import com.inspiredandroid.kai.data.Service
@@ -37,6 +38,8 @@ data class ConfiguredServiceEntry(
     /** OpenAI-Compatible only: when true, [customModelId] is used for chat instead of [selectedModel]. */
     val useCustomModel: Boolean = false,
     val customModelId: String = "",
+    val advanced: InstanceAdvancedSettings = InstanceAdvancedSettings(),
+    val serverDetectState: ServerDetectState = ServerDetectState.Idle,
 )
 
 enum class ConnectionStatus {

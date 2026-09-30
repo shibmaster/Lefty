@@ -28,6 +28,9 @@ data class OpenAIResponsesRequestDto(
      * history on every request, so it never needs `previous_response_id` chaining.
      */
     val store: Boolean = false,
+    val temperature: Double? = null,
+    val top_p: Double? = null,
+    val max_output_tokens: Int? = null,
 ) {
     /**
      * Same JSON Schema as the chat-completions tool, minus the `function` wrapper — the Responses

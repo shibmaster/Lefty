@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.CardColors
@@ -124,6 +125,7 @@ fun KaiOutlinedTextField(
     singleLine: Boolean = false,
     minLines: Int = 1,
     maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
 ) {
     OutlinedTextField(
         value = value,
@@ -138,6 +140,7 @@ fun KaiOutlinedTextField(
         singleLine = singleLine,
         minLines = minLines,
         maxLines = maxLines,
+        keyboardOptions = keyboardOptions,
         shape = RoundedCornerShape(12.dp),
         colors = outlineTextFieldColors(),
     )

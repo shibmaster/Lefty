@@ -8,7 +8,20 @@ data class GeminiChatRequestDto(
     val contents: List<Content>,
     val tools: List<GeminiTool>? = null,
     val systemInstruction: Content? = null,
+    val generationConfig: GenerationConfig? = null,
 ) {
+    @Serializable
+    data class GenerationConfig(
+        val temperature: Double? = null,
+        val topP: Double? = null,
+        val topK: Int? = null,
+        val maxOutputTokens: Int? = null,
+        val stopSequences: List<String>? = null,
+        val seed: Long? = null,
+        val presencePenalty: Double? = null,
+        val frequencyPenalty: Double? = null,
+    )
+
     @Serializable
     data class Content(
         val parts: List<Part>,

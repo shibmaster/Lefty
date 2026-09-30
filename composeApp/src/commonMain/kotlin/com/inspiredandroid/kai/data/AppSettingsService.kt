@@ -124,12 +124,32 @@ fun AppSettings.setInstanceBaseUrl(instanceId: String, baseUrl: String) {
     settings.putString("instance_${instanceId}_base_url", baseUrl)
 }
 
+/** Advanced per-instance request settings (timeouts, retries, context, sampling), stored as one JSON blob. */
+fun AppSettings.getInstanceAdvancedSettings(instanceId: String): InstanceAdvancedSettings {
+    val raw = settings.getString("instance_${instanceId}_advanced", "")
+    if (raw.isBlank()) return InstanceAdvancedSettings()
+    return try {
+        SharedJson.decodeFromString(InstanceAdvancedSettings.serializer(), raw)
+    } catch (_: Exception) {
+        InstanceAdvancedSettings()
+    }
+}
+
+fun AppSettings.setInstanceAdvancedSettings(instanceId: String, advanced: InstanceAdvancedSettings) {
+    if (advanced.isEmpty) {
+        settings.remove("instance_${instanceId}_advanced")
+    } else {
+        settings.putString("instance_${instanceId}_advanced", SharedJson.encodeToString(InstanceAdvancedSettings.serializer(), advanced))
+    }
+}
+
 fun AppSettings.removeInstanceSettings(instanceId: String) {
     settings.remove("instance_${instanceId}_api_key")
     settings.remove("instance_${instanceId}_model_id")
     settings.remove("instance_${instanceId}_base_url")
     settings.remove("instance_${instanceId}_use_custom_model")
     settings.remove("instance_${instanceId}_custom_model_id")
+    settings.remove("instance_${instanceId}_advanced")
 }
 
 fun AppSettings.generateInstanceId(serviceId: String): String {

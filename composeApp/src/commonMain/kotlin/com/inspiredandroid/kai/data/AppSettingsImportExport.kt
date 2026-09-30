@@ -53,6 +53,10 @@ fun AppSettings.exportToJson(
                             if (customModelId.isNotBlank()) {
                                 put("custom_model_id", JsonPrimitive(customModelId))
                             }
+                            val advanced = getInstanceAdvancedSettings(instance.instanceId)
+                            if (!advanced.isEmpty) {
+                                put("advanced", SharedJson.encodeToJsonElement(InstanceAdvancedSettings.serializer(), advanced))
+                            }
                         },
                     )
                 },
@@ -211,6 +215,11 @@ fun AppSettings.importFromJson(
                 }
                 obj["custom_model_id"]?.jsonPrimitive?.content?.let {
                     setInstanceCustomModelId(instanceId, it)
+                }
+                (obj["advanced"] as? JsonObject)?.let { advancedJson ->
+                    runCatching { SharedJson.decodeFromJsonElement(InstanceAdvancedSettings.serializer(), advancedJson) }
+                        .getOrNull()
+                        ?.let { setInstanceAdvancedSettings(instanceId, it) }
                 }
             }
         } catch (_: Exception) {

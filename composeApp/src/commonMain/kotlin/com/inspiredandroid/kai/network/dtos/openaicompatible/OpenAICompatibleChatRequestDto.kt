@@ -9,6 +9,18 @@ data class OpenAICompatibleChatRequestDto(
     val messages: List<Message>,
     val model: String? = null,
     val tools: List<Tool>? = null,
+    // Sampling — null fields are omitted from the body (explicitNulls = false).
+    val temperature: Double? = null,
+    val top_p: Double? = null,
+    val max_tokens: Int? = null,
+    val presence_penalty: Double? = null,
+    val frequency_penalty: Double? = null,
+    val seed: Long? = null,
+    val stop: List<String>? = null,
+    // llama.cpp server extensions; only sent to the generic OpenAI-compatible service.
+    val top_k: Int? = null,
+    val min_p: Double? = null,
+    val repeat_penalty: Double? = null,
 ) {
     @Serializable
     data class Message(
