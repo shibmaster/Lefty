@@ -23,6 +23,7 @@ Lefty can reach a home inference server from any network through a WireGuard tun
 ## Connecting and Disconnecting
 
 - On demand: the first request for a tunnel host starts the tunnel. Lefty resolves the server's host name over the normal network first, because WireGuard itself only takes addresses.
+- Packet size: the config's `MTU`, or 1280 when it sets none, the same default as the WireGuard Android app (the settings card shows which). wg-quick's 1420 is too large for many mobile networks once WireGuard's overhead is added; such packets are dropped silently, so short replies arrive while longer ones hang or stop midway. If replies still stall, try `MTU = 1200` in the config.
 - A keepalive (the config's `PersistentKeepalive`, 25 seconds when it sets none) keeps mobile NAT mappings open and starts the handshake immediately. `PersistentKeepalive = off` is honored.
 - Idle shutdown: the tunnel stops after "Disconnect after idle" minutes (default 5, range 1–120) without traffic. A request still waiting for an answer (for example a long prompt being processed) counts as busy.
 - Heartbeats and scheduled tasks run through the same client, so they bring the tunnel up in the background too; the daemon's foreground service keeps the process (and the tunnel) alive.
@@ -39,7 +40,7 @@ Lefty can reach a home inference server from any network through a WireGuard tun
 
 - Toggle "WireGuard tunnel" (needs an imported config).
 - Import .conf (any file is accepted, because `.conf` has no registered file type on Android), or Paste config; Replace and Remove once one is stored.
-- Shows the tunnel address, the server and the config's AllowedIPs, never keys.
+- Shows the tunnel address, the server, the config's AllowedIPs and the packet size (MTU), never keys.
 - "Send through the tunnel" and "Disconnect after idle (minutes)".
 - Status: off (connects on the next request), connecting, up and waiting for the server, connected (seconds since the last handshake, bytes received and sent), or the error. "Connect now" starts the tunnel and waits up to 10 seconds for the handshake, which is a quick way to check a config; "Disconnect" stops it.
 

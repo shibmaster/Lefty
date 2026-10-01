@@ -37,6 +37,7 @@ import com.inspiredandroid.kai.tools.AppPermission
 import com.inspiredandroid.kai.tools.PermissionController
 import com.inspiredandroid.kai.tools.isLocalNetworkUrl
 import com.inspiredandroid.kai.tunnel.TunnelManager
+import com.inspiredandroid.kai.tunnel.WgConfig
 import io.github.vinceglb.filekit.PlatformFile
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -681,6 +682,8 @@ class SettingsViewModel(
             addresses = config?.addresses?.joinToString(", ").orEmpty(),
             endpoints = config?.peers?.mapNotNull { it.endpoint }?.joinToString(", ").orEmpty(),
             allowedIps = config?.allowedIps?.joinToString(", ").orEmpty(),
+            mtu = config?.mtu ?: WgConfig.DEFAULT_MTU,
+            mtuFromConfig = config?.mtu != null,
             ignoredKeys = config?.ignoredKeys?.joinToString(", ").orEmpty(),
             enabled = manager.isEnabled,
             customRoutes = manager.customRoutes,

@@ -18,6 +18,7 @@ import kotlin.time.Duration.Companion.seconds
 private class FakeBridge : WireGuardBridge {
     override var isSupported = true
     var starts = mutableListOf<String>()
+    var mtus = mutableListOf<Int>()
     var stops = 0
     var running = false
     var status = BridgeStatus()
@@ -26,6 +27,7 @@ private class FakeBridge : WireGuardBridge {
     override fun start(uapi: String, addresses: String, dns: String, mtu: Int): BridgeSession {
         failStart?.let { throw IllegalStateException(it) }
         starts += uapi
+        mtus += mtu
         running = true
         return BridgeSession(port = 40000 + starts.size, token = "token-${starts.size}")
     }
@@ -95,6 +97,7 @@ class TunnelManagerTest {
         assertEquals(first, second)
         assertEquals(1, bridge.starts.size)
         assertTrue("endpoint=203.0.113.7:51820" in bridge.starts.single())
+        assertEquals(listOf(1380), bridge.mtus, "the config's MTU is used")
         assertIs<TunnelState.Up>(m.state.value)
         assertEquals(first, m.currentSession)
     }
@@ -166,5 +169,13 @@ class TunnelManagerTest {
         assertFalse(bridge.running)
         assertEquals(null, settings.getWireGuardConf())
         assertFalse(m.isEnabled)
+    }
+
+    @Test
+    fun `without an MTU in the config the mobile-safe default is used`() = runTest {
+        val m = manager()
+        m.importConfig(CLIENT_CONF.lines().filterNot { it.startsWith("MTU") }.joinToString("\n"))
+        m.ensureUp()
+        assertEquals(listOf(1280), bridge.mtus)
     }
 }

@@ -59,6 +59,13 @@ data class WgConfig(
     companion object {
         const val DEFAULT_KEEPALIVE = 25
 
+        /**
+         * Used when the config sets no MTU; the official WireGuard Android app does the same. wg-quick's
+         * 1420 is too large for many mobile networks once WireGuard's overhead is added: full-size
+         * packets get dropped silently, so short replies arrive and longer ones hang or stop midway.
+         */
+        const val DEFAULT_MTU = 1280
+
         private val INTERFACE_KEYS = setOf("privatekey", "address", "dns", "mtu")
         private val PEER_KEYS = setOf("publickey", "presharedkey", "endpoint", "allowedips", "persistentkeepalive")
 

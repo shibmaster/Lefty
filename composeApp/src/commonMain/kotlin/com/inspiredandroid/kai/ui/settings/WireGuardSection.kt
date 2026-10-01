@@ -41,6 +41,9 @@ import kai.composeapp.generated.resources.settings_wireguard_ignored
 import kai.composeapp.generated.resources.settings_wireguard_import
 import kai.composeapp.generated.resources.settings_wireguard_import_failed
 import kai.composeapp.generated.resources.settings_wireguard_invalid_routes
+import kai.composeapp.generated.resources.settings_wireguard_mtu
+import kai.composeapp.generated.resources.settings_wireguard_mtu_config
+import kai.composeapp.generated.resources.settings_wireguard_mtu_default
 import kai.composeapp.generated.resources.settings_wireguard_paste
 import kai.composeapp.generated.resources.settings_wireguard_paste_hint
 import kai.composeapp.generated.resources.settings_wireguard_paste_use
@@ -75,6 +78,10 @@ internal fun WireGuardSection(state: WireGuardUiState, actions: SettingsActions)
             InfoLine(Res.string.settings_wireguard_your_address, state.addresses)
             InfoLine(Res.string.settings_wireguard_endpoint, state.endpoints)
             InfoLine(Res.string.settings_wireguard_allowed_ips, state.allowedIps)
+            InfoLine(
+                Res.string.settings_wireguard_mtu,
+                stringResource(if (state.mtuFromConfig) Res.string.settings_wireguard_mtu_config else Res.string.settings_wireguard_mtu_default, state.mtu),
+            )
             if (state.ignoredKeys.isNotEmpty()) {
                 SmallNote(stringResource(Res.string.settings_wireguard_ignored, state.ignoredKeys))
             }

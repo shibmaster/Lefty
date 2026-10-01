@@ -79,6 +79,9 @@
     <string name="settings_wireguard_your_address">Tunnel address</string>
     <string name="settings_wireguard_endpoint">Server</string>
     <string name="settings_wireguard_allowed_ips">Config AllowedIPs</string>
+    <string name="settings_wireguard_mtu">Packet size (MTU)</string>
+    <string name="settings_wireguard_mtu_default">%1$d (default; set MTU in the config to change it)</string>
+    <string name="settings_wireguard_mtu_config">%1$d (from the config)</string>
     <string name="settings_wireguard_ignored">Not used in Lefty: %1$s</string>
     <string name="settings_wireguard_routes">Send through the tunnel</string>
     <string name="settings_wireguard_routes_hint">Networks, addresses or host names (e.g. 192.168.4.0/24, llama.home, *.home), separated by commas. Leave empty to use the config\'s AllowedIPs. Everything else goes directly.</string>

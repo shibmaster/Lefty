@@ -219,6 +219,9 @@ data class WireGuardUiState(
     val addresses: String = "",
     val endpoints: String = "",
     val allowedIps: String = "",
+    /** The packet size in use and whether it came from the config. */
+    val mtu: Int = 0,
+    val mtuFromConfig: Boolean = false,
     /** Config entries Lefty doesn't use (ListenPort, PostUp, …), for the import note. */
     val ignoredKeys: String = "",
     val enabled: Boolean = false,

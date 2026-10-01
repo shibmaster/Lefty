@@ -182,7 +182,7 @@ class TunnelManager(
                 uapi = config.toUapi(resolved),
                 addresses = config.addresses.joinToString(","),
                 dns = config.dns.joinToString(","),
-                mtu = config.mtu ?: 0,
+                mtu = config.mtu ?: WgConfig.DEFAULT_MTU,
             )
             session = started
             _state.value = TunnelState.Up(null, 0, 0)

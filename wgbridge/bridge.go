@@ -56,7 +56,8 @@ func Start(uapi, addresses, dns string, mtu int, token string) (int, error) {
 		return 0, fmt.Errorf("dns: %w", err)
 	}
 	if mtu <= 0 {
-		mtu = 1420
+		// Same default as the WireGuard Android app; 1420 gets dropped on many mobile networks.
+		mtu = 1280
 	}
 
 	mu.Lock()
