@@ -32,6 +32,12 @@ Every service has an **Advanced** section (Settings → Services → *service* �
 - It restarts after a reboot or an app update.
 - It asks for a battery-optimization exemption, so Doze doesn't pause heartbeats and scheduled tasks.
 
+### Built-in WireGuard tunnel
+- **Reach your home server from any network** without the WireGuard app: import a standard WireGuard client config (`.conf`) in Settings → General.
+- **Only Lefty's requests to your home addresses** go through it (the config's AllowedIPs, or your own list of networks and host names). Everything else connects directly.
+- **No VPN slot:** WireGuard runs inside the app, so there's no VPN permission or key icon, and another VPN can stay on.
+- **Connects when needed:** it comes up on the first request (heartbeats in the background too) and disconnects when idle. A status line shows the handshake and traffic.
+
 ### Smaller fixes
 - When every service fails for the same reason, you see that reason instead of "All services failed". A server that can't take audio fails fast, with no retry and model-swap cascade.
 - Invalid API keys and unknown models are no longer retried.
@@ -58,6 +64,13 @@ Requirements: JDK 21 and the Android SDK (platform 37, NDK 29.0.14206865).
 ```bash
 ./gradlew :androidApp:assembleFossDebug            # debug APK → androidApp/build/outputs/apk/foss/debug/
 ./gradlew :composeApp:testAndroidHostTest          # unit tests
+```
+
+The in-app WireGuard tunnel needs its Go library (Go and gomobile installed; see [docs/features/wireguard.md](docs/features/wireguard.md)). Without it the app builds with the tunnel hidden:
+
+```bash
+./wgbridge/build.sh                                # → wgbridge/repo (local Maven repo)
+(cd wgbridge && go test ./...)                     # end-to-end tunnel test
 ```
 
 A signed release build reads `KEYSTORE_FILE`, `KEY_ALIAS` and `KEYSTORE_PASSWORD` from the environment and runs `./gradlew :androidApp:assembleFossRelease`.

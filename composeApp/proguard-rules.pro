@@ -205,3 +205,6 @@
 }
 -dontwarn com.google.gson.**
 -dontwarn sun.misc.Unsafe
+
+# In-app WireGuard: KaiApplication creates the Go bridge by reflection (absent in builds without wgbridge).
+-keep class com.inspiredandroid.kai.GoWireGuardBridge { <init>(); }

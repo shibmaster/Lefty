@@ -31,6 +31,23 @@ class AppSettingsExportImportTest {
     }
 
     @Test
+    fun `wireguard tunnel settings are never exported and survive a replace-all import`() {
+        val appSettings = createAppSettings()
+        appSettings.setWireGuardConf("[Interface]\nPrivateKey = secret")
+        appSettings.setWireGuardEnabled(true)
+        appSettings.setWireGuardRoutes("192.168.4.0/24")
+
+        val json = appSettings.exportToJson(toolIds)
+        assertFalse(json.toString().contains("secret"), "the private key never leaves in an export")
+        assertFalse(json.toString().contains("wireguard"))
+
+        appSettings.importFromJson(json, toolIds, replace = true)
+        assertEquals("[Interface]\nPrivateKey = secret", appSettings.getWireGuardConf())
+        assertTrue(appSettings.isWireGuardEnabled())
+        assertEquals("192.168.4.0/24", appSettings.getWireGuardRoutes())
+    }
+
+    @Test
     fun `export excludes daemon_enabled app_opens and encryption_key`() {
         val settings = MapSettings()
         val appSettings = AppSettings(settings)

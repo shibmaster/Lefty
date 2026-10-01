@@ -23,3 +23,16 @@ The full GPL-2.0 license text is available at: https://www.gnu.org/licenses/old-
 talloc is a hierarchical memory allocator used as a dependency of PRoot. It is dynamically linked.
 
 The full LGPL-3.0 license text is available at: https://www.gnu.org/licenses/lgpl-3.0.html
+
+## In-app WireGuard tunnel (`libgojni.so`)
+
+- **Files:** `libgojni.so` (arm64-v8a, x86_64), built from `wgbridge/` by `wgbridge/build.sh` and packaged from the local Maven repo, not from `jniLibs/`
+- **Statically linked Go modules:**
+  - wireguard-go (`golang.zx2c4.com/wireguard`): MIT, Copyright (C) 2017-2025 WireGuard LLC. https://git.zx2c4.com/wireguard-go
+  - gVisor (`gvisor.dev/gvisor`): Apache-2.0, Copyright The gVisor Authors. https://github.com/google/gvisor
+  - `github.com/google/btree`: Apache-2.0, Copyright Google Inc.
+  - `golang.org/x/crypto`, `golang.org/x/net`, `golang.org/x/sys`, `golang.org/x/time`, `golang.org/x/mobile` (gomobile runtime): BSD-3-Clause, Copyright The Go Authors
+  - Go runtime and standard library: BSD-3-Clause, Copyright The Go Authors
+
+"WireGuard" is a registered trademark of Jason A. Donenfeld. Lefty is not affiliated with or endorsed by the WireGuard project.
+

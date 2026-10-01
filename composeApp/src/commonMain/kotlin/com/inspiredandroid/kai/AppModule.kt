@@ -30,6 +30,9 @@ import com.inspiredandroid.kai.splinterlands.SplinterlandsStore
 import com.inspiredandroid.kai.tools.AppPermission
 import com.inspiredandroid.kai.tools.NotificationListenerController
 import com.inspiredandroid.kai.tools.PermissionController
+import com.inspiredandroid.kai.tunnel.TunnelManager
+import com.inspiredandroid.kai.tunnel.UnsupportedWireGuardBridge
+import com.inspiredandroid.kai.tunnel.WireGuardBridge
 import com.inspiredandroid.kai.ui.build.KaiBuildViewModel
 import com.inspiredandroid.kai.ui.chat.ChatViewModel
 import com.inspiredandroid.kai.ui.sandbox.SandboxFileBrowserViewModel
@@ -38,6 +41,9 @@ import com.inspiredandroid.kai.ui.sandbox.SandboxSessionViewModel
 import com.inspiredandroid.kai.ui.settings.SandboxViewModel
 import com.inspiredandroid.kai.ui.settings.SettingsViewModel
 import com.inspiredandroid.kai.ui.settings.SplinterlandsViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.withContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -152,10 +158,20 @@ val appModule = module {
             get<NotificationStore>(),
         )
     }
+    single<TunnelManager> {
+        // The Go bridge is registered by the Android app when its native library is bundled.
+        val bridge = getOrNull<WireGuardBridge>() ?: UnsupportedWireGuardBridge
+        TunnelManager(
+            bridge = bridge,
+            settings = get(),
+            scope = CoroutineScope(SupervisorJob() + getBackgroundDispatcher()),
+            resolveHost = { host -> withContext(getBackgroundDispatcher()) { bridge.resolveHost(host) } },
+        )
+    }
     single<DaemonController> { createDaemonController() }
     single<SandboxController> { createSandboxController() }
     single<KaiBuildController> { createKaiBuildController() }
-    viewModel { SettingsViewModel(get<DataRepository>(), get<DaemonController>(), get(permissionQualifier(AppPermission.POST_NOTIFICATIONS)), get<TaskScheduler>(), localNetworkPermissionController = get(permissionQualifier(AppPermission.LOCAL_NETWORK))) }
+    viewModel { SettingsViewModel(get<DataRepository>(), get<DaemonController>(), get(permissionQualifier(AppPermission.POST_NOTIFICATIONS)), get<TaskScheduler>(), localNetworkPermissionController = get(permissionQualifier(AppPermission.LOCAL_NETWORK)), tunnelManager = get<TunnelManager>()) }
     viewModel { SandboxViewModel(get<DataRepository>(), get<SandboxController>()) }
     viewModel { SandboxFileBrowserViewModel(get<SandboxController>()) }
     viewModel { SandboxPackagesViewModel(get<SandboxController>()) }

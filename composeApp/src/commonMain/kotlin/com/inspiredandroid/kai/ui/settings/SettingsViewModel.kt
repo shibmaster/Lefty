@@ -36,6 +36,7 @@ import com.inspiredandroid.kai.skills.parseGitHubSkillUrl
 import com.inspiredandroid.kai.tools.AppPermission
 import com.inspiredandroid.kai.tools.PermissionController
 import com.inspiredandroid.kai.tools.isLocalNetworkUrl
+import com.inspiredandroid.kai.tunnel.TunnelManager
 import io.github.vinceglb.filekit.PlatformFile
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -73,6 +74,7 @@ class SettingsViewModel(
     private val taskScheduler: TaskScheduler,
     private val backgroundDispatcher: CoroutineContext = getBackgroundDispatcher(),
     private val localNetworkPermissionController: PermissionController = PermissionController(AppPermission.LOCAL_NETWORK),
+    private val tunnelManager: TunnelManager? = null,
 ) : ViewModel() {
 
     private var connectionCheckJobs: MutableMap<String, Job> = mutableMapOf()
@@ -95,6 +97,7 @@ class SettingsViewModel(
         isDaemonEnabled = dataRepository.isDaemonEnabled(),
         isBatteryOptimizationExempt = daemonController.isBatteryOptimizationExempt(),
         showDaemonToggle = currentPlatform is Platform.Mobile.Android,
+        wireGuard = wireGuardUiState(),
         isHeartbeatEnabled = dataRepository.getHeartbeatConfig().enabled,
         heartbeatIntervalMinutes = dataRepository.getHeartbeatConfig().intervalMinutes,
         heartbeatActiveHoursStart = dataRepository.getHeartbeatConfig().activeHoursStart,
@@ -177,6 +180,13 @@ class SettingsViewModel(
         onToggleDaemon = ::onToggleDaemon,
         onRequestBatteryExemption = ::onRequestBatteryExemption,
         onRefreshBatteryExemption = ::onRefreshBatteryExemption,
+        onImportWireGuardConf = ::onImportWireGuardConf,
+        onRemoveWireGuard = ::onRemoveWireGuard,
+        onToggleWireGuard = ::onToggleWireGuard,
+        onChangeWireGuardRoutes = ::onChangeWireGuardRoutes,
+        onChangeWireGuardIdleMinutes = ::onChangeWireGuardIdleMinutes,
+        onConnectWireGuardNow = ::onConnectWireGuardNow,
+        onDisconnectWireGuard = ::onDisconnectWireGuard,
         onToggleHeartbeat = ::onToggleHeartbeat,
         onChangeHeartbeatInterval = ::onChangeHeartbeatInterval,
         onChangeHeartbeatActiveHours = ::onChangeHeartbeatActiveHours,
@@ -229,6 +239,11 @@ class SettingsViewModel(
     )
 
     init {
+        tunnelManager?.let { manager ->
+            viewModelScope.launch {
+                manager.state.collect { status -> _state.update { it.copy(wireGuard = it.wireGuard.copy(status = status)) } }
+            }
+        }
         // Observe download state from the engine singleton (survives activity recreation)
         val downloadingFlow = dataRepository.getLocalDownloadingModelId() ?: flowOf(null)
         val progressFlow = dataRepository.getLocalDownloadProgress() ?: flowOf(null)
@@ -654,6 +669,71 @@ class SettingsViewModel(
             delay(4.seconds)
             executeDeletion(PendingDeletion.Task(id))
         }
+    }
+
+    private fun wireGuardUiState(importError: String? = null, testing: Boolean = false): WireGuardUiState {
+        val manager = tunnelManager ?: return WireGuardUiState()
+        val config = manager.config()
+        val routes = manager.routes()
+        return WireGuardUiState(
+            supported = manager.isSupported,
+            hasConfig = config != null,
+            addresses = config?.addresses?.joinToString(", ").orEmpty(),
+            endpoints = config?.peers?.mapNotNull { it.endpoint }?.joinToString(", ").orEmpty(),
+            allowedIps = config?.allowedIps?.joinToString(", ").orEmpty(),
+            ignoredKeys = config?.ignoredKeys?.joinToString(", ").orEmpty(),
+            enabled = manager.isEnabled,
+            customRoutes = manager.customRoutes,
+            routesCoverEverything = routes?.coversEverything == true,
+            invalidRoutes = routes?.invalid?.joinToString(", ").orEmpty(),
+            idleMinutes = manager.idleMinutes,
+            status = manager.state.value,
+            importError = importError,
+            testing = testing,
+        )
+    }
+
+    private fun refreshWireGuard(importError: String? = null) {
+        _state.update { it.copy(wireGuard = wireGuardUiState(importError, it.wireGuard.testing)) }
+    }
+
+    private fun onImportWireGuardConf(text: String) {
+        val manager = tunnelManager ?: return
+        val result = manager.importConfig(text)
+        refreshWireGuard(importError = result.exceptionOrNull()?.message)
+    }
+
+    private fun onRemoveWireGuard() {
+        tunnelManager?.removeConfig()
+        refreshWireGuard()
+    }
+
+    private fun onToggleWireGuard(enabled: Boolean) {
+        tunnelManager?.setEnabled(enabled)
+        refreshWireGuard()
+    }
+
+    private fun onChangeWireGuardRoutes(routes: String) {
+        tunnelManager?.setCustomRoutes(routes)
+        refreshWireGuard()
+    }
+
+    private fun onChangeWireGuardIdleMinutes(minutes: Int) {
+        tunnelManager?.setIdleMinutes(minutes)
+        refreshWireGuard()
+    }
+
+    private fun onConnectWireGuardNow() {
+        val manager = tunnelManager ?: return
+        _state.update { it.copy(wireGuard = it.wireGuard.copy(testing = true)) }
+        viewModelScope.launch(backgroundDispatcher) {
+            manager.connectNow()
+            _state.update { it.copy(wireGuard = it.wireGuard.copy(testing = false)) }
+        }
+    }
+
+    private fun onDisconnectWireGuard() {
+        tunnelManager?.stop()
     }
 
     private fun onToggleDaemon(enabled: Boolean) {

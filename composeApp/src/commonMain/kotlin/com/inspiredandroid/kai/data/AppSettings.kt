@@ -336,6 +336,33 @@ class AppSettings(internal val settings: Settings) {
         settings.putBoolean(KEY_DAEMON_ENABLED, enabled)
     }
 
+    // WireGuard tunnel. The config holds a private key, so it stays out of settings export (the export
+    // only writes keys it lists) and lives in this store, which is encrypted on Android.
+    fun getWireGuardConf(): String? = settings.getStringOrNull(KEY_WIREGUARD_CONF)
+
+    fun setWireGuardConf(conf: String?) {
+        if (conf == null) settings.remove(KEY_WIREGUARD_CONF) else settings.putString(KEY_WIREGUARD_CONF, conf)
+    }
+
+    fun isWireGuardEnabled(): Boolean = settings.getBoolean(KEY_WIREGUARD_ENABLED, false)
+
+    fun setWireGuardEnabled(enabled: Boolean) {
+        settings.putBoolean(KEY_WIREGUARD_ENABLED, enabled)
+    }
+
+    /** Addresses sent through the tunnel; null means the config's AllowedIPs. */
+    fun getWireGuardRoutes(): String? = settings.getStringOrNull(KEY_WIREGUARD_ROUTES)
+
+    fun setWireGuardRoutes(routes: String?) {
+        if (routes.isNullOrBlank()) settings.remove(KEY_WIREGUARD_ROUTES) else settings.putString(KEY_WIREGUARD_ROUTES, routes)
+    }
+
+    fun getWireGuardIdleMinutes(): Int = settings.getInt(KEY_WIREGUARD_IDLE_MINUTES, DEFAULT_WIREGUARD_IDLE_MINUTES)
+
+    fun setWireGuardIdleMinutes(minutes: Int) {
+        settings.putInt(KEY_WIREGUARD_IDLE_MINUTES, minutes.coerceIn(1, 120))
+    }
+
     // Linux Sandbox
     fun isSandboxEnabled(): Boolean = settings.getBoolean(KEY_SANDBOX_ENABLED, true)
 
@@ -596,6 +623,11 @@ class AppSettings(internal val settings: Settings) {
         const val KEY_OLED_MODE_ENABLED = "oled_mode_enabled"
         const val KEY_THEME_MODE = "theme_mode"
         const val KEY_DAEMON_ENABLED = "daemon_enabled"
+        const val KEY_WIREGUARD_CONF = "wireguard_conf"
+        const val KEY_WIREGUARD_ENABLED = "wireguard_enabled"
+        const val KEY_WIREGUARD_ROUTES = "wireguard_routes"
+        const val KEY_WIREGUARD_IDLE_MINUTES = "wireguard_idle_minutes"
+        const val DEFAULT_WIREGUARD_IDLE_MINUTES = 5
         const val KEY_HEARTBEAT_CONFIG = "heartbeat_config"
         const val KEY_HEARTBEAT_PROMPT = "heartbeat_prompt"
         const val KEY_HEARTBEAT_LOG = "heartbeat_log"

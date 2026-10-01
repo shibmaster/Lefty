@@ -17,6 +17,11 @@ pluginManagement {
 
 dependencyResolutionManagement {
     repositories {
+        // The in-app WireGuard bridge, built locally by wgbridge/build.sh (see androidApp).
+        maven {
+            url = uri("wgbridge/repo")
+            content { includeGroup("ai.shibmaster.lefty") }
+        }
         google {
             mavenContent {
                 includeGroupAndSubgroups("androidx")

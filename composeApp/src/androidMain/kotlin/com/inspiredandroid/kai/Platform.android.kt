@@ -42,6 +42,7 @@ import com.inspiredandroid.kai.tools.ShellCommandTool
 import com.inspiredandroid.kai.tools.SmsTools
 import com.inspiredandroid.kai.tools.SshConfigureHostTool
 import com.inspiredandroid.kai.tools.buildAgentToolSet
+import com.inspiredandroid.kai.tunnel.routeThroughTunnel
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.SharedPreferencesSettings
 import dev.spght.encryptedprefs.EncryptedSharedPreferences
@@ -59,6 +60,7 @@ import org.koin.java.KoinJavaComponent.inject
 import kotlin.coroutines.CoroutineContext
 
 actual fun httpClient(config: HttpClientConfig<*>.() -> Unit): HttpClient = HttpClient(OkHttp) {
+    engine { config { routeThroughTunnel() } }
     config(this)
 }
 

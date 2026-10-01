@@ -70,6 +70,11 @@ internal fun GeneralContent(uiState: SettingsUiState, actions: SettingsActions) 
                     )
                 }
             }
+            if (uiState.wireGuard.supported) {
+                SettingsCard {
+                    WireGuardSection(uiState.wireGuard, actions)
+                }
+            }
             SettingsCard {
                 DynamicUiToggle(
                     isDynamicUiEnabled = uiState.isDynamicUiEnabled,

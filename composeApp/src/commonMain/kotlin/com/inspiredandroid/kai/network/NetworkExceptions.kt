@@ -178,3 +178,21 @@ fun Exception.toUiError(): UiError = when (this) {
 
     else -> if (!message.isNullOrBlank()) UiError.Text(message!!) else UiError.Resource(Res.string.error_unknown)
 }
+
+/**
+ * A request for a tunnel host failed because the in-app WireGuard tunnel couldn't come up (the
+ * Android proxy selector throws a TunnelIOException). Its message says why, which is more useful
+ * than the generic "cannot connect"; null for any other failure.
+ */
+internal fun Throwable.tunnelFailure(): OpenAICompatibleGenericException? {
+    var current: Throwable? = this
+    var depth = 0
+    while (current != null && depth < 8) {
+        if (current::class.simpleName == "TunnelIOException") {
+            return OpenAICompatibleGenericException(current.message ?: "WireGuard tunnel failed", current)
+        }
+        current = current.cause
+        depth++
+    }
+    return null
+}

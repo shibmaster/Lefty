@@ -1,6 +1,6 @@
 # Settings Export / Import
 
-**Last verified:** 2026-09-30
+**Last verified:** 2026-10-01
 
 Users can backup and restore all Kai settings via a human-readable JSON file. The feature is available under **Settings > General** at the bottom of the page.
 
@@ -71,6 +71,7 @@ Users can backup and restore all Kai settings via a human-readable JSON file. Th
 - `daemon_enabled` (platform-specific, should not transfer between devices)
 - `app_opens` (analytics counter)
 - `encryption_key` (security-sensitive)
+- `wireguard_conf`, `wireguard_enabled`, `wireguard_routes`, `wireguard_idle_minutes` (the in-app WireGuard tunnel: the config holds a private key; an import, even "replace all", leaves the tunnel settings untouched)
 - `ui_scale` (platform-specific, desktop may differ from mobile)
 - Migration flags
 

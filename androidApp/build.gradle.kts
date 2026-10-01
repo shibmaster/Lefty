@@ -4,6 +4,13 @@ plugins {
     alias(libs.plugins.composeCompiler)
 }
 
+// The WireGuard bridge AAR (wireguard-go + gVisor netstack) is built by wgbridge/build.sh, which needs
+// Go. Without it the app still builds and reports the in-app tunnel as unsupported.
+val hasWireGuardBridge = rootProject.file("wgbridge/repo/ai/shibmaster/lefty/wgbridge").exists()
+if (!hasWireGuardBridge) {
+    logger.warn("wgbridge AAR not found: building without the in-app WireGuard tunnel (run wgbridge/build.sh)")
+}
+
 android {
     namespace = "com.inspiredandroid.kai"
     compileSdk =
@@ -86,7 +93,12 @@ android {
     }
 }
 
+if (hasWireGuardBridge) {
+    android.sourceSets.getByName("main").kotlin.srcDir("src/wireguard/kotlin")
+}
+
 dependencies {
+    if (hasWireGuardBridge) implementation("ai.shibmaster.lefty:wgbridge:1.0.0")
     implementation(project(":composeApp"))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.process)

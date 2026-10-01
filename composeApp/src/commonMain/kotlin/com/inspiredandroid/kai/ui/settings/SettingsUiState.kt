@@ -19,6 +19,7 @@ import com.inspiredandroid.kai.network.dtos.SponsorsResponseDto
 import com.inspiredandroid.kai.network.tools.ToolInfo
 import com.inspiredandroid.kai.skills.RegistrySkillEntry
 import com.inspiredandroid.kai.skills.SkillManifest
+import com.inspiredandroid.kai.tunnel.TunnelState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.ImmutableSet
@@ -88,6 +89,7 @@ data class SettingsUiState(
     val isDaemonEnabled: Boolean = false,
     val isBatteryOptimizationExempt: Boolean = true,
     val showDaemonToggle: Boolean = false,
+    val wireGuard: WireGuardUiState = WireGuardUiState(),
     val isHeartbeatEnabled: Boolean = true,
     val heartbeatIntervalMinutes: Int = 30,
     val heartbeatActiveHoursStart: Int = 8,
@@ -207,4 +209,25 @@ data class SettingsModel(
      * instead of accumulating intermediate keystrokes in the picker.
      */
     val isManualEntry: Boolean = false,
+)
+
+/** The in-app WireGuard tunnel section (Android builds that bundle the Go bridge). */
+@Immutable
+data class WireGuardUiState(
+    val supported: Boolean = false,
+    val hasConfig: Boolean = false,
+    val addresses: String = "",
+    val endpoints: String = "",
+    val allowedIps: String = "",
+    /** Config entries Lefty doesn't use (ListenPort, PostUp, …), for the import note. */
+    val ignoredKeys: String = "",
+    val enabled: Boolean = false,
+    /** The user's route list; empty means the config's AllowedIPs. */
+    val customRoutes: String = "",
+    val routesCoverEverything: Boolean = false,
+    val invalidRoutes: String = "",
+    val idleMinutes: Int = 5,
+    val status: TunnelState = TunnelState.Off,
+    val importError: String? = null,
+    val testing: Boolean = false,
 )

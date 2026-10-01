@@ -128,7 +128,7 @@ private inline fun <T> openAICompatibleResult(block: () -> Result<T>): Result<T>
 } catch (e: OpenAICompatibleApiException) {
     Result.failure(e)
 } catch (e: Exception) {
-    Result.failure(OpenAICompatibleConnectionException())
+    Result.failure(e.tunnelFailure() ?: OpenAICompatibleConnectionException())
 }
 
 /** Text of an `/audio/transcriptions` JSON response (`{"text": ...}`), or the raw body for text formats. */
@@ -794,6 +794,7 @@ class Requests {
     // client-side exceptions (schema/serialization bugs, etc.) which would
     // otherwise be silently misclassified as connection failures.
     private fun mapOpenAICompatibleException(e: Exception): OpenAICompatibleApiException {
+        e.tunnelFailure()?.let { return it }
         val name = e::class.simpleName.orEmpty()
         val looksLikeNetworkFailure = name.endsWith("IOException") ||
             name.contains("Timeout", ignoreCase = true) ||
