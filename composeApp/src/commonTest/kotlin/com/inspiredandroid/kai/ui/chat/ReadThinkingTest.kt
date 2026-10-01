@@ -3,6 +3,8 @@ package com.inspiredandroid.kai.ui.chat
 import kotlinx.collections.immutable.persistentListOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class ReadThinkingTest {
 
@@ -29,5 +31,21 @@ class ReadThinkingTest {
         assertEquals("answer", speechTextFor("answer", listOf("t1"), includeThinking = false))
         assertEquals("t1\n\nt2\n\nanswer", speechTextFor("answer", listOf("t1", "t2"), includeThinking = true))
         assertEquals("answer", speechTextFor("answer", emptyList(), includeThinking = true))
+    }
+
+    @Test
+    fun `only answers are read out automatically, not thinking or tool steps`() {
+        assertTrue(History(role = History.Role.ASSISTANT, content = "It's 5 pm.").isAutoSpoken())
+        // A tool-call turn without text carries its reasoning as content.
+        val toolThinking = History(
+            role = History.Role.ASSISTANT,
+            content = "need to search",
+            isThinking = true,
+            toolCalls = persistentListOf(ToolCallInfo(id = "1", name = "search", arguments = "{}")),
+        )
+        assertFalse(toolThinking.isAutoSpoken())
+        assertFalse(thinking("let me think").isAutoSpoken())
+        assertFalse(History(role = History.Role.ASSISTANT, content = " ").isAutoSpoken())
+        assertFalse(user("hi").isAutoSpoken())
     }
 }

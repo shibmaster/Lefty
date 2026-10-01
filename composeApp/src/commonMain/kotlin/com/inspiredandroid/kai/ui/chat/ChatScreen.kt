@@ -678,7 +678,7 @@ private fun ChatModeScreen(
                                 if (history.isNotEmpty()) {
                                     listState.requestScrollToItem(history.lastIndex)
                                     val lastMessage = history.last()
-                                    if (uiState.isSpeechOutputEnabled && lastMessage.role == History.Role.ASSISTANT) {
+                                    if (uiState.isSpeechOutputEnabled && lastMessage.isAutoSpoken()) {
                                         componentScope.launch(getBackgroundDispatcher()) {
                                             textToSpeech?.stop()
                                             uiState.actions.setIsSpeaking(true, lastMessage.id)

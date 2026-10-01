@@ -157,6 +157,13 @@ fun List<History>.thinkingFor(answer: History): List<String> {
     }
 }
 
+/**
+ * Whether a newly added entry is read out automatically. Thinking entries (a tool-call turn whose
+ * only text is reasoning) are not answers: their text is spoken with the final answer, and only
+ * when "read thinking aloud" is on.
+ */
+fun History.isAutoSpoken(): Boolean = role == History.Role.ASSISTANT && !isThinking && content.isNotBlank()
+
 /** Text to read aloud for an answer: its thinking first when [includeThinking], then the answer. */
 fun speechTextFor(answer: String, thinking: List<String>, includeThinking: Boolean): String = if (includeThinking && thinking.isNotEmpty()) {
     (thinking + answer).joinToString("\n\n")
