@@ -45,9 +45,13 @@ data class InstanceAdvancedSettings(
     val textToSpeechModel: String? = null,
     val ttsVoice: String? = null,
     val ttsSpeed: Double? = null,
+    // How the voice should sound ("deep older male voice, New York accent"), for voice-design
+    // models such as Qwen3-TTS VoiceDesign on KoboldCpp. Sent as a "[…]" prefix of every input.
+    val ttsVoiceDescription: String? = null,
 ) {
     val sttModel: String? get() = speechToTextModel?.trim()?.takeIf { it.isNotEmpty() }
     val ttsModel: String? get() = textToSpeechModel?.trim()?.takeIf { it.isNotEmpty() }
+    val ttsDescription: String? get() = ttsVoiceDescription?.trim()?.takeIf { it.isNotEmpty() }
     val effectiveTtsVoice: String get() = ttsVoice?.trim()?.takeIf { it.isNotEmpty() } ?: DEFAULT_TTS_VOICE
 
     val isEmpty: Boolean get() = this == InstanceAdvancedSettings()

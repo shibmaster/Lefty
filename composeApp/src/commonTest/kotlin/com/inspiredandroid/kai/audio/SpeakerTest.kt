@@ -1,5 +1,6 @@
 package com.inspiredandroid.kai.audio
 
+import com.inspiredandroid.kai.network.speechInput
 import com.inspiredandroid.kai.network.speechRequestJson
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -114,5 +115,14 @@ class SpeakerTest {
         assertEquals("alloy", body["voice"]!!.jsonPrimitive.content)
         assertEquals("mp3", body["response_format"]!!.jsonPrimitive.content)
         assertFalse(body.containsKey("speed"))
+    }
+
+    @Test
+    fun `voice description goes in front of the text`() {
+        assertEquals("Hi.", speechInput("Hi.", null))
+        assertEquals("Hi.", speechInput("Hi.", "  "))
+        assertEquals("[deep male voice] Hi.", speechInput("Hi.", " deep male voice "))
+        // A "]" inside the description would end the instruction early.
+        assertEquals("[calm (whispering) tone] Hi.", speechInput("Hi.", "calm [whispering] tone"))
     }
 }

@@ -90,6 +90,8 @@ import kai.composeapp.generated.resources.settings_advanced_tts_preview_failed
 import kai.composeapp.generated.resources.settings_advanced_tts_preview_running
 import kai.composeapp.generated.resources.settings_advanced_tts_speed
 import kai.composeapp.generated.resources.settings_advanced_tts_voice
+import kai.composeapp.generated.resources.settings_advanced_tts_voice_description
+import kai.composeapp.generated.resources.settings_advanced_tts_voice_description_hint
 import kai.composeapp.generated.resources.settings_advanced_tts_voices_loading
 import kai.composeapp.generated.resources.settings_advanced_tts_voices_none
 import kai.composeapp.generated.resources.settings_advanced_tts_voices_show
@@ -330,6 +332,10 @@ internal fun AdvancedServiceSettings(
                 onChange(advanced.copy(ttsVoice = it))
             }
         }
+        TextSettingField(Res.string.settings_advanced_tts_voice_description, advanced.ttsVoiceDescription) {
+            onChange(advanced.copy(ttsVoiceDescription = it))
+        }
+        Hint(Res.string.settings_advanced_tts_voice_description_hint)
         DoubleField(Res.string.settings_advanced_tts_speed, advanced.ttsSpeed, "1.0") {
             onChange(advanced.copy(ttsSpeed = it))
         }

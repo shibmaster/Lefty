@@ -162,6 +162,16 @@ internal fun parseVoiceList(body: String): List<String> {
     }.distinct()
 }
 
+/**
+ * Text for `/audio/speech` with an optional voice description in front, the "[description] text"
+ * form KoboldCpp reads as a Qwen3-TTS VoiceDesign instruction. It travels inside `input`, so proxies
+ * such as LiteLLM pass it through unchanged. Brackets in the description would end it early.
+ */
+internal fun speechInput(text: String, voiceDescription: String?): String {
+    val description = voiceDescription?.replace('[', '(')?.replace(']', ')')?.trim()?.takeIf { it.isNotEmpty() }
+    return if (description == null) text else "[$description] $text"
+}
+
 /** JSON body of an OpenAI `/audio/speech` request. */
 internal fun speechRequestJson(model: String, input: String, voice: String, speed: Double?, format: String): String = JsonObject(
     buildMap {

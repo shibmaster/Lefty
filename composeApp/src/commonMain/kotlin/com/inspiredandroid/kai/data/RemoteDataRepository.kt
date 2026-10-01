@@ -41,6 +41,7 @@ import com.inspiredandroid.kai.network.dtos.anthropic.extractText
 import com.inspiredandroid.kai.network.dtos.gemini.extractText
 import com.inspiredandroid.kai.network.dtos.openaicompatible.extractInlineToolCalls
 import com.inspiredandroid.kai.network.dtos.openairesponses.OpenAIResponsesResponseDto
+import com.inspiredandroid.kai.network.speechInput
 import com.inspiredandroid.kai.network.toUiError
 import com.inspiredandroid.kai.network.tools.Tool
 import com.inspiredandroid.kai.network.tools.ToolInfo
@@ -1574,7 +1575,7 @@ class RemoteDataRepository(
             service = entry.service,
             credentials = creds,
             model = creds.advanced.ttsModel!!,
-            input = text,
+            input = speechInput(text, creds.advanced.ttsDescription),
             voice = creds.advanced.effectiveTtsVoice,
             speed = creds.advanced.ttsSpeed,
         ).getOrThrow()
@@ -1586,7 +1587,7 @@ class RemoteDataRepository(
         val service = Service.fromId(instance.serviceId)
         val creds = instanceCredentials(instanceId, service)
         val model = creds.advanced.ttsModel ?: return Result.failure(IllegalStateException("No text-to-speech model set"))
-        return requests.synthesizeSpeech(service, creds, model, TTS_PREVIEW_TEXT, creds.advanced.effectiveTtsVoice, creds.advanced.ttsSpeed)
+        return requests.synthesizeSpeech(service, creds, model, speechInput(TTS_PREVIEW_TEXT, creds.advanced.ttsDescription), creds.advanced.effectiveTtsVoice, creds.advanced.ttsSpeed)
     }
 
     override suspend fun listTextToSpeechVoices(instanceId: String): Result<List<String>> {
