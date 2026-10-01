@@ -14,7 +14,7 @@ data class VadConfig(
 ) {
     companion object {
         const val DEFAULT_SILENCE_MS = 1200L
-        const val DEFAULT_NO_SPEECH_TIMEOUT_MS = 15_000L
+        const val DEFAULT_NO_SPEECH_TIMEOUT_MS = 30_000L
     }
 }
 

@@ -259,11 +259,49 @@ class ChatViewModelVoiceTest {
         assertEquals(1, recorder.vadConfigs.size)
 
         vm.state.value.actions.setIsSpeaking(false, "reply")
-        testDispatcher.scheduler.runCurrent()
+        testDispatcher.scheduler.advanceUntilIdle()
         assertEquals(TalkMode.Listening, vm.state.value.talkMode)
         assertEquals(2, recorder.vadConfigs.size)
 
         vm.state.value.actions.toggleTalkMode()
+        testDispatcher.scheduler.advanceUntilIdle()
+        assertEquals(TalkMode.Off, vm.state.value.talkMode)
+    }
+
+    @Test
+    fun `talk mode keeps waiting when a new read-out replaces the current one`() = runTest(testDispatcher) {
+        val recorder = FakeVoiceRecorder(RecordingResult.Recorded(wavFile(), 2000), null)
+        val vm = viewModel(recorder)
+
+        vm.state.value.actions.toggleTalkMode()
+        testDispatcher.scheduler.runCurrent()
+        val actions = vm.state.value.actions
+        actions.setIsSpeaking(true, "thinking")
+        testDispatcher.scheduler.runCurrent()
+        // The next history entry starts its read-out before the stopped one reports its end.
+        actions.setIsSpeaking(true, "answer")
+        actions.setIsSpeaking(false, "thinking")
+        testDispatcher.scheduler.advanceTimeBy(5_000)
+        testDispatcher.scheduler.runCurrent()
+        assertEquals(TalkMode.Speaking, vm.state.value.talkMode)
+        assertTrue(vm.state.value.isSpeaking)
+        assertEquals(1, recorder.vadConfigs.size)
+
+        // A gap between back-to-back read-outs doesn't count as finished either.
+        actions.setIsSpeaking(false, "answer")
+        testDispatcher.scheduler.advanceTimeBy(500)
+        testDispatcher.scheduler.runCurrent()
+        actions.setIsSpeaking(true, "answer2")
+        testDispatcher.scheduler.advanceTimeBy(5_000)
+        testDispatcher.scheduler.runCurrent()
+        assertEquals(1, recorder.vadConfigs.size)
+
+        actions.setIsSpeaking(false, "answer2")
+        testDispatcher.scheduler.advanceUntilIdle()
+        assertEquals(TalkMode.Listening, vm.state.value.talkMode)
+        assertEquals(2, recorder.vadConfigs.size)
+
+        actions.toggleTalkMode()
         testDispatcher.scheduler.advanceUntilIdle()
         assertEquals(TalkMode.Off, vm.state.value.talkMode)
     }

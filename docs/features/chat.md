@@ -115,7 +115,7 @@ Speech is recognised by a model, not by the platform's speech recognizer — eit
 - **Tap** records a voice message (16 kHz mono WAV). The button pulses and turns into a send button, with a ✕ next to it to discard. Recording stops after 2 minutes at the latest
 - **Send mode** (Settings > General > "Transcribe voice messages first"): on puts the transcript into the message box for editing. Off sends the speech-to-text transcript right away — or, without a speech-to-text model, sends the recording itself as an audio attachment
 - **Long-press** starts **talk mode**, a hands-free loop: listen → the take ends after a pause (Settings > General > "Talk mode pause", default 1.2 s) → send (audio, or the transcript when transcribe-first is on) → the reply is read aloud → listen again. The button shows the talk-mode icon and pulses while listening; the input placeholder shows listening / thinking / speaking
-- Talk mode turns speech output on, never records while a reply is being spoken, and ends when the user taps the button, nobody speaks for 15 seconds, recording fails, or a request fails. Leaving talk mode stops any speech and cancels a request still in flight
+- Talk mode turns speech output on, never records while a reply is being spoken (it waits until no read-out has run for 1.5 s, since one reply can be read as several back-to-back parts), and ends when the user taps the button, nobody speaks for 30 seconds, recording fails, or a request fails. Leaving talk mode stops any speech and cancels a request still in flight
 - Silence detection is an energy gate relative to the background noise measured in the first ~300 ms of each take
 
 ## Speech Output (TTS)

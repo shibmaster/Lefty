@@ -50,10 +50,12 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.jetbrains.compose.resources.getString
 import kotlin.coroutines.CoroutineContext
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 class ChatViewModel(
@@ -352,10 +354,17 @@ class ChatViewModel(
     }
 
     private fun setIsSpeaking(isSpeaking: Boolean, contentId: String) {
-        if (isSpeaking) speechStarts.update { it + 1 } else speechEnds.update { it + 1 }
+        // Read-outs overlap: a new one starts (stopping the old) before the old one reports its end,
+        // so count them instead of trusting the latest call.
+        val active = if (isSpeaking) {
+            speechStarts.update { it + 1 }
+            activeSpeech.updateAndGet { it + 1 }
+        } else {
+            activeSpeech.updateAndGet { (it - 1).coerceAtLeast(0) }
+        }
         _state.update {
             it.copy(
-                isSpeaking = isSpeaking,
+                isSpeaking = active > 0,
                 isSpeakingContentId = if (isSpeaking) {
                     contentId
                 } else {
@@ -467,6 +476,10 @@ class ChatViewModel(
 
     companion object {
         private val FREE_MODE_INSTANCE_IDS = FreeMode.entries.associateBy { it.instanceId }
+
+        private val TALK_SPEECH_START_TIMEOUT = 10.seconds
+        private val TALK_SPEECH_SETTLE = 1500.milliseconds
+        private val TALK_PLAYBACK_TAIL = 400.milliseconds
     }
 
     private fun regenerate() {
@@ -523,10 +536,10 @@ class ChatViewModel(
     private var recordingJob: Job? = null
     private var talkJob: Job? = null
 
-    // Counters bumped by the chat screen's auto-speak effect, so the talk loop can wait for the
-    // reply to be spoken without racing the effect.
+    // Fed by the chat screen's auto-speak effect, so the talk loop can wait for the reply to be
+    // spoken without racing the effect: read-outs started so far, and those still running.
     private val speechStarts = MutableStateFlow(0)
-    private val speechEnds = MutableStateFlow(0)
+    private val activeSpeech = MutableStateFlow(0)
 
     /** Voice needs a model that can hear; say how to enable it rather than hiding the mic. */
     private fun ensureAudioModel(): Boolean {
@@ -637,18 +650,31 @@ class ChatViewModel(
                     }
                     _state.update { it.copy(talkMode = TalkMode.Thinking) }
                     val startsBefore = speechStarts.value
-                    val endsBefore = speechEnds.value
                     if (!sendVoice(take.file, inTalkMode = true)) break
                     _state.update { it.copy(talkMode = TalkMode.Speaking) }
                     // Wait for the reply to be read out before listening again, so the mic never
                     // records the speaker. If speech never starts (no TTS), just carry on.
-                    val started = withTimeoutOrNull(5.seconds) { speechStarts.first { it > startsBefore } } != null
-                    if (started) speechEnds.first { it > endsBefore }
+                    val started = withTimeoutOrNull(TALK_SPEECH_START_TIMEOUT) { speechStarts.first { it > startsBefore } } != null
+                    if (started) awaitSpeechFinished()
                 }
             } finally {
                 _state.update { it.copy(talkMode = TalkMode.Off, voiceState = VoiceState.Idle) }
             }
         }
+    }
+
+    /**
+     * Suspends until no read-out is running and none starts for [TALK_SPEECH_SETTLE]: one reply can
+     * be spoken as several back-to-back read-outs (thinking, tool steps, answer). Then waits a moment
+     * so the end of the playback doesn't leak into the next take.
+     */
+    private suspend fun awaitSpeechFinished() {
+        while (true) {
+            activeSpeech.first { it == 0 }
+            val restarted = withTimeoutOrNull(TALK_SPEECH_SETTLE) { activeSpeech.first { it > 0 } } != null
+            if (!restarted) break
+        }
+        delay(TALK_PLAYBACK_TAIL)
     }
 
     private fun stopTalkMode() {
