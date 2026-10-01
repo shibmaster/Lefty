@@ -2,6 +2,7 @@ package com.inspiredandroid.kai.ui.settings
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,9 +10,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -85,6 +90,9 @@ import kai.composeapp.generated.resources.settings_advanced_tts_preview_failed
 import kai.composeapp.generated.resources.settings_advanced_tts_preview_running
 import kai.composeapp.generated.resources.settings_advanced_tts_speed
 import kai.composeapp.generated.resources.settings_advanced_tts_voice
+import kai.composeapp.generated.resources.settings_advanced_tts_voices_loading
+import kai.composeapp.generated.resources.settings_advanced_tts_voices_none
+import kai.composeapp.generated.resources.settings_advanced_tts_voices_show
 import kai.composeapp.generated.resources.settings_advanced_use_as_fallback
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -105,6 +113,9 @@ internal fun AdvancedServiceSettings(
     onTestSpeechToText: () -> Unit = {},
     ttsPreviewState: ServerDetectState = ServerDetectState.Idle,
     onPreviewTextToSpeech: () -> Unit = {},
+    ttsVoices: List<String> = emptyList(),
+    ttsVoicesState: ServerDetectState = ServerDetectState.Idle,
+    onLoadTtsVoices: () -> Unit = {},
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
     val isLlamaCppCapable = service == Service.OpenAICompatible
@@ -308,7 +319,14 @@ internal fun AdvancedServiceSettings(
             TextSettingField(Res.string.settings_advanced_tts_model, advanced.textToSpeechModel, Modifier.weight(2f)) {
                 onChange(advanced.copy(textToSpeechModel = it))
             }
-            TextSettingField(Res.string.settings_advanced_tts_voice, advanced.ttsVoice, Modifier.weight(1f), placeholder = InstanceAdvancedSettings.DEFAULT_TTS_VOICE) {
+            VoiceField(
+                value = advanced.ttsVoice,
+                voices = ttsVoices,
+                state = ttsVoicesState,
+                // The list comes from the text-to-speech endpoint, so it needs a model to ask about.
+                onOpen = onLoadTtsVoices.takeIf { advanced.ttsModel != null },
+                modifier = Modifier.weight(1f),
+            ) {
                 onChange(advanced.copy(ttsVoice = it))
             }
         }
@@ -457,6 +475,90 @@ private fun TextSettingField(labelRes: StringResource, value: String?, modifier:
         placeholder = placeholder?.let { { Text(it, color = MaterialTheme.colorScheme.onSurfaceVariant) } },
         singleLine = true,
     )
+}
+
+/**
+ * Voice name with a picker of the voices the server lists. Typing stays possible: not every server
+ * publishes its voices. Opening the picker asks the server again ([onOpen]); null disables it.
+ */
+@Composable
+private fun VoiceField(
+    value: String?,
+    voices: List<String>,
+    state: ServerDetectState,
+    onOpen: (() -> Unit)?,
+    modifier: Modifier = Modifier,
+    onCommit: (String?) -> Unit,
+) {
+    var text by remember { mutableStateOf(value.orEmpty()) }
+    LaunchedEffect(value) {
+        if (text.trim().ifEmpty { null } != value) text = value.orEmpty()
+    }
+    var menuOpen by remember { mutableStateOf(false) }
+    Box(modifier) {
+        KaiOutlinedTextField(
+            value = text,
+            onValueChange = { input ->
+                text = input
+                onCommit(input.trim().ifEmpty { null })
+            },
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text(stringResource(Res.string.settings_advanced_tts_voice), color = MaterialTheme.colorScheme.onBackground) },
+            placeholder = { Text(InstanceAdvancedSettings.DEFAULT_TTS_VOICE, color = MaterialTheme.colorScheme.onSurfaceVariant) },
+            singleLine = true,
+            trailingIcon = onOpen?.let { open ->
+                {
+                    IconButton(
+                        onClick = {
+                            if (state != ServerDetectState.Running) open()
+                            menuOpen = true
+                        },
+                        modifier = Modifier.handCursor(),
+                    ) {
+                        Icon(
+                            imageVector = vectorResource(Res.drawable.ic_arrow_drop_down),
+                            contentDescription = stringResource(Res.string.settings_advanced_tts_voices_show),
+                        )
+                    }
+                }
+            },
+        )
+        DropdownMenu(
+            expanded = menuOpen,
+            onDismissRequest = { menuOpen = false },
+            shape = RoundedCornerShape(16.dp),
+        ) {
+            voices.forEach { voice ->
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = voice,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = if (voice == value) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                        )
+                    },
+                    onClick = {
+                        menuOpen = false
+                        text = voice
+                        onCommit(voice)
+                    },
+                    modifier = Modifier.handCursor(),
+                )
+            }
+            val statusRes = when {
+                state == ServerDetectState.Running -> Res.string.settings_advanced_tts_voices_loading
+                voices.isEmpty() && state != ServerDetectState.Idle -> Res.string.settings_advanced_tts_voices_none
+                else -> null
+            }
+            if (statusRes != null) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(statusRes), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) },
+                    onClick = {},
+                    enabled = false,
+                )
+            }
+        }
+    }
 }
 
 /** Comma-separated stop sequences; blank clears them. */

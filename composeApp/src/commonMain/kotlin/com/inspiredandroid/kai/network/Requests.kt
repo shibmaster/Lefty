@@ -137,6 +137,31 @@ internal fun parseTranscriptionText(body: String): String = try {
     body.trim()
 }
 
+/**
+ * Voice names from a `GET /audio/voices` response. Servers disagree on the shape: `{"voices":[…]}`
+ * (KoboldCpp, Kokoro-FastAPI), `{"data":[…]}` or a bare array, with plain names or objects carrying
+ * `id` / `voice_id` / `name`.
+ */
+internal fun parseVoiceList(body: String): List<String> {
+    val root = try {
+        Json.parseToJsonElement(body)
+    } catch (_: Exception) {
+        return emptyList()
+    }
+    val items = when (root) {
+        is JsonArray -> root
+        is JsonObject -> (root["voices"] ?: root["data"]) as? JsonArray ?: return emptyList()
+        else -> return emptyList()
+    }
+    return items.mapNotNull { item ->
+        when (item) {
+            is JsonPrimitive -> item.contentOrNull
+            is JsonObject -> listOf("id", "voice_id", "name").firstNotNullOfOrNull { (item[it] as? JsonPrimitive)?.contentOrNull }
+            else -> null
+        }?.trim()?.takeIf { it.isNotEmpty() }
+    }.distinct()
+}
+
 /** JSON body of an OpenAI `/audio/speech` request. */
 internal fun speechRequestJson(model: String, input: String, voice: String, speed: Double?, format: String): String = JsonObject(
     buildMap {
@@ -515,6 +540,23 @@ class Requests {
         }
         if (response.status.isSuccess()) {
             Result.success(response.readRawBytes())
+        } else {
+            handleOpenAICompatibleError(service, credentials, response)
+        }
+    }
+
+    /**
+     * Voices the text-to-speech server offers (`GET /audio/voices`, not part of the OpenAI API but
+     * common on self-hosted servers). [model] is sent as a query parameter so llama-swap can route it.
+     */
+    suspend fun listSpeechVoices(service: Service, credentials: ServiceCredentials, model: String): Result<List<String>> = openAICompatibleResult {
+        val url = audioUrl(service, credentials, "/audio/voices") + "?model=" + model.encodeURLParameter()
+        val response: HttpResponse = defaultClient.get(url) {
+            applyTimeout(null, credentials.advanced)
+            credentials.apiKey.ifEmpty { null }?.let { bearerAuth(it) }
+        }
+        if (response.status.isSuccess()) {
+            Result.success(parseVoiceList(response.bodyAsText()))
         } else {
             handleOpenAICompatibleError(service, credentials, response)
         }

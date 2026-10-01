@@ -279,6 +279,9 @@ class FakeDataRepository : DataRepository {
 
     override suspend fun previewTextToSpeech(instanceId: String): Result<ByteArray> = Result.success(ByteArray(0))
 
+    var fakeTtsVoices: Result<List<String>> = Result.success(emptyList())
+    override suspend fun listTextToSpeechVoices(instanceId: String): Result<List<String>> = fakeTtsVoices
+
     override suspend fun testSpeechToText(instanceId: String): Result<String> = sttTestResult
 
     override suspend fun transcribeAudio(file: PlatformFile): String {

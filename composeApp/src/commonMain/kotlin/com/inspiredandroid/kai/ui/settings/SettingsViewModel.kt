@@ -46,6 +46,7 @@ import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.error_unknown
 import kai.composeapp.generated.resources.error_unrecognized_github_repo
 import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.collections.immutable.toPersistentSet
@@ -161,6 +162,7 @@ class SettingsViewModel(
         onDetectServerProps = ::onDetectServerProps,
         onTestSpeechToText = ::onTestSpeechToText,
         onPreviewTextToSpeech = ::onPreviewTextToSpeech,
+        onLoadTtsVoices = ::onLoadTtsVoices,
         onToggleTool = ::onToggleTool,
         onSaveSoul = ::onSaveSoul,
         onToggleDynamicUi = ::onToggleDynamicUi,
@@ -363,10 +365,10 @@ class SettingsViewModel(
 
     private fun refreshServiceList() {
         _state.update { current ->
-            val existingStatuses = current.configuredServices.associate { it.instanceId to it.connectionStatus }
+            val existing = current.configuredServices.associateBy { it.instanceId }
             val newEntries = buildConfiguredServiceEntries().map { entry ->
-                val preservedStatus = existingStatuses[entry.instanceId]
-                if (preservedStatus != null) entry.copy(connectionStatus = preservedStatus) else entry
+                val previous = existing[entry.instanceId] ?: return@map entry
+                entry.copy(connectionStatus = previous.connectionStatus, ttsVoices = previous.ttsVoices, ttsVoicesState = previous.ttsVoicesState)
             }
             current.copy(
                 configuredServices = newEntries.toImmutableList(),
@@ -519,7 +521,7 @@ class SettingsViewModel(
 
     private fun onTestSpeechToText(instanceId: String) {
         updateServiceEntry(instanceId) { it.copy(sttTestState = ServerDetectState.Running) }
-        viewModelScope.launch(getBackgroundDispatcher()) {
+        viewModelScope.launch(backgroundDispatcher) {
             val ok = try {
                 dataRepository.testSpeechToText(instanceId).isSuccess
             } catch (e: Exception) {
@@ -534,7 +536,7 @@ class SettingsViewModel(
 
     private fun onPreviewTextToSpeech(instanceId: String) {
         updateServiceEntry(instanceId) { it.copy(ttsPreviewState = ServerDetectState.Running) }
-        viewModelScope.launch(getBackgroundDispatcher()) {
+        viewModelScope.launch(backgroundDispatcher) {
             val audio = try {
                 dataRepository.previewTextToSpeech(instanceId).getOrNull()
             } catch (e: Exception) {
@@ -550,9 +552,30 @@ class SettingsViewModel(
         }
     }
 
+    private fun onLoadTtsVoices(instanceId: String) {
+        updateServiceEntry(instanceId) { it.copy(ttsVoicesState = ServerDetectState.Running) }
+        viewModelScope.launch(backgroundDispatcher) {
+            val voices = try {
+                dataRepository.listTextToSpeechVoices(instanceId).getOrNull()
+            } catch (e: Exception) {
+                if (e is kotlinx.coroutines.CancellationException) throw e
+                null
+            }
+            if (voices.isNullOrEmpty()) {
+                updateServiceEntry(instanceId) { it.copy(ttsVoices = persistentListOf(), ttsVoicesState = ServerDetectState.Failed) }
+                return@launch
+            }
+            updateServiceEntry(instanceId) { it.copy(ttsVoices = voices.toImmutableList(), ttsVoicesState = ServerDetectState.Success) }
+            // A blank voice falls back to "alloy", which servers without that voice may not keep
+            // steady; take the server's first voice instead.
+            val entry = _state.value.configuredServices.firstOrNull { it.instanceId == instanceId } ?: return@launch
+            if (entry.advanced.ttsVoice.isNullOrBlank()) onChangeAdvancedSettings(instanceId, entry.advanced.copy(ttsVoice = voices.first()))
+        }
+    }
+
     private fun onDetectServerProps(instanceId: String) {
         updateServiceEntry(instanceId) { it.copy(serverDetectState = ServerDetectState.Running) }
-        viewModelScope.launch(getBackgroundDispatcher()) {
+        viewModelScope.launch(backgroundDispatcher) {
             val props = try {
                 dataRepository.detectLlamaCppProps(instanceId)
             } catch (e: Exception) {

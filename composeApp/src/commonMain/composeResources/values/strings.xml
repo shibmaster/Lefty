@@ -64,7 +64,10 @@
     <string name="settings_advanced_tts_model">Text-to-speech model</string>
     <string name="settings_advanced_tts_voice">Voice</string>
     <string name="settings_advanced_tts_speed">Speech speed</string>
-    <string name="settings_advanced_tts_hint">A speech model on this endpoint (/audio/speech), e.g. voice-tts. Replies, the play button and talk mode use this voice instead of the phone\'s; the phone voice takes over if the server is unreachable.</string>
+    <string name="settings_advanced_tts_hint">A speech model on this endpoint (/audio/speech), e.g. voice-tts. Replies, the play button and talk mode use this voice instead of the phone\'s; the phone voice takes over if the server is unreachable. Pick a voice the server lists: an unknown name can sound different in every sentence.</string>
+    <string name="settings_advanced_tts_voices_show">Show the server\'s voices</string>
+    <string name="settings_advanced_tts_voices_loading">Loading voices…</string>
+    <string name="settings_advanced_tts_voices_none">The server lists no voices; type a name</string>
     <string name="settings_advanced_tts_preview">Preview voice</string>
     <string name="settings_advanced_tts_preview_running">Generating…</string>
     <string name="settings_advanced_tts_preview_failed">Text-to-speech request failed</string>

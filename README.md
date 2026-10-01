@@ -22,7 +22,7 @@ Every service has an **Advanced** section (Settings → Services → *service* �
 - **Audio attachments:** wav/mp3/… for chat models that accept audio input directly.
 
 ### Natural voice output
-- **Text-to-speech model:** replies, the play button and talk mode can use an OpenAI-style `/audio/speech` endpoint instead of the phone's voice. A voice name, speed and **Preview** button are included.
+- **Text-to-speech model:** replies, the play button and talk mode can use an OpenAI-style `/audio/speech` endpoint instead of the phone's voice. A voice picker (it lists the server's voices from `/audio/voices`), speed and **Preview** button are included.
 - Long replies are split into sentences and synthesized ahead, so speech starts after the first sentence.
 - If the server is unreachable, the phone's voice takes over.
 - **Read thinking aloud:** long-press the 🔊 icon at the top to also hear the model's reasoning before the answer.
@@ -49,7 +49,7 @@ Download the APK from [Releases](https://github.com/shibmaster/Lefty/releases) a
 | API key | your llama-swap key |
 | Advanced → Model accepts audio input | off, unless the chat model has an audio mmproj |
 | Advanced → Speech-to-text model / Language | `voice-stt` / `de` |
-| Advanced → Text-to-speech model / Voice | `voice-tts` / `alloy` |
+| Advanced → Text-to-speech model / Voice | `voice-tts` / pick from the list (e.g. `kobo`) |
 
 ## Build from source
 

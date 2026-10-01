@@ -42,6 +42,9 @@ data class ConfiguredServiceEntry(
     val serverDetectState: ServerDetectState = ServerDetectState.Idle,
     val sttTestState: ServerDetectState = ServerDetectState.Idle,
     val ttsPreviewState: ServerDetectState = ServerDetectState.Idle,
+    /** Voices discovered on the text-to-speech endpoint, for the voice picker. */
+    val ttsVoices: ImmutableList<String> = persistentListOf(),
+    val ttsVoicesState: ServerDetectState = ServerDetectState.Idle,
 )
 
 enum class ConnectionStatus {

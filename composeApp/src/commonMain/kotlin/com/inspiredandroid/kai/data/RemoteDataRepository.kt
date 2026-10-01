@@ -1589,6 +1589,15 @@ class RemoteDataRepository(
         return requests.synthesizeSpeech(service, creds, model, TTS_PREVIEW_TEXT, creds.advanced.effectiveTtsVoice, creds.advanced.ttsSpeed)
     }
 
+    override suspend fun listTextToSpeechVoices(instanceId: String): Result<List<String>> {
+        val instance = getConfiguredServiceInstances().find { it.instanceId == instanceId }
+            ?: return Result.failure(IllegalArgumentException("Unknown service"))
+        val service = Service.fromId(instance.serviceId)
+        val creds = instanceCredentials(instanceId, service)
+        val model = creds.advanced.ttsModel ?: return Result.failure(IllegalStateException("No text-to-speech model set"))
+        return requests.listSpeechVoices(service, creds, model)
+    }
+
     override fun supportsVoiceInput(): Boolean = hasSpeechToTextModel() || supportsAudioInput()
 
     override suspend fun transcribeAudio(file: PlatformFile): String {

@@ -345,6 +345,7 @@ internal fun ServicesContent(uiState: SettingsUiState, actions: SettingsActions)
                     onDetectServerProps = { actions.onDetectServerProps(entry.instanceId) },
                     onTestSpeechToText = { actions.onTestSpeechToText(entry.instanceId) },
                     onPreviewTextToSpeech = { actions.onPreviewTextToSpeech(entry.instanceId) },
+                    onLoadTtsVoices = { actions.onLoadTtsVoices(entry.instanceId) },
                     onRemove = { actions.onRemoveService(entry.instanceId) },
                     isDragging = isDragging,
                     dragHandleModifier = if (entries.size >= 2) Modifier.draggableHandle() else null,
@@ -500,6 +501,7 @@ private fun ConfiguredServiceCardContent(
     onDetectServerProps: () -> Unit = {},
     onTestSpeechToText: () -> Unit = {},
     onPreviewTextToSpeech: () -> Unit = {},
+    onLoadTtsVoices: () -> Unit = {},
 ) {
     // Clear a stale denied status when the user returns from granting the permission in
     // system settings; the recheck never re-prompts, so this is a no-op while still denied.
@@ -649,6 +651,9 @@ private fun ConfiguredServiceCardContent(
                         onTestSpeechToText = onTestSpeechToText,
                         ttsPreviewState = entry.ttsPreviewState,
                         onPreviewTextToSpeech = onPreviewTextToSpeech,
+                        ttsVoices = entry.ttsVoices,
+                        ttsVoicesState = entry.ttsVoicesState,
+                        onLoadTtsVoices = onLoadTtsVoices,
                     )
                 }
 
