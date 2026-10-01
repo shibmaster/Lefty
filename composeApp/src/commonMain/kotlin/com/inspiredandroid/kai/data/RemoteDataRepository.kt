@@ -1590,7 +1590,7 @@ class RemoteDataRepository(
         return requests.synthesizeSpeech(service, creds, model, speechInput(TTS_PREVIEW_TEXT, creds.advanced.ttsDescription), creds.advanced.effectiveTtsVoice, creds.advanced.ttsSpeed)
     }
 
-    override suspend fun listTextToSpeechVoices(instanceId: String): Result<List<String>> {
+    override suspend fun listTextToSpeechVoices(instanceId: String): Result<List<TtsVoice>> {
         val instance = getConfiguredServiceInstances().find { it.instanceId == instanceId }
             ?: return Result.failure(IllegalArgumentException("Unknown service"))
         val service = Service.fromId(instance.serviceId)

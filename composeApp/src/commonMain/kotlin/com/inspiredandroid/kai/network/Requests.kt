@@ -6,6 +6,7 @@ import com.inspiredandroid.kai.Version
 import com.inspiredandroid.kai.currentPlatform
 import com.inspiredandroid.kai.data.InstanceAdvancedSettings
 import com.inspiredandroid.kai.data.Service
+import com.inspiredandroid.kai.data.TtsVoice
 import com.inspiredandroid.kai.httpClient
 import com.inspiredandroid.kai.isDebugBuild
 import com.inspiredandroid.kai.network.dtos.anthropic.AnthropicChatRequestDto
@@ -138,11 +139,11 @@ internal fun parseTranscriptionText(body: String): String = try {
 }
 
 /**
- * Voice names from a `GET /audio/voices` response. Servers disagree on the shape: `{"voices":[…]}`
+ * Voices from a `GET /audio/voices` response. Servers disagree on the shape: `{"voices":[…]}`
  * (KoboldCpp, Kokoro-FastAPI), `{"data":[…]}` or a bare array, with plain names or objects carrying
- * `id` / `voice_id` / `name`.
+ * `id` / `voice_id` / `name` and optionally a `description`.
  */
-internal fun parseVoiceList(body: String): List<String> {
+internal fun parseVoiceList(body: String): List<TtsVoice> {
     val root = try {
         Json.parseToJsonElement(body)
     } catch (_: Exception) {
@@ -155,11 +156,15 @@ internal fun parseVoiceList(body: String): List<String> {
     }
     return items.mapNotNull { item ->
         when (item) {
-            is JsonPrimitive -> item.contentOrNull
-            is JsonObject -> listOf("id", "voice_id", "name").firstNotNullOfOrNull { (item[it] as? JsonPrimitive)?.contentOrNull }
+            is JsonPrimitive -> item.contentOrNull?.trim()?.takeIf { it.isNotEmpty() }?.let { TtsVoice(it) }
+
+            is JsonObject -> listOf("id", "voice_id", "name")
+                .firstNotNullOfOrNull { (item[it] as? JsonPrimitive)?.contentOrNull?.trim()?.takeIf { id -> id.isNotEmpty() } }
+                ?.let { id -> TtsVoice(id, (item["description"] as? JsonPrimitive)?.contentOrNull?.trim()?.takeIf { it.isNotEmpty() }) }
+
             else -> null
-        }?.trim()?.takeIf { it.isNotEmpty() }
-    }.distinct()
+        }
+    }.distinctBy { it.id }
 }
 
 /**
@@ -559,7 +564,7 @@ class Requests {
      * Voices the text-to-speech server offers (`GET /audio/voices`, not part of the OpenAI API but
      * common on self-hosted servers). [model] is sent as a query parameter so llama-swap can route it.
      */
-    suspend fun listSpeechVoices(service: Service, credentials: ServiceCredentials, model: String): Result<List<String>> = openAICompatibleResult {
+    suspend fun listSpeechVoices(service: Service, credentials: ServiceCredentials, model: String): Result<List<TtsVoice>> = openAICompatibleResult {
         val url = audioUrl(service, credentials, "/audio/voices") + "?model=" + model.encodeURLParameter()
         val response: HttpResponse = defaultClient.get(url) {
             applyTimeout(null, credentials.advanced)

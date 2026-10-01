@@ -93,7 +93,7 @@ interface DataRepository {
     suspend fun previewTextToSpeech(instanceId: String): Result<ByteArray>
 
     /** Voices offered by the text-to-speech endpoint of [instanceId], for the voice picker. */
-    suspend fun listTextToSpeechVoices(instanceId: String): Result<List<String>>
+    suspend fun listTextToSpeechVoices(instanceId: String): Result<List<TtsVoice>>
 
     // Conversation management
     val savedConversations: StateFlow<List<Conversation>>

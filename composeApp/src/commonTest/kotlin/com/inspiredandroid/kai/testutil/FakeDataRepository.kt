@@ -19,6 +19,7 @@ import com.inspiredandroid.kai.data.SmsDraft
 import com.inspiredandroid.kai.data.SmsSyncState
 import com.inspiredandroid.kai.data.SystemPromptVariant
 import com.inspiredandroid.kai.data.ThemeMode
+import com.inspiredandroid.kai.data.TtsVoice
 import com.inspiredandroid.kai.data.ensureSelectedModelPresent
 import com.inspiredandroid.kai.inference.DownloadError
 import com.inspiredandroid.kai.inference.DownloadedModel
@@ -279,8 +280,8 @@ class FakeDataRepository : DataRepository {
 
     override suspend fun previewTextToSpeech(instanceId: String): Result<ByteArray> = Result.success(ByteArray(0))
 
-    var fakeTtsVoices: Result<List<String>> = Result.success(emptyList())
-    override suspend fun listTextToSpeechVoices(instanceId: String): Result<List<String>> = fakeTtsVoices
+    var fakeTtsVoices: Result<List<TtsVoice>> = Result.success(emptyList())
+    override suspend fun listTextToSpeechVoices(instanceId: String): Result<List<TtsVoice>> = fakeTtsVoices
 
     override suspend fun testSpeechToText(instanceId: String): Result<String> = sttTestResult
 

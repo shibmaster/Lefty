@@ -569,7 +569,7 @@ class SettingsViewModel(
             // A blank voice falls back to "alloy", which servers without that voice may not keep
             // steady; take the server's first voice instead.
             val entry = _state.value.configuredServices.firstOrNull { it.instanceId == instanceId } ?: return@launch
-            if (entry.advanced.ttsVoice.isNullOrBlank()) onChangeAdvancedSettings(instanceId, entry.advanced.copy(ttsVoice = voices.first()))
+            if (entry.advanced.ttsVoice.isNullOrBlank()) onChangeAdvancedSettings(instanceId, entry.advanced.copy(ttsVoice = voices.first().id))
         }
     }
 

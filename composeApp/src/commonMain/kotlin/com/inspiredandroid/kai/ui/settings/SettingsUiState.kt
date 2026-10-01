@@ -11,6 +11,7 @@ import com.inspiredandroid.kai.data.Service
 import com.inspiredandroid.kai.data.ServiceEntry
 import com.inspiredandroid.kai.data.SmsSyncState
 import com.inspiredandroid.kai.data.ThemeMode
+import com.inspiredandroid.kai.data.TtsVoice
 import com.inspiredandroid.kai.inference.DownloadError
 import com.inspiredandroid.kai.inference.LocalModel
 import com.inspiredandroid.kai.inference.ModelImportError
@@ -43,7 +44,7 @@ data class ConfiguredServiceEntry(
     val sttTestState: ServerDetectState = ServerDetectState.Idle,
     val ttsPreviewState: ServerDetectState = ServerDetectState.Idle,
     /** Voices discovered on the text-to-speech endpoint, for the voice picker. */
-    val ttsVoices: ImmutableList<String> = persistentListOf(),
+    val ttsVoices: ImmutableList<TtsVoice> = persistentListOf(),
     val ttsVoicesState: ServerDetectState = ServerDetectState.Idle,
 )
 

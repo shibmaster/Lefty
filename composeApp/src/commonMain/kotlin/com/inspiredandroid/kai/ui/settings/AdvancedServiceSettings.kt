@@ -35,6 +35,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.inspiredandroid.kai.data.InstanceAdvancedSettings
 import com.inspiredandroid.kai.data.Service
+import com.inspiredandroid.kai.data.TtsVoice
 import com.inspiredandroid.kai.ui.KaiOutlinedTextField
 import com.inspiredandroid.kai.ui.handCursor
 import kai.composeapp.generated.resources.Res
@@ -115,7 +116,7 @@ internal fun AdvancedServiceSettings(
     onTestSpeechToText: () -> Unit = {},
     ttsPreviewState: ServerDetectState = ServerDetectState.Idle,
     onPreviewTextToSpeech: () -> Unit = {},
-    ttsVoices: List<String> = emptyList(),
+    ttsVoices: List<TtsVoice> = emptyList(),
     ttsVoicesState: ServerDetectState = ServerDetectState.Idle,
     onLoadTtsVoices: () -> Unit = {},
 ) {
@@ -490,7 +491,7 @@ private fun TextSettingField(labelRes: StringResource, value: String?, modifier:
 @Composable
 private fun VoiceField(
     value: String?,
-    voices: List<String>,
+    voices: List<TtsVoice>,
     state: ServerDetectState,
     onOpen: (() -> Unit)?,
     modifier: Modifier = Modifier,
@@ -537,16 +538,21 @@ private fun VoiceField(
             voices.forEach { voice ->
                 DropdownMenuItem(
                     text = {
-                        Text(
-                            text = voice,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = if (voice == value) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                        )
+                        Column {
+                            Text(
+                                text = voice.id,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = if (voice.id == value) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                            )
+                            voice.description?.let {
+                                Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
                     },
                     onClick = {
                         menuOpen = false
-                        text = voice
-                        onCommit(voice)
+                        text = voice.id
+                        onCommit(voice.id)
                     },
                     modifier = Modifier.handCursor(),
                 )

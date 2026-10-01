@@ -4,6 +4,7 @@ import com.inspiredandroid.kai.DaemonController
 import com.inspiredandroid.kai.data.InstanceAdvancedSettings
 import com.inspiredandroid.kai.data.Service
 import com.inspiredandroid.kai.data.TaskScheduler
+import com.inspiredandroid.kai.data.TtsVoice
 import com.inspiredandroid.kai.network.parseVoiceList
 import com.inspiredandroid.kai.testutil.FakeDataRepository
 import com.inspiredandroid.kai.tools.AppPermission
@@ -29,9 +30,13 @@ class TtsVoicesTest {
     @Test
     fun `voice lists in the common server shapes`() {
         val kobold = """{"status": "ok", "voices": ["kobo", "cheery", "sleepy"]}"""
-        assertEquals(listOf("kobo", "cheery", "sleepy"), parseVoiceList(kobold))
-        assertEquals(listOf("af_bella", "am_adam"), parseVoiceList("""["af_bella", "am_adam", "af_bella"]"""))
-        assertEquals(listOf("a", "b", "c"), parseVoiceList("""{"data": [{"id": "a"}, {"voice_id": "b"}, {"name": "c"}]}"""))
+        assertEquals(listOf("kobo", "cheery", "sleepy"), parseVoiceList(kobold).map { it.id })
+        assertEquals(listOf("af_bella", "am_adam"), parseVoiceList("""["af_bella", "am_adam", "af_bella"]""").map { it.id })
+        assertEquals(listOf("a", "b", "c"), parseVoiceList("""{"data": [{"id": "a"}, {"voice_id": "b"}, {"name": "c"}]}""").map { it.id })
+        assertEquals(
+            listOf(TtsVoice("kobo", "low, male range"), TtsVoice("lefty.wav")),
+            parseVoiceList("""{"voices": [{"id": "kobo", "description": "low, male range"}, {"id": "lefty.wav", "description": ""}]}"""),
+        )
         assertTrue(parseVoiceList("""{"detail": "Not Found"}""").isEmpty())
         assertTrue(parseVoiceList("not json").isEmpty())
     }
@@ -65,7 +70,7 @@ class TtsVoicesTest {
 
     @Test
     fun `loaded voices fill the picker and replace a blank voice`() = runTest(testDispatcher) {
-        repo.fakeTtsVoices = Result.success(listOf("kobo", "cheery"))
+        repo.fakeTtsVoices = Result.success(listOf(TtsVoice("kobo", "low"), TtsVoice("cheery")))
         val vm = viewModel()
         advanceUntilIdle()
 
@@ -73,7 +78,7 @@ class TtsVoicesTest {
         advanceUntilIdle()
 
         val entry = vm.state.value.configuredServices.single()
-        assertEquals(listOf("kobo", "cheery"), entry.ttsVoices)
+        assertEquals(listOf("kobo", "cheery"), entry.ttsVoices.map { it.id })
         assertEquals(ServerDetectState.Success, entry.ttsVoicesState)
         assertEquals("kobo", entry.advanced.ttsVoice)
         assertEquals("kobo", repo.getInstanceAdvancedSettings(id).ttsVoice)
@@ -82,7 +87,7 @@ class TtsVoicesTest {
     @Test
     fun `a chosen voice is kept`() = runTest(testDispatcher) {
         repo.updateInstanceAdvancedSettings(id, InstanceAdvancedSettings(ttsVoice = "chatty"))
-        repo.fakeTtsVoices = Result.success(listOf("kobo", "chatty"))
+        repo.fakeTtsVoices = Result.success(listOf(TtsVoice("kobo"), TtsVoice("chatty")))
         val vm = viewModel()
         advanceUntilIdle()
 
