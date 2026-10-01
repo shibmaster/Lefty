@@ -66,6 +66,35 @@ class ConversationStorageTest {
     }
 
     @Test
+    fun `rename changes only the title and survives a reload`() {
+        val settings = MapSettings()
+        val storage = createStorage(settings)
+        storage.saveConversation(conversation("c1", "Hello", "Hi!"))
+        storage.saveConversation(conversation("c2", "Other"))
+
+        storage.renameConversation("c1", "Greetings")
+        storage.renameConversation("missing", "Nothing")
+
+        val reloaded = createStorage(settings)
+        reloaded.loadConversations()
+        val renamed = reloaded.conversations.value
+        assertEquals(listOf("c1", "c2"), renamed.map { it.id })
+        assertEquals("Greetings", renamed[0].title)
+        assertEquals(2000L, renamed[0].updatedAt)
+        assertEquals(listOf("Hello", "Hi!"), renamed[0].messages.map { it.content })
+        assertEquals("Title c2", renamed[1].title)
+    }
+
+    @Test
+    fun `renamed title is trimmed, capped, and blank restores the automatic one`() {
+        val chat = conversation("c1", "What is the capital of France and why is it Paris of all places?", "Paris.")
+        assertEquals("Trip", renamedConversationTitle("  Trip \n", chat))
+        assertEquals(100, renamedConversationTitle("x".repeat(300), chat).length)
+        assertEquals("What is the capital of France and why is it Paris...", renamedConversationTitle("   ", chat))
+        assertEquals("", renamedConversationTitle("", conversation("c2")))
+    }
+
+    @Test
     fun `deleteConversation removes it from flow and persistence`() {
         val settings = MapSettings()
         val storage = createStorage(settings)

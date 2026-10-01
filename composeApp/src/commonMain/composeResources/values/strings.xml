@@ -136,6 +136,11 @@
     <string name="chat_history_content_description">Chat history</string>
     <string name="chat_history_title">Chat History</string>
     <string name="chat_history_delete_content_description">Delete conversation</string>
+    <string name="chat_history_rename_content_description">Rename conversation</string>
+    <string name="chat_history_rename_title">Rename chat</string>
+    <string name="chat_history_rename_hint">Leave empty to use the first message</string>
+    <string name="chat_history_rename_save">Save</string>
+    <string name="chat_history_rename_cancel">Cancel</string>
     <string name="chat_history_empty">No saved conversations</string>
     <string name="chat_history_heartbeat_label">Heartbeat</string>
     <string name="heartbeat_banner_message">Heartbeat has something to report</string>

@@ -81,6 +81,7 @@ class ChatViewModel(
         selectService = ::selectService,
         loadConversation = ::loadConversation,
         deleteConversation = ::deleteConversation,
+        renameConversation = ::renameConversation,
         clearUnreadHeartbeat = ::clearUnreadHeartbeat,
         clearSnackbar = ::clearSnackbar,
         undoDeleteConversation = ::undoDeleteConversation,
@@ -512,6 +513,12 @@ class ChatViewModel(
             delay(4.seconds)
             dataRepository.deleteConversation(id)
             _state.update { it.copy(pendingConversationDeletion = null) }
+        }
+    }
+
+    private fun renameConversation(id: String, title: String) {
+        viewModelScope.launch(backgroundDispatcher) {
+            dataRepository.renameConversation(id, title)
         }
     }
 

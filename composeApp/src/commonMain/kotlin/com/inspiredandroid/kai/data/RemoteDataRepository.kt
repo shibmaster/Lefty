@@ -1716,6 +1716,11 @@ class RemoteDataRepository(
         sandboxController.closeSession(id)
     }
 
+    override suspend fun renameConversation(id: String, title: String) {
+        val conversation = savedConversations.value.find { it.id == id } ?: return
+        conversationStorage.renameConversation(id, renamedConversationTitle(title, conversation))
+    }
+
     override fun regenerate() {
         chatHistory.update { history ->
             val lastUserIndex = history.indexOfLast { it.role == History.Role.USER }
@@ -2332,16 +2337,7 @@ class RemoteDataRepository(
         return id
     }
 
-    private fun deriveTitle(history: List<History>): String {
-        val firstUserMessage = history.firstOrNull { it.role == History.Role.USER }?.content ?: return ""
-        return if (firstUserMessage.length <= 50) {
-            firstUserMessage
-        } else {
-            val truncated = firstUserMessage.take(50)
-            val lastSpace = truncated.lastIndexOf(' ')
-            if (lastSpace > 20) truncated.substring(0, lastSpace) + "..." else truncated + "..."
-        }
-    }
+    private fun deriveTitle(history: List<History>): String = deriveConversationTitle(history.firstOrNull { it.role == History.Role.USER }?.content)
 
     // On-device inference (LiteRT)
 

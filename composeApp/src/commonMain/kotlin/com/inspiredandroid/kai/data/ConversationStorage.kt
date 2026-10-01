@@ -95,6 +95,22 @@ class ConversationStorage(
         return listOf(last.withText(last.text.takeLast(limit)))
     }
 
+    /** Sets the title of a saved conversation. Keeps `updatedAt`, so renaming doesn't reorder the list. */
+    fun renameConversation(id: String, title: String) {
+        var changed: Conversation? = null
+        mutableConversations.update { current ->
+            val idx = current.indexOfFirst { it.id == id }
+            if (idx < 0 || current[idx].title == title) {
+                current
+            } else {
+                val updated = current[idx].copy(title = title)
+                changed = updated
+                current.toMutableList().apply { set(idx, updated) }
+            }
+        }
+        changed?.let { persistence.save(it, mutableConversations.value) }
+    }
+
     fun deleteConversation(id: String) {
         mutableConversations.update { current ->
             current.filter { it.id != id }

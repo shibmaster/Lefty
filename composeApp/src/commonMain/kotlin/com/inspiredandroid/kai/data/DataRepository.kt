@@ -100,6 +100,9 @@ interface DataRepository {
     fun loadConversations()
     fun loadConversation(id: String)
     suspend fun deleteConversation(id: String)
+
+    /** Renames a saved conversation; a blank [title] restores the automatic one from the first message. */
+    suspend fun renameConversation(id: String, title: String)
     fun startNewChat()
     fun regenerate()
     fun popLastExchange()

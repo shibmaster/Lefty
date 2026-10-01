@@ -322,6 +322,13 @@ class FakeDataRepository : DataRepository {
         savedConversations.update { it.filter { c -> c.id != id } }
     }
 
+    val renamedConversations = mutableListOf<Pair<String, String>>()
+
+    override suspend fun renameConversation(id: String, title: String) {
+        renamedConversations += id to title
+        savedConversations.update { list -> list.map { if (it.id == id) it.copy(title = title) else it } }
+    }
+
     override fun regenerate() {
         regenerateCalls++
         chatHistory.update { history ->

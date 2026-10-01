@@ -29,6 +29,9 @@ Every service has an **Advanced** section (Settings → Services → *service* �
 - If the server is unreachable, the phone's voice takes over.
 - **Read thinking aloud:** long-press the 🔊 icon at the top to also hear the model's reasoning before the answer. Off by default; when off, reasoning is never read out.
 
+### Rename chats
+- Tap the ✏️ next to a chat in the history to give it your own name. Leave the name empty to go back to the first message.
+
 ### Background heartbeats that keep running
 - **Daemon Mode** (Settings → General) no longer stops after about 6 hours on Android 15+.
 - It restarts after a reboot or an app update.

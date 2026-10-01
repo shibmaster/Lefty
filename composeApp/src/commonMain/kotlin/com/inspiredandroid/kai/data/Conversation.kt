@@ -73,3 +73,22 @@ data class ConversationsData(
     val version: Int = 2,
     val conversations: List<Conversation>,
 )
+
+private const val MAX_CONVERSATION_TITLE_LENGTH = 100
+
+/** Automatic title: the first user message, cut to ~50 characters at a word boundary. */
+internal fun deriveConversationTitle(firstUserMessage: String?): String {
+    if (firstUserMessage == null) return ""
+    return if (firstUserMessage.length <= 50) {
+        firstUserMessage
+    } else {
+        val truncated = firstUserMessage.take(50)
+        val lastSpace = truncated.lastIndexOf(' ')
+        if (lastSpace > 20) truncated.substring(0, lastSpace) + "..." else truncated + "..."
+    }
+}
+
+/** Title for a rename: trimmed and capped; blank goes back to the automatic title. */
+internal fun renamedConversationTitle(input: String, conversation: Conversation): String = input.trim().take(MAX_CONVERSATION_TITLE_LENGTH).ifEmpty {
+    deriveConversationTitle(conversation.messages.firstOrNull { it.role == "user" }?.content)
+}

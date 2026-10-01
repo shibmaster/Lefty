@@ -1,6 +1,6 @@
 # Chat & Conversations
 
-**Last verified:** 2026-09-30
+**Last verified:** 2026-10-02
 
 Kai's chat system manages the message history, conversation persistence, file attachments, and speech output. Conversations are service-independent — switching providers does not affect which conversation is loaded or restored. Multiple conversations are persisted and browsable via a history sheet.
 
@@ -16,7 +16,7 @@ The in-memory message list that drives the UI. Each entry has a role: USER, ASSI
 
 ### Conversation Title
 
-Auto-derived from the first user message when a conversation is saved for the first time. Truncated to ~50 characters at a word boundary. Once set, titles are not updated.
+Auto-derived from the first user message when a conversation is saved for the first time. Truncated to ~50 characters at a word boundary. Later saves keep the existing title. The user can rename a conversation from the history sheet (trimmed, up to 100 characters); saving an empty name restores the automatic title. Renaming doesn't change `updatedAt`, so the list order and date stay as they were.
 
 ## Conversation Lifecycle
 
@@ -39,6 +39,7 @@ Auto-derived from the first user message when a conversation is saved for the fi
 - Each item shows the title and formatted date
 - Non-interactive conversations are outlined with a primary-colored border; interactive-mode conversations get an animated gradient border. The active conversation's title is rendered in the primary color (inactive titles use onBackground)
 - Tapping an item loads that conversation and dismisses the sheet
+- Each item except heartbeat conversations has a rename (pencil) button that opens a dialog prefilled with the current title (empty for untitled chats); the sheet stays open and the new title shows immediately
 - Each item has a delete button that defers deletion with a snackbar "Undo" option (~4 seconds) before the conversation is permanently removed. The snackbar appears inside the history sheet so it remains visible while the sheet is open, and the sheet stays open so multiple conversations can be deleted in sequence
 - Deleting the active conversation clears the chat
 - Heartbeat conversations are included in the history list with a "Heartbeat" label badge, and can also be accessed via the heartbeat banner
@@ -149,7 +150,7 @@ Speech is recognised by a model, not by the platform's speech recognizer — eit
 - **Input**: text field, send/stop button, attachment button, file chip
 - **Empty state**: animated logo + welcome message
 - **Drag-and-drop**: supported for file attachments
-- **History sheet**: bottom sheet listing saved conversations with title, date, active highlight, and delete
+- **History sheet**: bottom sheet listing saved conversations with title, date, active highlight, rename, and delete
 
 ## Key Files
 

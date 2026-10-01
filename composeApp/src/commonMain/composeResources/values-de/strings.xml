@@ -202,6 +202,11 @@ Wenn etwas Aufmerksamkeit erfordert (veraltete Erinnerungen, fällige Aufgaben, 
     <string name="chat_history_content_description">Chatverlauf</string>
     <string name="chat_history_title">Chatverlauf</string>
     <string name="chat_history_delete_content_description">Unterhaltung löschen</string>
+    <string name="chat_history_rename_content_description">Unterhaltung umbenennen</string>
+    <string name="chat_history_rename_title">Chat umbenennen</string>
+    <string name="chat_history_rename_hint">Leer lassen, um die erste Nachricht zu verwenden</string>
+    <string name="chat_history_rename_save">Speichern</string>
+    <string name="chat_history_rename_cancel">Abbrechen</string>
     <string name="chat_history_empty">Keine gespeicherten Unterhaltungen</string>
     <string name="chat_history_heartbeat_label">Herzschlag</string>
     <string name="heartbeat_banner_message">Herzschlag hat etwas zu berichten</string>

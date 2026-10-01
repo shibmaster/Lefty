@@ -146,6 +146,14 @@ class ChatViewModelTest {
     }
 
     @Test
+    fun `rename action reaches the repository`() = runTest {
+        val viewModel = createViewModel()
+        viewModel.state.value.actions.renameConversation("c1", "Trip planning")
+        testDispatcher.scheduler.advanceUntilIdle()
+        assertEquals(listOf("c1" to "Trip planning"), fakeRepository.renamedConversations)
+    }
+
+    @Test
     fun `initial state reflects isUsingSharedKey from repository`() = runTest {
         fakeRepository.setCurrentService(Service.Free)
         val viewModel = createViewModel()

@@ -18,6 +18,7 @@ data class ChatActions(
     val selectService: (String) -> Unit,
     val loadConversation: (String) -> Unit,
     val deleteConversation: (String) -> Unit,
+    val renameConversation: (id: String, title: String) -> Unit = { _, _ -> },
     val clearUnreadHeartbeat: () -> Unit,
     val clearSnackbar: () -> Unit,
     val undoDeleteConversation: () -> Unit,
