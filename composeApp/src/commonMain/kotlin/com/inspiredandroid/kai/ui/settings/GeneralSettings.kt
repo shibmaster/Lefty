@@ -16,6 +16,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.inspiredandroid.kai.Platform
 import com.inspiredandroid.kai.currentPlatform
 import com.inspiredandroid.kai.data.ThemeMode
@@ -32,6 +34,8 @@ import com.inspiredandroid.kai.ui.components.KaiSlider
 import com.inspiredandroid.kai.ui.handCursor
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.ic_arrow_drop_down
+import kai.composeapp.generated.resources.settings_daemon_battery_allow
+import kai.composeapp.generated.resources.settings_daemon_battery_warning
 import kai.composeapp.generated.resources.settings_daemon_mode
 import kai.composeapp.generated.resources.settings_daemon_mode_description
 import kai.composeapp.generated.resources.settings_dynamic_ui
@@ -60,6 +64,9 @@ internal fun GeneralContent(uiState: SettingsUiState, actions: SettingsActions) 
                     DaemonModeToggle(
                         isDaemonEnabled = uiState.isDaemonEnabled,
                         onToggleDaemon = actions.onToggleDaemon,
+                        isBatteryOptimizationExempt = uiState.isBatteryOptimizationExempt,
+                        onRequestBatteryExemption = actions.onRequestBatteryExemption,
+                        onRefreshBatteryExemption = actions.onRefreshBatteryExemption,
                     )
                 }
             }
@@ -110,7 +117,14 @@ internal fun GeneralContent(uiState: SettingsUiState, actions: SettingsActions) 
 private fun DaemonModeToggle(
     isDaemonEnabled: Boolean,
     onToggleDaemon: (Boolean) -> Unit,
+    isBatteryOptimizationExempt: Boolean,
+    onRequestBatteryExemption: () -> Unit,
+    onRefreshBatteryExemption: () -> Unit,
 ) {
+    LifecycleResumeEffect(Unit) {
+        onRefreshBatteryExemption()
+        onPauseOrDispose {}
+    }
     Column(modifier = Modifier.fillMaxWidth()) {
         ToggleableHeadline(
             title = stringResource(Res.string.settings_daemon_mode),
@@ -118,6 +132,22 @@ private fun DaemonModeToggle(
             checked = isDaemonEnabled,
             onCheckedChange = onToggleDaemon,
         )
+        if (isDaemonEnabled && !isBatteryOptimizationExempt) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = stringResource(Res.string.settings_daemon_battery_warning),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.weight(1f),
+                )
+                TextButton(onClick = onRequestBatteryExemption, modifier = Modifier.handCursor()) {
+                    Text(stringResource(Res.string.settings_daemon_battery_allow))
+                }
+            }
+        }
     }
 }
 

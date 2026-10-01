@@ -12,6 +12,10 @@
     <uses-permission android:name="android.permission.READ_SMS"/>
     <uses-permission android:name="android.permission.SEND_SMS"/>
 
+    <!-- Daemon Mode asks to be exempted from battery optimization so Doze doesn't pause heartbeats.
+         Play restricts this permission, so it is declared for the foss flavor only. -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
+
     <!--
       Lets the user tap an .apk in the sandbox file browser and hand it to the system
       package installer. FOSS-only for the same reason as the permissions above: Play

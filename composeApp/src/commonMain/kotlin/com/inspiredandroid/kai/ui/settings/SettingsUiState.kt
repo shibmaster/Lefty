@@ -82,6 +82,7 @@ data class SettingsUiState(
     val isSchedulingEnabled: Boolean = true,
     val scheduledTasks: ImmutableList<ScheduledTask> = persistentListOf(),
     val isDaemonEnabled: Boolean = false,
+    val isBatteryOptimizationExempt: Boolean = true,
     val showDaemonToggle: Boolean = false,
     val isHeartbeatEnabled: Boolean = true,
     val heartbeatIntervalMinutes: Int = 30,

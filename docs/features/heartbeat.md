@@ -1,6 +1,6 @@
 # Heartbeat
 
-**Last verified:** 2026-08-03
+**Last verified:** 2026-10-01
 
 > Heartbeat is user-controlled (on/off toggle, interval, active hours live in the settings UI). The AI cannot enable, disable, or reschedule it. To customise *what happens on each heartbeat*, the AI creates heartbeat-triggered scheduled tasks via `schedule_task` with `on_heartbeat: true` — these are `HEARTBEAT`-trigger tasks (see [tasks.md](tasks.md)) and their prompts are appended to every heartbeat run under `## Heartbeat Additions`. Each addition is a first-class task the user can see, edit, and cancel.
 
@@ -19,6 +19,8 @@ A configurable time window (default 8:00–22:00) during which heartbeats are al
 ### Promotion
 
 A mechanism for graduating well-established memories into the permanent soul/system prompt. Memories that have been reinforced 5 or more times become promotion candidates and are surfaced during heartbeat checks for the AI to evaluate.
+
+> On Android, heartbeats only run while the app is closed when **Daemon Mode** is on (see [daemon.md](daemon.md)). The daemon has no daily runtime cap, restarts after reboot/update, and asks for a battery-optimization exemption.
 
 ## Configuration
 

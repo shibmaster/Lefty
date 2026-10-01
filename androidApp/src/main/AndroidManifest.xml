@@ -13,6 +13,9 @@
    <uses-permission android:name="com.android.alarm.permission.SET_ALARM"/>
    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
+   <!-- Daemon Mode: no daily cap (dataSync is limited to ~6 h/day on Android 15+), restart after boot/update. -->
+   <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"/>
+   <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
     <application
         android:name="com.inspiredandroid.kai.KaiApplication"
@@ -59,7 +62,19 @@
         <service
             android:name="com.inspiredandroid.kai.DaemonService"
             android:exported="false"
-            android:foregroundServiceType="dataSync" />
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Personal AI assistant: runs user-scheduled tasks, heartbeat checks and mail/SMS polling" />
+        </service>
+        <receiver
+            android:name="com.inspiredandroid.kai.DaemonBootReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
         <service
             android:name="com.inspiredandroid.kai.inference.ModelDownloadService"
             android:exported="false"

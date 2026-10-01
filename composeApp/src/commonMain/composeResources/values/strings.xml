@@ -234,6 +234,8 @@
     <string name="execution_log_status_fail">FAIL</string>
     <string name="settings_daemon_mode">Daemon Mode</string>
     <string name="settings_daemon_mode_description">Keep Lefty running in the background so scheduled tasks execute even when the app is not in the foreground.</string>
+    <string name="settings_daemon_battery_warning">Battery optimization may pause background checks.</string>
+    <string name="settings_daemon_battery_allow">Allow</string>
     <string name="settings_heartbeat">Heartbeat</string>
     <string name="settings_heartbeat_description">Periodic self-checks that let the AI review memories and tasks without user input. Runs every %1$d minutes during active hours.</string>
     <string name="settings_heartbeat_interval">Interval</string>
