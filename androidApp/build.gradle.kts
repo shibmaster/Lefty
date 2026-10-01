@@ -94,7 +94,10 @@ android {
 }
 
 if (hasWireGuardBridge) {
-    android.sourceSets.getByName("main").kotlin.srcDir("src/wireguard/kotlin")
+    android.sourceSets
+        .getByName("main")
+        .kotlin
+        .srcDir("src/wireguard/kotlin")
 }
 
 dependencies {
