@@ -92,6 +92,7 @@ class SettingsViewModel(
         isSchedulingEnabled = dataRepository.isSchedulingEnabled(),
         scheduledTasks = dataRepository.getScheduledTasks().toImmutableList(),
         isDaemonEnabled = dataRepository.isDaemonEnabled(),
+        isBatteryOptimizationExempt = daemonController.isBatteryOptimizationExempt(),
         showDaemonToggle = currentPlatform is Platform.Mobile.Android,
         isHeartbeatEnabled = dataRepository.getHeartbeatConfig().enabled,
         heartbeatIntervalMinutes = dataRepository.getHeartbeatConfig().intervalMinutes,
@@ -172,6 +173,8 @@ class SettingsViewModel(
         onToggleScheduling = ::onToggleScheduling,
         onCancelTask = ::onCancelTask,
         onToggleDaemon = ::onToggleDaemon,
+        onRequestBatteryExemption = ::onRequestBatteryExemption,
+        onRefreshBatteryExemption = ::onRefreshBatteryExemption,
         onToggleHeartbeat = ::onToggleHeartbeat,
         onChangeHeartbeatInterval = ::onChangeHeartbeatInterval,
         onChangeHeartbeatActiveHours = ::onChangeHeartbeatActiveHours,
@@ -633,12 +636,27 @@ class SettingsViewModel(
     private fun onToggleDaemon(enabled: Boolean) {
         dataRepository.setDaemonEnabled(enabled)
         if (enabled) {
-            viewModelScope.launch { notificationPermissionController.requestPermission() }
+            viewModelScope.launch {
+                notificationPermissionController.requestPermission()
+                // Without the exemption Doze can pause the daemon for hours; ask once it's on.
+                if (!daemonController.isBatteryOptimizationExempt()) {
+                    daemonController.requestBatteryOptimizationExemption()
+                }
+            }
             daemonController.start()
         } else {
             daemonController.stop()
         }
         _state.update { it.copy(isDaemonEnabled = enabled) }
+    }
+
+    private fun onRequestBatteryExemption() {
+        daemonController.requestBatteryOptimizationExemption()
+    }
+
+    /** Re-read after returning from the system dialog (called on screen resume). */
+    private fun onRefreshBatteryExemption() {
+        _state.update { it.copy(isBatteryOptimizationExempt = daemonController.isBatteryOptimizationExempt()) }
     }
 
     private fun onToggleHeartbeat(enabled: Boolean) {

@@ -6,6 +6,8 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
+import android.content.pm.ServiceInfo
+import android.os.Build
 import android.os.IBinder
 import com.inspiredandroid.kai.data.TaskScheduler
 import com.inspiredandroid.kai.shared.R
@@ -25,7 +27,12 @@ class DaemonService : Service() {
         createNotificationChannel()
         val notification = buildNotification()
         try {
-            startForeground(NOTIFICATION_ID, notification)
+            // specialUse has no daily runtime cap, unlike dataSync (~6 h/day on Android 15+).
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
+            } else {
+                startForeground(NOTIFICATION_ID, notification)
+            }
         } catch (_: Exception) {
             stopSelf()
             return
@@ -41,6 +48,7 @@ class DaemonService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
+    // Only time-limited types (dataSync) get this; specialUse doesn't. Kept as a safety net.
     override fun onTimeout(startId: Int, fgsType: Int) {
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
