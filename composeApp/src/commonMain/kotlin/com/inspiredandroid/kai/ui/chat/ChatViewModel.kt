@@ -127,6 +127,14 @@ class ChatViewModel(
             if (!skipRestore) {
                 dataRepository.restoreCurrentConversation()
                 presetInteractiveModeForCurrentConversation()
+                // A turn interrupted by process death leaves the user's prompt as the
+                // last message (the assistant reply never arrived). Surface the
+                // existing error + retry UI so the prompt can be resubmitted as-is.
+                if (dataRepository.chatHistory.value.lastOrNull()?.role == History.Role.USER) {
+                    _state.update {
+                        it.copy(error = UiError.Text("The last reply was interrupted. Your message was kept — tap to try again."))
+                    }
+                }
             }
             _state.update { it.copy(isRestoring = false) }
         }

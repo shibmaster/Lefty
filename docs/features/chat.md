@@ -1,6 +1,6 @@
 # Chat & Conversations
 
-**Last verified:** 2026-10-02
+**Last verified:** 2026-10-27
 
 Kai's chat system manages the message history, conversation persistence, file attachments, and speech output. Conversations are service-independent — switching providers does not affect which conversation is loaded or restored. Multiple conversations are persisted and browsable via a history sheet.
 
@@ -23,13 +23,14 @@ Auto-derived from the first user message when a conversation is saved for the fi
 - The "current conversation" pointer is persisted across launches: opening the app restores whichever conversation was last active, including an empty new chat the user explicitly started
 - If the persisted pointer references a conversation that no longer exists (or is null because the user started a new chat), the app opens to an empty new chat
 - "New Chat" clears history, unsets the current conversation pointer, and persists the empty state — so an unused new chat survives an app restart
-- A new conversation ID (UUID) is generated on first successful save (after the first assistant response) and immediately becomes the persisted current pointer
-- Conversations are saved after each assistant response
+- A new conversation ID (UUID) is generated when the first message of a fresh chat is sent and immediately becomes the persisted current pointer
+- The user's prompt is persisted before the model call, and the conversation is saved again after each assistant response — so a turn interrupted by process death (connection loss, background kill) keeps the prompt
 - Only the most recent 20 exchanges are persisted per chat conversation; heartbeat conversations have a separate, larger cap of 50 messages so longer automation runs are not truncated as aggressively
 - Multiple conversations are persisted — starting a new chat preserves previous conversations
 - Conversations are service-independent — switching services does not affect which conversation is loaded
 - Interactive vs normal chat mode is persisted alongside the current pointer, so an empty interactive chat also survives a restart
 - On the first launch after upgrading from a build that did not persist the current-conversation pointer, a one-time migration pins the most recently updated conversation as the current pointer so the user resumes where they left off
+- If the restored conversation ends with a user message (a turn interrupted before the assistant reply arrived), the chat shows an error with a retry button so the kept prompt can be resubmitted without retyping
 - On Android, sharing plain text into Kai from another app (the system share sheet) starts a new conversation and puts the shared text in the input field, unsent. The previous conversation stays in history. The user can edit the text or add an instruction, then send as usual. Opening Kai from the launcher or the assist gesture is unchanged; assist still starts an empty new chat
 
 ## Chat History
@@ -46,9 +47,9 @@ Auto-derived from the first user message when a conversation is saved for the fi
 
 ## Message Sending
 
-- User message is added to history, then an API call is made via the fallback chain
+- User message is added to history and persisted, then an API call is made via the fallback chain
 - Tool calls are executed inline (TOOL_EXECUTING shown during execution, TOOL result stored after)
-- On success, the conversation is saved
+- On success, the conversation is saved again (now including the assistant reply)
 - On failure, an error is displayed with a retry button
 - **Free rate-limit upsell:** when the user has **no configured services** (only Free FAST/EXPERT) and the request fails with a rate-limit, quota-exhausted, or Free proxy capacity error (e.g. “All free providers failed”), the chat shows a special panel instead of the generic error. It explains that Free is rate-limited and shows compact provider chips (icon + name) for free-usage providers (Groq, Cerebras, Gemini, OpenRouter, Ollama Cloud) in a flow layout; tapping a chip opens that provider’s API-key page in the browser. A retry control remains available. The panel is not shown if any non-Free service is already configured.
 

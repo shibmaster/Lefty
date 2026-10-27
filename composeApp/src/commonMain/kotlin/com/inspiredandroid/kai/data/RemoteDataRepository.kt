@@ -899,8 +899,8 @@ class RemoteDataRepository(
         // still null, so per-conversation routing (e.g. the sandbox shell)
         // falls through to a shared default — which both makes the new chat
         // invisible in the Terminal session picker and lets unrelated callers
-        // collide on the same shell mutex. Persistence is deferred to the
-        // existing saveCurrentConversation() flow that runs after the response.
+        // collide on the same shell mutex. The user's prompt is persisted before
+        // the model call (see below) so an interrupted turn doesn't lose it.
         if (_currentConversationId.value == null) {
             setCurrentConversationId(Uuid.random().toString())
         }
@@ -977,6 +977,10 @@ class RemoteDataRepository(
         }
 
         compactHistoryIfNeeded()
+        // Persist the prompt before the (potentially long) model call: if the process
+        // dies mid-turn (connection loss, background kill), the user's message survives
+        // and can be retried after relaunch.
+        if (question != null) saveCurrentConversation()
 
         val messages = chatHistory.value
         val systemPrompt = getActiveSystemPrompt()
