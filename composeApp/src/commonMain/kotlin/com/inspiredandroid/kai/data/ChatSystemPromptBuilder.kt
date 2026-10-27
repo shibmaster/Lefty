@@ -31,13 +31,11 @@ enum class SystemPromptVariant {
 }
 
 /** Runtime state rendered into the `## Context` section. */
+// The current time is deliberately NOT part of this: it changes every turn and would
+// invalidate the server's prefix/KV cache, forcing a full re-prefill of the whole
+// conversation. It is appended to the outgoing user message instead (see
+// RemoteDataRepository.askInternal), so the system prompt + history stay byte-stable.
 internal data class ChatPromptRuntimeContext(
-    /** Local-zoned ISO 8601 with explicit offset, e.g. `2026-04-22T22:32:39+02:00`. */
-    val nowLocalIsoWithOffset: String,
-    /** IANA zone id, e.g. `Europe/Berlin`. Rendered next to the local time for clarity. */
-    val timeZoneId: String,
-    /** UTC ISO 8601 with `Z` suffix — kept so the model can double-check the offset. */
-    val nowUtcIsoString: String,
     val platform: String,
     val modelId: String,
     val providerName: String,
@@ -366,17 +364,10 @@ private fun StringBuilder.appendScheduledTasksSection(pendingTasks: List<Schedul
 
 private fun StringBuilder.appendContextSection(runtime: ChatPromptRuntimeContext) {
     append("\n\n## Context\n")
-    // Lead with local time so the model anchors on the user's wall clock when computing
-    // relative times ("in 3 minutes", "tomorrow at 9"). Tools that accept a naive datetime
-    // (e.g. `schedule_task`'s `execute_at`) interpret it in this zone.
-    append("- Local time: ")
-    append(runtime.nowLocalIsoWithOffset)
-    append(" (")
-    append(runtime.timeZoneId)
-    append(")\n")
-    append("- UTC: ")
-    append(runtime.nowUtcIsoString)
-    append('\n')
+    // The model anchors on the user's wall clock for relative times ("in 3 minutes",
+    // "tomorrow at 9"); tools that accept a naive datetime (e.g. `schedule_task`'s
+    // `execute_at`) interpret it in the user's zone. The time itself arrives with the
+    // user message (see class comment) to keep this prompt stable across turns.
     append("- Platform: ")
     append(runtime.platform)
     append('\n')

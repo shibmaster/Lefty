@@ -982,7 +982,7 @@ class RemoteDataRepository(
         // and can be retried after relaunch.
         if (question != null) saveCurrentConversation()
 
-        val messages = chatHistory.value
+        val messages = appendTimeToOutgoingUserMessage(chatHistory.value)
         val systemPrompt = getActiveSystemPrompt()
 
         val fallbackEntries = getOrderedFallbackEntries().filter { hasValidInstanceApiKey(it.instanceId, it.service) }
@@ -1837,6 +1837,25 @@ class RemoteDataRepository(
         appSettings.setSoulText(text)
     }
 
+    /**
+     * Appends the current local time to the outgoing (last) user message, without touching
+     * the persisted history. The time lives in the system prompt's ## Context section only
+     * as of the previous build; moving it to the tail of the request keeps the system
+     * prompt + full history byte-stable across turns so llama.cpp servers can reuse their
+     * prefix/KV cache and skip re-prefilling the conversation. Returns the input unchanged
+     * when there is no user message (e.g. tool-loop re-entry).
+     */
+    private fun appendTimeToOutgoingUserMessage(history: List<History>): List<History> {
+        val lastUserIndex = history.indexOfLast { it.role == History.Role.USER }
+        if (lastUserIndex < 0) return history
+        val now = Clock.System.now()
+        val timeZone = TimeZone.currentSystemDefault()
+        val local = now.toLocalDateTime(timeZone)
+        val suffix = "\n\n[Local time: ${'$'}{local}${'$'}{timeZone.offsetAt(now)} (${'$'}{timeZone.id})]"
+        val updated = history[lastUserIndex].copy(content = history[lastUserIndex].content + suffix)
+        return history.toMutableList().also { it[lastUserIndex] = updated }
+    }
+
     override suspend fun getActiveSystemPrompt(variant: SystemPromptVariant): String? {
         val soul = appSettings.getSoulText().ifEmpty { getString(Res.string.default_soul) }
         val memoryEnabled = appSettings.isMemoryEnabled()
@@ -1887,14 +1906,7 @@ class RemoteDataRepository(
                 ""
             }
         }
-        val now = Clock.System.now()
-        val timeZone = TimeZone.currentSystemDefault()
-        val localDateTime = now.toLocalDateTime(timeZone)
-        val offset = timeZone.offsetAt(now)
         val runtime = ChatPromptRuntimeContext(
-            nowLocalIsoWithOffset = "$localDateTime$offset",
-            timeZoneId = timeZone.id,
-            nowUtcIsoString = now.toString(),
             platform = currentPlatform.displayName,
             modelId = modelId,
             providerName = service.displayName,
