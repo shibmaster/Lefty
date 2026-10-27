@@ -25,4 +25,4 @@ fastlane/README.md
 .build-native/
 .claude
 .opencode
-.grok/
+.grok/token-github.txt
