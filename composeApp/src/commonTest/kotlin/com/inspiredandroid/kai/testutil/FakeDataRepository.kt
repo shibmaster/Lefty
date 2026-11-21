@@ -443,8 +443,15 @@ class FakeDataRepository : DataRepository {
 
     override suspend fun pollEmailAccount(accountId: String) {}
 
+    var fakeSystemSttEnabled = false
     var fakeVoiceTranscribeFirst = false
     var fakeTalkSilenceMs = 1200L
+
+    override fun isSystemSttEnabled(): Boolean = fakeSystemSttEnabled
+
+    override fun setSystemSttEnabled(enabled: Boolean) {
+        fakeSystemSttEnabled = enabled
+    }
 
     override fun isVoiceTranscribeFirst(): Boolean = fakeVoiceTranscribeFirst
 

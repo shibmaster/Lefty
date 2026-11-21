@@ -278,6 +278,16 @@ class AppSettings(internal val settings: Settings) {
 
     // Voice input
 
+    /**
+     * When true, voice takes are transcribed by the phone's built-in speech service (e.g. Google's
+     * voice typing) instead of the configured speech-to-text model. Android only; ignored elsewhere.
+     */
+    fun isSystemSttEnabled(): Boolean = settings.getBoolean(KEY_SYSTEM_STT_ENABLED, false)
+
+    fun setSystemSttEnabled(enabled: Boolean) {
+        settings.putBoolean(KEY_SYSTEM_STT_ENABLED, enabled)
+    }
+
     /** When true, voice messages are transcribed by the model first and land in the composer as text. */
     fun isVoiceTranscribeFirst(): Boolean = settings.getBoolean(KEY_VOICE_TRANSCRIBE_FIRST, false)
 
@@ -617,6 +627,7 @@ class AppSettings(internal val settings: Settings) {
         const val KEY_SCHEDULED_TASKS = "scheduled_tasks"
         const val KEY_SCHEDULING_ENABLED = "scheduling_enabled"
         const val KEY_DYNAMIC_UI_ENABLED = "dynamic_ui_enabled"
+        const val KEY_SYSTEM_STT_ENABLED = "system_stt_enabled"
         const val KEY_VOICE_TRANSCRIBE_FIRST = "voice_transcribe_first"
         const val KEY_TALK_SILENCE_MS = "talk_silence_ms"
         const val KEY_READ_THINKING_ALOUD = "read_thinking_aloud"

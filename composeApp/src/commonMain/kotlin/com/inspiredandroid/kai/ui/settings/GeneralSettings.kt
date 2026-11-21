@@ -40,6 +40,9 @@ import kai.composeapp.generated.resources.settings_daemon_mode
 import kai.composeapp.generated.resources.settings_daemon_mode_description
 import kai.composeapp.generated.resources.settings_dynamic_ui
 import kai.composeapp.generated.resources.settings_dynamic_ui_description
+import kai.composeapp.generated.resources.settings_system_stt
+import kai.composeapp.generated.resources.settings_system_stt_description
+import kai.composeapp.generated.resources.settings_system_stt_unavailable
 import kai.composeapp.generated.resources.settings_talk_silence
 import kai.composeapp.generated.resources.settings_talk_silence_description
 import kai.composeapp.generated.resources.settings_theme
@@ -84,6 +87,10 @@ internal fun GeneralContent(uiState: SettingsUiState, actions: SettingsActions) 
             if (currentPlatform is Platform.Mobile) {
                 SettingsCard {
                     VoiceInputSection(
+                        showSystemStt = currentPlatform is Platform.Mobile.Android,
+                        systemSttEnabled = uiState.isSystemSttEnabled,
+                        onToggleSystemStt = actions.onToggleSystemStt,
+                        systemSttSupported = uiState.systemSttSupported,
                         transcribeFirst = uiState.isVoiceTranscribeFirst,
                         onToggleTranscribeFirst = actions.onToggleVoiceTranscribeFirst,
                         talkSilenceMs = uiState.talkSilenceMs,
@@ -173,6 +180,10 @@ private fun DynamicUiToggle(
 
 @Composable
 private fun VoiceInputSection(
+    showSystemStt: Boolean,
+    systemSttEnabled: Boolean,
+    onToggleSystemStt: (Boolean) -> Unit,
+    systemSttSupported: Boolean,
     transcribeFirst: Boolean,
     onToggleTranscribeFirst: (Boolean) -> Unit,
     talkSilenceMs: Long,
@@ -180,6 +191,22 @@ private fun VoiceInputSection(
 ) {
     var sliderValue by remember(talkSilenceMs) { mutableStateOf(talkSilenceMs / 1000f) }
     Column(modifier = Modifier.fillMaxWidth()) {
+        if (showSystemStt) {
+            ToggleableHeadline(
+                title = stringResource(Res.string.settings_system_stt),
+                description = stringResource(Res.string.settings_system_stt_description),
+                checked = systemSttEnabled,
+                onCheckedChange = onToggleSystemStt,
+            )
+            if (systemSttEnabled && !systemSttSupported) {
+                Text(
+                    text = stringResource(Res.string.settings_system_stt_unavailable),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
+            Spacer(Modifier.height(12.dp))
+        }
         ToggleableHeadline(
             title = stringResource(Res.string.settings_voice_transcribe_first),
             description = stringResource(Res.string.settings_voice_transcribe_first_description),

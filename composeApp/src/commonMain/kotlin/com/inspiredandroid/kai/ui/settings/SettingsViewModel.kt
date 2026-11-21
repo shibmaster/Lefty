@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.inspiredandroid.kai.DaemonController
 import com.inspiredandroid.kai.Platform
 import com.inspiredandroid.kai.audio.createAudioPlayer
+import com.inspiredandroid.kai.audio.createSystemStt
 import com.inspiredandroid.kai.currentPlatform
 import com.inspiredandroid.kai.data.DataRepository
 import com.inspiredandroid.kai.data.ImportSection
@@ -88,6 +89,8 @@ class SettingsViewModel(
         tools = dataRepository.getToolDefinitions().toImmutableList(),
         soulText = dataRepository.getSoulText(),
         isDynamicUiEnabled = dataRepository.isDynamicUiEnabled(),
+        isSystemSttEnabled = dataRepository.isSystemSttEnabled(),
+        systemSttSupported = createSystemStt().isSupported(),
         isVoiceTranscribeFirst = dataRepository.isVoiceTranscribeFirst(),
         talkSilenceMs = dataRepository.getTalkSilenceMs(),
         themeMode = dataRepository.getThemeMode(),
@@ -170,6 +173,7 @@ class SettingsViewModel(
         onToggleTool = ::onToggleTool,
         onSaveSoul = ::onSaveSoul,
         onToggleDynamicUi = ::onToggleDynamicUi,
+        onToggleSystemStt = ::onToggleSystemStt,
         onToggleVoiceTranscribeFirst = ::onToggleVoiceTranscribeFirst,
         onChangeTalkSilenceMs = ::onChangeTalkSilenceMs,
         onChangeThemeMode = ::onChangeThemeMode,
@@ -615,6 +619,11 @@ class SettingsViewModel(
     private fun onSaveSoul(text: String) {
         dataRepository.setSoulText(text)
         _state.update { it.copy(soulText = text) }
+    }
+
+    private fun onToggleSystemStt(enabled: Boolean) {
+        dataRepository.setSystemSttEnabled(enabled)
+        _state.update { it.copy(isSystemSttEnabled = enabled) }
     }
 
     private fun onToggleVoiceTranscribeFirst(enabled: Boolean) {

@@ -149,6 +149,8 @@ interface DataRepository {
     suspend fun cancelScheduledTask(id: String)
 
     // Dynamic UI
+    fun isSystemSttEnabled(): Boolean
+    fun setSystemSttEnabled(enabled: Boolean)
     fun isVoiceTranscribeFirst(): Boolean
     fun setVoiceTranscribeFirst(enabled: Boolean)
     fun getTalkSilenceMs(): Long

@@ -79,6 +79,8 @@ data class SettingsUiState(
     val tools: ImmutableList<ToolInfo> = persistentListOf(),
     val soulText: String = "",
     val isDynamicUiEnabled: Boolean = true,
+    val isSystemSttEnabled: Boolean = false,
+    val systemSttSupported: Boolean = false,
     val isVoiceTranscribeFirst: Boolean = false,
     val talkSilenceMs: Long = 1200L,
     val themeMode: ThemeMode = ThemeMode.System,

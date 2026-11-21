@@ -1,6 +1,6 @@
 # Chat & Conversations
 
-**Last verified:** 2026-10-27
+**Last verified:** 2026-11-21
 
 Kai's chat system manages the message history, conversation persistence, file attachments, and speech output. Conversations are service-independent — switching providers does not affect which conversation is loaded or restored. Multiple conversations are persisted and browsable via a history sheet.
 
@@ -110,6 +110,8 @@ Multiple files can be attached to a single prompt. Each file is added one at a t
 
 Speech is recognised by a model, not by the platform's speech recognizer — either a dedicated **speech-to-text model** or a chat model that accepts audio. Voice input is Android-only and needs the microphone permission, which is requested on first use; a denial shows a snackbar.
 
+- **System voice typing (optional, Android):** Settings > General > "Use system voice typing" transcribes voice takes with the phone's built-in speech service (e.g. Google's, mostly on-device) via `android.speech.SpeechRecognizer` instead of the configured speech-to-text model. It works offline and the chat model then only needs to accept text. The recognizer drives the microphone itself — one tap (or one talk-mode turn) is one utterance, ended by the system's own speech detection, so no WAV is recorded and a take can't be re-transcribed; the 2-minute cap becomes 60 seconds. "Transcribe voice messages first" and talk mode work unchanged with it, and the level indicator is driven by the recognizer's RMS callback. On a device without a speech service the settings toggle shows a warning and recording fails with a snackbar
+
 - **Speech-to-text model** (preferred): set "Speech-to-text model" (and optionally a language such as `de`) in a service's Advanced settings. Recordings are sent to that endpoint's OpenAI-style `/audio/transcriptions` (Whisper, Qwen3-ASR, … — e.g. behind llama-swap or LiteLLM), and the transcript goes to the chat model as ordinary text, so the chat model does not need audio input. The first configured service with such a model is used, independent of the fallback order; "Test speech-to-text" sends a short silent clip to check the endpoint
 - Without a speech-to-text model, recordings go to a chat model that accepts audio (see [Audio](#audio))
 
@@ -172,6 +174,8 @@ Speech is recognised by a model, not by the platform's speech recognizer — eit
 | `composeApp/src/commonMain/.../audio/VoiceRecorder.kt` | Recorder / player interfaces and silence-detection config |
 | `composeApp/src/commonMain/.../audio/Speaker.kt` | Speaker abstraction: remote text-to-speech with sentence chunking, falling back to the system voice |
 | `composeApp/src/androidMain/.../audio/VoiceRecorder.android.kt` | 16 kHz WAV recording with silence detection; attachment playback |
+| `composeApp/src/commonMain/.../audio/SystemStt.kt` | System speech-to-text interface (one utterance per session) |
+| `composeApp/src/androidMain/.../audio/SystemStt.android.kt` | `SpeechRecognizer` implementation (free-form, system endpointing) |
 | `composeApp/src/commonMain/.../ui/chat/composables/UserMessage.kt` | User bubble with image previews, file and audio chips |
 | `androidApp/src/main/AndroidManifest.xml` | Share-sheet registration for plain text (`ACTION_SEND`) |
 | `androidApp/src/main/kotlin/.../MainActivity.kt` | Reads shared text from `ACTION_SEND` and hands it to chat |

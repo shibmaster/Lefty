@@ -26,3 +26,4 @@ fastlane/README.md
 .claude
 .opencode
 .grok/token-github.txt
+token-github.txt

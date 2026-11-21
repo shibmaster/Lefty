@@ -1949,6 +1949,12 @@ class RemoteDataRepository(
         ).ifEmpty { null }
     }
 
+    override fun isSystemSttEnabled(): Boolean = appSettings.isSystemSttEnabled()
+
+    override fun setSystemSttEnabled(enabled: Boolean) {
+        appSettings.setSystemSttEnabled(enabled)
+    }
+
     override fun isVoiceTranscribeFirst(): Boolean = appSettings.isVoiceTranscribeFirst()
 
     override fun setVoiceTranscribeFirst(enabled: Boolean) {

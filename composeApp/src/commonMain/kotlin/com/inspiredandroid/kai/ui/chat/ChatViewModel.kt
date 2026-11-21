@@ -3,8 +3,11 @@ package com.inspiredandroid.kai.ui.chat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.inspiredandroid.kai.audio.RecordingResult
+import com.inspiredandroid.kai.audio.SystemStt
+import com.inspiredandroid.kai.audio.SystemSttResult
 import com.inspiredandroid.kai.audio.VadConfig
 import com.inspiredandroid.kai.audio.VoiceRecorder
+import com.inspiredandroid.kai.audio.createSystemStt
 import com.inspiredandroid.kai.audio.createVoiceRecorder
 import com.inspiredandroid.kai.data.Conversation
 import com.inspiredandroid.kai.data.DataRepository
@@ -65,6 +68,7 @@ class ChatViewModel(
     private val localNetworkPermissionController: PermissionController = PermissionController(AppPermission.LOCAL_NETWORK),
     private val requestMicPermission: suspend () -> Boolean = { PermissionController(AppPermission.RECORD_AUDIO).requestPermission() },
     private val voiceRecorder: VoiceRecorder = createVoiceRecorder(),
+    private val systemStt: SystemStt = createSystemStt(),
 ) : ViewModel() {
 
     private val actions = ChatActions(
@@ -572,6 +576,10 @@ class ChatViewModel(
     private fun startRecording() {
         val state = _state.value
         if (state.isLoading || state.voiceState != VoiceState.Idle || state.talkMode != TalkMode.Off) return
+        if (dataRepository.isSystemSttEnabled()) {
+            startSystemSttRecording()
+            return
+        }
         if (!ensureAudioModel()) return
         recordingJob = viewModelScope.launch(backgroundDispatcher) {
             if (!ensureMicPermission()) return@launch
@@ -589,12 +597,37 @@ class ChatViewModel(
         }
     }
 
+    /**
+     * Mic press with "use system voice typing" on: the system recognizer drives the mic itself
+     * and ends the session when you stop talking, so no WAV is recorded first. The model doesn't
+     * need to hear audio, hence no [ensureAudioModel] check here.
+     */
+    private fun startSystemSttRecording() {
+        recordingJob = viewModelScope.launch(backgroundDispatcher) {
+            if (!ensureMicPermission()) return@launch
+            _state.update { it.copy(voiceState = VoiceState.Recording) }
+            val result = try {
+                systemStt.transcribe()
+            } finally {
+                _state.update { it.copy(voiceState = VoiceState.Idle) }
+            }
+            when (result) {
+                is SystemSttResult.Success -> handleTranscript(result.text, inTalkMode = false)
+                is SystemSttResult.Failed -> _state.update { it.copy(snackbarMessage = Res.string.error_recording_failed) }
+                SystemSttResult.NoSpeech, SystemSttResult.Cancelled -> Unit
+            }
+        }
+    }
+
     private fun stopRecording() {
         voiceRecorder.stop()
+        // With system STT the session ends on its own; tapping ✓ just stops listening.
+        systemStt.cancel()
     }
 
     private fun cancelRecording() {
         voiceRecorder.cancel()
+        systemStt.cancel()
     }
 
     /**
@@ -620,18 +653,29 @@ class ChatViewModel(
                 return false
             }
             _state.update { it.copy(voiceState = VoiceState.Idle) }
-            if (transcript.isBlank()) {
-                _state.update { it.copy(snackbarMessage = Res.string.voice_no_speech) }
-                return inTalkMode // an empty take shouldn't end talk mode
-            }
-            if (reviewTranscript && !inTalkMode) {
-                _state.update { it.copy(composerPrefill = transcript) }
-                return true
-            }
-            askInternal(transcript, null)
-        } else {
-            askInternal("", null, extraFiles = listOf(file))
+            return handleTranscript(transcript, inTalkMode)
         }
+        askInternal("", null, extraFiles = listOf(file))
+        currentJob?.join()
+        return _state.value.error == null
+    }
+
+    /**
+     * Sends a transcript produced by speech recognition (the configured STT model or the system
+     * voice typing). With "transcribe first" (and outside talk mode) it lands in the composer for
+     * editing. Suspends until the reply has arrived; returns false when nothing was sent or it
+     * failed.
+     */
+    private suspend fun handleTranscript(transcript: String, inTalkMode: Boolean): Boolean {
+        if (transcript.isBlank()) {
+            _state.update { it.copy(snackbarMessage = Res.string.voice_no_speech) }
+            return inTalkMode // an empty take shouldn't end talk mode
+        }
+        if (dataRepository.isVoiceTranscribeFirst() && !inTalkMode) {
+            _state.update { it.copy(composerPrefill = transcript) }
+            return true
+        }
+        askInternal(transcript, null)
         currentJob?.join()
         return _state.value.error == null
     }
@@ -643,7 +687,8 @@ class ChatViewModel(
     private fun startTalkMode() {
         val state = _state.value
         if (state.isLoading || state.voiceState != VoiceState.Idle || talkJob?.isActive == true) return
-        if (!ensureAudioModel()) return
+        // System STT produces text, so the model doesn't need to hear the audio itself.
+        if (!dataRepository.isSystemSttEnabled() && !ensureAudioModel()) return
         talkJob = viewModelScope.launch(backgroundDispatcher) {
             if (!ensureMicPermission()) return@launch
             _state.update { it.copy(talkMode = TalkMode.Listening, isSpeechOutputEnabled = true) }
@@ -651,21 +696,43 @@ class ChatViewModel(
                 while (true) {
                     currentCoroutineContext().ensureActive()
                     _state.update { it.copy(talkMode = TalkMode.Listening) }
-                    val take = voiceRecorder.record(VadConfig(silenceMs = dataRepository.getTalkSilenceMs()))
-                    when (take) {
-                        is RecordingResult.Recorded -> Unit
-
-                        is RecordingResult.Failed -> {
-                            _state.update { it.copy(snackbarMessage = Res.string.error_recording_failed) }
-                            break
-                        }
-
-                        // Nobody spoke within the timeout, or the user left talk mode.
-                        RecordingResult.NoSpeech, RecordingResult.Cancelled -> break
-                    }
-                    _state.update { it.copy(talkMode = TalkMode.Thinking) }
+                    // Captured before the turn is sent, so the speech wait below only sees
+                    // read-outs started by this reply.
                     val startsBefore = speechStarts.value
-                    if (!sendVoice(take.file, inTalkMode = true)) break
+                    var sent = false
+                    if (dataRepository.isSystemSttEnabled()) {
+                        // One recognition session per turn; the system ends it when you stop talking.
+                        val transcript = when (val result = systemStt.transcribe()) {
+                            is SystemSttResult.Success -> result.text
+
+                            is SystemSttResult.Failed -> {
+                                _state.update { it.copy(snackbarMessage = Res.string.error_recording_failed) }
+                                null
+                            }
+
+                            SystemSttResult.NoSpeech, SystemSttResult.Cancelled -> null
+                        }
+                        if (transcript == null) break
+                        _state.update { it.copy(talkMode = TalkMode.Thinking) }
+                        sent = handleTranscript(transcript, inTalkMode = true)
+                    } else {
+                        val take = voiceRecorder.record(VadConfig(silenceMs = dataRepository.getTalkSilenceMs()))
+                        when (take) {
+                            is RecordingResult.Recorded -> {
+                                _state.update { it.copy(talkMode = TalkMode.Thinking) }
+                                sent = sendVoice(take.file, inTalkMode = true)
+                            }
+
+                            is RecordingResult.Failed -> {
+                                _state.update { it.copy(snackbarMessage = Res.string.error_recording_failed) }
+                                break
+                            }
+
+                            // Nobody spoke within the timeout, or the user left talk mode.
+                            RecordingResult.NoSpeech, RecordingResult.Cancelled -> break
+                        }
+                    }
+                    if (!sent) break
                     _state.update { it.copy(talkMode = TalkMode.Speaking) }
                     // Wait for the reply to be read out before listening again, so the mic never
                     // records the speaker. If speech never starts (no TTS), just carry on.
@@ -695,6 +762,7 @@ class ChatViewModel(
     private fun stopTalkMode() {
         val wasThinking = _state.value.talkMode == TalkMode.Thinking
         voiceRecorder.cancel()
+        systemStt.cancel()
         talkJob?.cancel()
         talkJob = null
         if (wasThinking) cancel()
@@ -705,6 +773,7 @@ class ChatViewModel(
 
     override fun onCleared() {
         voiceRecorder.cancel()
+        systemStt.cancel()
         talkJob?.cancel()
         recordingJob?.cancel()
         commitPendingConversationDeletion()
