@@ -123,7 +123,7 @@ private fun AppContent(
             val player = createAudioPlayer()
             SwitchingSpeaker(
                 system = system,
-                remoteEnabled = { dataRepository.hasTextToSpeechModel() },
+                remoteEnabled = { dataRepository.hasTextToSpeechModel() && !dataRepository.isSystemTtsEnabled() },
                 synthesize = { dataRepository.synthesizeSpeech(it) },
                 play = { player.playAndAwait(it, "audio/mpeg") },
                 stopPlayback = { player.stop() },

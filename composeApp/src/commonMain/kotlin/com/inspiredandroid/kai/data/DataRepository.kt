@@ -151,6 +151,8 @@ interface DataRepository {
     // Dynamic UI
     fun isSystemSttEnabled(): Boolean
     fun setSystemSttEnabled(enabled: Boolean)
+    fun isSystemTtsEnabled(): Boolean
+    fun setSystemTtsEnabled(enabled: Boolean)
     fun isVoiceTranscribeFirst(): Boolean
     fun setVoiceTranscribeFirst(enabled: Boolean)
     fun getTalkSilenceMs(): Long

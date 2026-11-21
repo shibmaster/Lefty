@@ -1955,6 +1955,12 @@ class RemoteDataRepository(
         appSettings.setSystemSttEnabled(enabled)
     }
 
+    override fun isSystemTtsEnabled(): Boolean = appSettings.isSystemTtsEnabled()
+
+    override fun setSystemTtsEnabled(enabled: Boolean) {
+        appSettings.setSystemTtsEnabled(enabled)
+    }
+
     override fun isVoiceTranscribeFirst(): Boolean = appSettings.isVoiceTranscribeFirst()
 
     override fun setVoiceTranscribeFirst(enabled: Boolean) {

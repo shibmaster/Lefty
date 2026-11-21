@@ -237,6 +237,8 @@
     <string name="settings_system_stt">Use system voice typing</string>
     <string name="settings_system_stt_description">Transcribe voice messages with the phone\'s built-in speech recognition (e.g. Google\'s, mostly on-device) instead of the configured speech-to-text model. Works offline, but you speak once and it transcribes live — a recorded take can\'t be re-transcribed.</string>
     <string name="settings_system_stt_unavailable">No speech recognition service is installed on this device.</string>
+    <string name="settings_system_tts">Use phone voice</string>
+    <string name="settings_system_tts_description">Read replies aloud with the phone\'s built-in text-to-speech (the engine from the system speech settings, e.g. Google\'s on-device voice) instead of the configured speech model. Works offline.</string>
     <string name="settings_voice_transcribe_first">Transcribe voice messages first</string>
     <string name="settings_voice_transcribe_first_description">Recorded messages are transcribed and put in the message box for you to edit. When off, a speech-to-text model's transcript is sent right away (without one, the recording goes to the chat model as audio). Talk mode always sends right away.</string>
     <string name="settings_talk_silence">Talk mode pause</string>

@@ -81,6 +81,7 @@ data class SettingsUiState(
     val isDynamicUiEnabled: Boolean = true,
     val isSystemSttEnabled: Boolean = false,
     val systemSttSupported: Boolean = false,
+    val isSystemTtsEnabled: Boolean = false,
     val isVoiceTranscribeFirst: Boolean = false,
     val talkSilenceMs: Long = 1200L,
     val themeMode: ThemeMode = ThemeMode.System,

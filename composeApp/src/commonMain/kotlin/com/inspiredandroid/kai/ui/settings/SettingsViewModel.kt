@@ -91,6 +91,7 @@ class SettingsViewModel(
         isDynamicUiEnabled = dataRepository.isDynamicUiEnabled(),
         isSystemSttEnabled = dataRepository.isSystemSttEnabled(),
         systemSttSupported = createSystemStt().isSupported(),
+        isSystemTtsEnabled = dataRepository.isSystemTtsEnabled(),
         isVoiceTranscribeFirst = dataRepository.isVoiceTranscribeFirst(),
         talkSilenceMs = dataRepository.getTalkSilenceMs(),
         themeMode = dataRepository.getThemeMode(),
@@ -174,6 +175,7 @@ class SettingsViewModel(
         onSaveSoul = ::onSaveSoul,
         onToggleDynamicUi = ::onToggleDynamicUi,
         onToggleSystemStt = ::onToggleSystemStt,
+        onToggleSystemTts = ::onToggleSystemTts,
         onToggleVoiceTranscribeFirst = ::onToggleVoiceTranscribeFirst,
         onChangeTalkSilenceMs = ::onChangeTalkSilenceMs,
         onChangeThemeMode = ::onChangeThemeMode,
@@ -624,6 +626,11 @@ class SettingsViewModel(
     private fun onToggleSystemStt(enabled: Boolean) {
         dataRepository.setSystemSttEnabled(enabled)
         _state.update { it.copy(isSystemSttEnabled = enabled) }
+    }
+
+    private fun onToggleSystemTts(enabled: Boolean) {
+        dataRepository.setSystemTtsEnabled(enabled)
+        _state.update { it.copy(isSystemTtsEnabled = enabled) }
     }
 
     private fun onToggleVoiceTranscribeFirst(enabled: Boolean) {

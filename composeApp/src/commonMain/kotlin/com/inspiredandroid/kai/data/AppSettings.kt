@@ -288,6 +288,16 @@ class AppSettings(internal val settings: Settings) {
         settings.putBoolean(KEY_SYSTEM_STT_ENABLED, enabled)
     }
 
+    /**
+     * When true, replies are read with the phone's built-in text-to-speech (the engine from the
+     * system speech settings) instead of the configured text-to-speech model.
+     */
+    fun isSystemTtsEnabled(): Boolean = settings.getBoolean(KEY_SYSTEM_TTS_ENABLED, false)
+
+    fun setSystemTtsEnabled(enabled: Boolean) {
+        settings.putBoolean(KEY_SYSTEM_TTS_ENABLED, enabled)
+    }
+
     /** When true, voice messages are transcribed by the model first and land in the composer as text. */
     fun isVoiceTranscribeFirst(): Boolean = settings.getBoolean(KEY_VOICE_TRANSCRIBE_FIRST, false)
 
@@ -628,6 +638,7 @@ class AppSettings(internal val settings: Settings) {
         const val KEY_SCHEDULING_ENABLED = "scheduling_enabled"
         const val KEY_DYNAMIC_UI_ENABLED = "dynamic_ui_enabled"
         const val KEY_SYSTEM_STT_ENABLED = "system_stt_enabled"
+        const val KEY_SYSTEM_TTS_ENABLED = "system_tts_enabled"
         const val KEY_VOICE_TRANSCRIBE_FIRST = "voice_transcribe_first"
         const val KEY_TALK_SILENCE_MS = "talk_silence_ms"
         const val KEY_READ_THINKING_ALOUD = "read_thinking_aloud"

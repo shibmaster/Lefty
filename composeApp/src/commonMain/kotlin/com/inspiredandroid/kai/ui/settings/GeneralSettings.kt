@@ -43,6 +43,8 @@ import kai.composeapp.generated.resources.settings_dynamic_ui_description
 import kai.composeapp.generated.resources.settings_system_stt
 import kai.composeapp.generated.resources.settings_system_stt_description
 import kai.composeapp.generated.resources.settings_system_stt_unavailable
+import kai.composeapp.generated.resources.settings_system_tts
+import kai.composeapp.generated.resources.settings_system_tts_description
 import kai.composeapp.generated.resources.settings_talk_silence
 import kai.composeapp.generated.resources.settings_talk_silence_description
 import kai.composeapp.generated.resources.settings_theme
@@ -91,6 +93,8 @@ internal fun GeneralContent(uiState: SettingsUiState, actions: SettingsActions) 
                         systemSttEnabled = uiState.isSystemSttEnabled,
                         onToggleSystemStt = actions.onToggleSystemStt,
                         systemSttSupported = uiState.systemSttSupported,
+                        systemTtsEnabled = uiState.isSystemTtsEnabled,
+                        onToggleSystemTts = actions.onToggleSystemTts,
                         transcribeFirst = uiState.isVoiceTranscribeFirst,
                         onToggleTranscribeFirst = actions.onToggleVoiceTranscribeFirst,
                         talkSilenceMs = uiState.talkSilenceMs,
@@ -184,6 +188,8 @@ private fun VoiceInputSection(
     systemSttEnabled: Boolean,
     onToggleSystemStt: (Boolean) -> Unit,
     systemSttSupported: Boolean,
+    systemTtsEnabled: Boolean,
+    onToggleSystemTts: (Boolean) -> Unit,
     transcribeFirst: Boolean,
     onToggleTranscribeFirst: (Boolean) -> Unit,
     talkSilenceMs: Long,
@@ -205,6 +211,13 @@ private fun VoiceInputSection(
                     color = MaterialTheme.colorScheme.error,
                 )
             }
+            Spacer(Modifier.height(12.dp))
+            ToggleableHeadline(
+                title = stringResource(Res.string.settings_system_tts),
+                description = stringResource(Res.string.settings_system_tts_description),
+                checked = systemTtsEnabled,
+                onCheckedChange = onToggleSystemTts,
+            )
             Spacer(Modifier.height(12.dp))
         }
         ToggleableHeadline(

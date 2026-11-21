@@ -453,6 +453,14 @@ class FakeDataRepository : DataRepository {
         fakeSystemSttEnabled = enabled
     }
 
+    var fakeSystemTtsEnabled = false
+
+    override fun isSystemTtsEnabled(): Boolean = fakeSystemTtsEnabled
+
+    override fun setSystemTtsEnabled(enabled: Boolean) {
+        fakeSystemTtsEnabled = enabled
+    }
+
     override fun isVoiceTranscribeFirst(): Boolean = fakeVoiceTranscribeFirst
 
     override fun setVoiceTranscribeFirst(enabled: Boolean) {
