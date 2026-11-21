@@ -123,6 +123,9 @@ import kai.composeapp.generated.resources.scroll_to_bottom_content_description
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import nl.marc_apps.tts.errors.TextToSpeechSynthesisInterruptedError
 import org.jetbrains.compose.resources.getString
@@ -141,6 +144,7 @@ fun ChatScreen(
     val uiState by viewModel.state.collectAsStateWithLifecycle()
 
     ChatScreenContent(
+        viewModel = viewModel,
         uiState = uiState,
         textToSpeech = textToSpeech,
         onNavigateToSettings = onNavigateToSettings,
@@ -152,6 +156,7 @@ fun ChatScreen(
 
 @Composable
 fun ChatScreenContent(
+    viewModel: ChatViewModel,
     uiState: ChatUiState,
     textToSpeech: Speaker? = null,
     onNavigateToSettings: () -> Unit = {},
@@ -181,6 +186,7 @@ fun ChatScreenContent(
         isKaiBuildOpen -> KaiBuildScreen(onExit = { isKaiBuildOpen = false })
 
         else -> ChatModeScreen(
+            viewModel = viewModel,
             uiState = uiState,
             textToSpeech = textToSpeech,
             onNavigateToSettings = onNavigateToSettings,
@@ -492,6 +498,7 @@ private fun InteractiveModeContent(
 
 @Composable
 private fun ChatModeScreen(
+    viewModel: ChatViewModel,
     uiState: ChatUiState,
     textToSpeech: Speaker?,
     onNavigateToSettings: () -> Unit,
@@ -677,29 +684,42 @@ private fun ChatModeScreen(
                                 val history = uiState.history
                                 if (history.isNotEmpty()) {
                                     listState.requestScrollToItem(history.lastIndex)
-                                    val lastMessage = history.last()
-                                    if (uiState.isSpeechOutputEnabled && lastMessage.isAutoSpoken()) {
-                                        componentScope.launch(getBackgroundDispatcher()) {
-                                            textToSpeech?.stop()
-                                            uiState.actions.setIsSpeaking(true, lastMessage.id)
-                                            try {
-                                                textToSpeech?.say(
-                                                    speechTextFor(
-                                                        answer = lastMessage.content.toSpeakableText(),
-                                                        thinking = history.thinkingFor(lastMessage).map { it.toSpeakableText() },
-                                                        includeThinking = uiState.readThinkingAloud,
-                                                    ),
-                                                )
-                                            } catch (_: TextToSpeechSynthesisInterruptedError) {
-                                                // Speech was interrupted by user
-                                            } catch (_: Exception) {
-                                                // Handle TTS errors gracefully (service failure, audio issues, etc.)
-                                            } finally {
-                                                uiState.actions.setIsSpeaking(false, lastMessage.id)
+                                }
+                            }
+                            // Read-outs must not depend on the screen being on: `uiState` comes from
+                            // collectAsStateWithLifecycle, which pauses while the activity is stopped,
+                            // so an effect keyed on it only fires when the screen wakes. The ViewModel's
+                            // state flow keeps emitting in the background (talk mode relies on this).
+                            LaunchedEffect(Unit) {
+                                viewModel.state
+                                    .map { it.history }
+                                    .distinctUntilChanged { a, b -> a.size == b.size }
+                                    .drop(1) // skip the history already visible at composition
+                                    .collect { history ->
+                                        if (history.isEmpty()) return@collect
+                                        val lastMessage = history.last()
+                                        if (uiState.isSpeechOutputEnabled && lastMessage.isAutoSpoken()) {
+                                            componentScope.launch(getBackgroundDispatcher()) {
+                                                textToSpeech?.stop()
+                                                uiState.actions.setIsSpeaking(true, lastMessage.id)
+                                                try {
+                                                    textToSpeech?.say(
+                                                        speechTextFor(
+                                                            answer = lastMessage.content.toSpeakableText(),
+                                                            thinking = history.thinkingFor(lastMessage).map { it.toSpeakableText() },
+                                                            includeThinking = uiState.readThinkingAloud,
+                                                        ),
+                                                    )
+                                                } catch (_: TextToSpeechSynthesisInterruptedError) {
+                                                    // Speech was interrupted by user
+                                                } catch (_: Exception) {
+                                                    // Handle TTS errors gracefully (service failure, audio issues, etc.)
+                                                } finally {
+                                                    uiState.actions.setIsSpeaking(false, lastMessage.id)
+                                                }
                                             }
                                         }
                                     }
-                                }
                             }
 
                             val lastAssistantId = remember(uiState.history) { uiState.history.lastRenderedAssistant()?.id }
