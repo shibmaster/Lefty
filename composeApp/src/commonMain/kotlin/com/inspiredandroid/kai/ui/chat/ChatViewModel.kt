@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.inspiredandroid.kai.audio.RecordingResult
 import com.inspiredandroid.kai.audio.SystemStt
 import com.inspiredandroid.kai.audio.SystemSttResult
+import com.inspiredandroid.kai.audio.TalkModeMic
 import com.inspiredandroid.kai.audio.VadConfig
 import com.inspiredandroid.kai.audio.VoiceRecorder
 import com.inspiredandroid.kai.audio.createSystemStt
@@ -691,6 +692,9 @@ class ChatViewModel(
         if (!dataRepository.isSystemSttEnabled() && !ensureAudioModel()) return
         talkJob = viewModelScope.launch(backgroundDispatcher) {
             if (!ensureMicPermission()) return@launch
+            // Android 14+ mutes the mic once the screen turns off without a microphone-type
+            // foreground service, so talk mode keeps one running for its whole lifetime.
+            TalkModeMic.setActive(true)
             _state.update { it.copy(talkMode = TalkMode.Listening, isSpeechOutputEnabled = true) }
             try {
                 while (true) {
@@ -740,6 +744,7 @@ class ChatViewModel(
                     if (started) awaitSpeechFinished()
                 }
             } finally {
+                TalkModeMic.setActive(false)
                 _state.update { it.copy(talkMode = TalkMode.Off, voiceState = VoiceState.Idle) }
             }
         }

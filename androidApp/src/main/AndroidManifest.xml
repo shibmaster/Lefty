@@ -15,6 +15,9 @@
    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
    <!-- Daemon Mode: no daily cap (dataSync is limited to ~6 h/day on Android 15+), restart after boot/update. -->
    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"/>
+   <!-- Talk mode: Android 14+ mutes the mic for background apps without a microphone-type
+        foreground service, so the daemon service switches to this type while talk mode runs. -->
+   <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE"/>
    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
     <application
@@ -67,6 +70,12 @@
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="Personal AI assistant: runs user-scheduled tasks, heartbeat checks and mail/SMS polling" />
         </service>
+        <!-- Talk mode: specialUse cannot be combined with other types, so the microphone gets
+             its own foreground service, started only while talk mode runs. -->
+        <service
+            android:name="com.inspiredandroid.kai.TalkModeService"
+            android:exported="false"
+            android:foregroundServiceType="microphone" />
         <receiver
             android:name="com.inspiredandroid.kai.DaemonBootReceiver"
             android:exported="false">
