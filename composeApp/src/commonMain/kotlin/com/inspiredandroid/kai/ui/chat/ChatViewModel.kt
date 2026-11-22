@@ -807,31 +807,28 @@ class ChatViewModel(
      * fresh once listening resumes. Returns true when the user barged in.
      */
     private suspend fun listenForStop(): Boolean {
+        // Needs something to transcribe the captured clip with.
+        if (!dataRepository.hasSpeechToTextModel() && !dataRepository.isSystemSttEnabled()) return false
         while (activeSpeech.value > 0 && (currentCoroutineContext()[Job]?.isActive ?: true)) {
-            val heardStop = if (dataRepository.hasSpeechToTextModel()) {
-                // Raw microphone: AudioRecord takes no audio focus, so the read-out keeps playing
-                // uninterrupted while we listen for "stop".
-                when (val take = voiceRecorder.record(
-                    VadConfig(BARGE_IN_SILENCE_MS, BARGE_IN_TIMEOUT_MS),
-                    maxDurationMs = BARGE_IN_MAX_MS,
-                )) {
-                    is RecordingResult.Recorded -> {
-                        val transcript = runCatching { dataRepository.transcribeAudio(take.file) }.getOrNull().orEmpty()
-                        isStopCommand(transcript)
-                    }
-
-                    else -> false
-                }
-            } else if (dataRepository.isSystemSttEnabled()) {
-                // System voice typing takes audio focus, so the read-out pauses while it listens.
-                when (val result = systemStt.transcribe(maxDurationMs = BARGE_IN_TIMEOUT_MS)) {
-                    is SystemSttResult.Success -> isStopCommand(result.text)
-                    else -> false
-                }
+            // Raw microphone: AudioRecord takes no audio focus, so the read-out keeps playing
+            // uninterrupted while we listen for "stop" (the live voice-typing recognizer would
+            // steal focus and stall the speech).
+            val take = voiceRecorder.record(
+                VadConfig(BARGE_IN_SILENCE_MS, BARGE_IN_TIMEOUT_MS),
+                maxDurationMs = BARGE_IN_MAX_MS,
+            )
+            if (take !is RecordingResult.Recorded) continue
+            val transcript = if (dataRepository.hasSpeechToTextModel()) {
+                runCatching { dataRepository.transcribeAudio(take.file) }.getOrNull().orEmpty()
             } else {
-                return false
+                runCatching {
+                    when (val r = systemStt.transcribe(take.file)) {
+                        is SystemSttResult.Success -> r.text
+                        else -> ""
+                    }
+                }.getOrNull().orEmpty()
             }
-            if (heardStop) {
+            if (isStopCommand(transcript)) {
                 _state.update { it.copy(speechSuppressed = true) }
                 requestStopSpeech()
                 return true
