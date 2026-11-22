@@ -728,6 +728,13 @@ private fun ChatModeScreen(
                                 viewModel.stopSpeech.collect { textToSpeech?.stop() }
                             }
 
+                            // Tell the talk loop when the engine is actually producing sound, so
+                            // the barge-in mic (which takes audio focus) only opens after speech
+                            // has started — otherwise the read-out never starts at all.
+                            LaunchedEffect(textToSpeech) {
+                                textToSpeech?.isSynthesizing?.collect { viewModel.setTtsActive(it) }
+                            }
+
                             val lastAssistantId = remember(uiState.history) { uiState.history.lastRenderedAssistant()?.id }
                             // Pair every user submission with its originating assistant so the kai-ui
                             // renders once (on the assistant side) with a frozen snapshot — never as a

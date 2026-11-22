@@ -4,6 +4,8 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import nl.marc_apps.tts.TextToSpeechInstance
 
@@ -12,6 +14,9 @@ interface Speaker {
     suspend fun say(text: String)
 
     fun stop()
+
+    /** True while the speaker is actually producing sound (the engine is mid-utterance). */
+    val isSynthesizing: StateFlow<Boolean>
 }
 
 /**
@@ -33,15 +38,26 @@ class SwitchingSpeaker(
 
     private var current: Job? = null
 
+    // True while `say` is running. The talk loop's barge-in mic waits for this before opening,
+    // because system voice typing takes audio focus and would keep the read-out from starting.
+    private val speaking = MutableStateFlow(false)
+
+    override val isSynthesizing: StateFlow<Boolean> = speaking
+
     override suspend fun say(text: String) {
-        if (!remoteEnabled()) {
-            systemSay(text)
-            return
-        }
-        coroutineScope {
-            val job = launch { speakRemote(text) }
-            current = job
-            job.join() // returns normally when stop() cancels the job
+        speaking.value = true
+        try {
+            if (!remoteEnabled()) {
+                systemSay(text)
+                return
+            }
+            coroutineScope {
+                val job = launch { speakRemote(text) }
+                current = job
+                job.join() // returns normally when stop() cancels the job
+            }
+        } finally {
+            speaking.value = false
         }
     }
 
@@ -70,6 +86,7 @@ class SwitchingSpeaker(
         current = null
         stopPlayback()
         system?.stop()
+        speaking.value = false
     }
 }
 

@@ -497,6 +497,13 @@ class ChatViewModel(
         private val TALK_SPEECH_SETTLE = 1500.milliseconds
         private val TALK_PLAYBACK_TAIL = 400.milliseconds
 
+        // The barge-in mic (system voice typing) takes audio focus, so it may only open once the
+        // read-out is actually producing sound — otherwise the voice never starts at all.
+        private val TALK_BARGE_IN_SPEECH_READY = 3.seconds
+
+        // The speaking flag is set before the engine starts producing sound; give it a moment.
+        private val TALK_BARGE_IN_SPEECH_SETTLE = 800.milliseconds
+
         // Barge-in capture: short takes that end quickly so a spoken "stop" is heard promptly.
         private const val BARGE_IN_SILENCE_MS = 900L
         private const val BARGE_IN_TIMEOUT_MS = 2500L
@@ -567,6 +574,15 @@ class ChatViewModel(
     // spoken without racing the effect: read-outs started so far, and those still running.
     private val speechStarts = MutableStateFlow(0)
     private val activeSpeech = MutableStateFlow(0)
+
+    // True while the TTS engine is actually producing sound (fed by the chat screen from
+    // `TextToSpeechInstance.isSynthesizing`). The barge-in mic waits for this before opening,
+    // because system voice typing takes audio focus and would keep the read-out from starting.
+    private val ttsActive = MutableStateFlow(false)
+
+    fun setTtsActive(active: Boolean) {
+        ttsActive.value = active
+    }
 
     // Barge-in: the chat screen stops the read-out when this fires (works with the screen off).
     private val _stopSpeech = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
@@ -753,6 +769,11 @@ class ChatViewModel(
                     // records the speaker. If speech never starts (no TTS), just carry on.
                     val started = withTimeoutOrNull(TALK_SPEECH_START_TIMEOUT) { speechStarts.first { it > startsBefore } } != null
                     if (started) {
+                        // System voice typing takes audio focus, so the barge-in mic may only open
+                        // once the read-out is actually producing sound — otherwise the voice
+                        // never starts (the bar shows "speaking" in silence).
+                        withTimeoutOrNull(TALK_BARGE_IN_SPEECH_READY) { ttsActive.first { it } }
+                        delay(TALK_BARGE_IN_SPEECH_SETTLE)
                         // Keep the mic open while the voice talks so the user can say "stop" to
                         // barge in; after an explicit stop only the playback tail has to settle.
                         if (listenForStop()) delay(TALK_PLAYBACK_TAIL) else awaitSpeechFinished()
@@ -787,12 +808,9 @@ class ChatViewModel(
      */
     private suspend fun listenForStop(): Boolean {
         while (activeSpeech.value > 0 && (currentCoroutineContext()[Job]?.isActive ?: true)) {
-            val heardStop = if (dataRepository.isSystemSttEnabled()) {
-                when (val result = systemStt.transcribe(maxDurationMs = BARGE_IN_TIMEOUT_MS)) {
-                    is SystemSttResult.Success -> isStopCommand(result.text)
-                    else -> false
-                }
-            } else if (dataRepository.hasSpeechToTextModel()) {
+            val heardStop = if (dataRepository.hasSpeechToTextModel()) {
+                // Raw microphone: AudioRecord takes no audio focus, so the read-out keeps playing
+                // uninterrupted while we listen for "stop".
                 when (val take = voiceRecorder.record(
                     VadConfig(BARGE_IN_SILENCE_MS, BARGE_IN_TIMEOUT_MS),
                     maxDurationMs = BARGE_IN_MAX_MS,
@@ -802,6 +820,12 @@ class ChatViewModel(
                         isStopCommand(transcript)
                     }
 
+                    else -> false
+                }
+            } else if (dataRepository.isSystemSttEnabled()) {
+                // System voice typing takes audio focus, so the read-out pauses while it listens.
+                when (val result = systemStt.transcribe(maxDurationMs = BARGE_IN_TIMEOUT_MS)) {
+                    is SystemSttResult.Success -> isStopCommand(result.text)
                     else -> false
                 }
             } else {
