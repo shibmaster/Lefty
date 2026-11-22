@@ -105,6 +105,8 @@ data class ChatUiState(
     val talkMode: TalkMode = TalkMode.Off,
     /** Speech output also reads the thinking (reasoning) before each answer. */
     val readThinkingAloud: Boolean = false,
+    /** A spoken "stop" was heard: the rest of this reply's read-outs are skipped. */
+    val speechSuppressed: Boolean = false,
 ) {
     val heartbeatConversationId: String?
         get() = savedConversations.firstOrNull { it.isHeartbeat }?.id

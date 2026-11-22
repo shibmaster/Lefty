@@ -692,11 +692,11 @@ private fun ChatModeScreen(
                             // state flow keeps emitting in the background (talk mode relies on this).
                             LaunchedEffect(Unit) {
                                 viewModel.state
-                                    .map { it.history }
-                                    .distinctUntilChanged { a, b -> a.size == b.size }
+                                    .map { it.history to it.speechSuppressed }
+                                    .distinctUntilChanged { (a, x), (b, y) -> a.size == b.size && x == y }
                                     .drop(1) // skip the history already visible at composition
-                                    .collect { history ->
-                                        if (history.isEmpty()) return@collect
+                                    .collect { (history, suppressed) ->
+                                        if (history.isEmpty() || suppressed) return@collect
                                         val lastMessage = history.last()
                                         if (uiState.isSpeechOutputEnabled && lastMessage.isAutoSpoken()) {
                                             componentScope.launch(getBackgroundDispatcher()) {
@@ -720,6 +720,12 @@ private fun ChatModeScreen(
                                             }
                                         }
                                     }
+                            }
+
+                            // Barge-in: the talk loop asks for the read-out to stop when the user
+                            // says "stop" while the voice is talking.
+                            LaunchedEffect(Unit) {
+                                viewModel.stopSpeech.collect { textToSpeech?.stop() }
                             }
 
                             val lastAssistantId = remember(uiState.history) { uiState.history.lastRenderedAssistant()?.id }

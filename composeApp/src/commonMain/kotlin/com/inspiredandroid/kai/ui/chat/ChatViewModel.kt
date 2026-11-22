@@ -45,8 +45,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -494,6 +496,11 @@ class ChatViewModel(
         private val TALK_SPEECH_START_TIMEOUT = 10.seconds
         private val TALK_SPEECH_SETTLE = 1500.milliseconds
         private val TALK_PLAYBACK_TAIL = 400.milliseconds
+
+        // Barge-in capture: short takes that end quickly so a spoken "stop" is heard promptly.
+        private const val BARGE_IN_SILENCE_MS = 900L
+        private const val BARGE_IN_TIMEOUT_MS = 2500L
+        private const val BARGE_IN_MAX_MS = 4000L
     }
 
     private fun regenerate() {
@@ -560,6 +567,10 @@ class ChatViewModel(
     // spoken without racing the effect: read-outs started so far, and those still running.
     private val speechStarts = MutableStateFlow(0)
     private val activeSpeech = MutableStateFlow(0)
+
+    // Barge-in: the chat screen stops the read-out when this fires (works with the screen off).
+    private val _stopSpeech = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val stopSpeech: SharedFlow<Unit> = _stopSpeech
 
     /** Voice needs a model that can hear; say how to enable it rather than hiding the mic. */
     private fun ensureAudioModel(): Boolean {
@@ -699,7 +710,7 @@ class ChatViewModel(
             try {
                 while (true) {
                     currentCoroutineContext().ensureActive()
-                    _state.update { it.copy(talkMode = TalkMode.Listening) }
+                    _state.update { it.copy(talkMode = TalkMode.Listening, speechSuppressed = false) }
                     // Captured before the turn is sent, so the speech wait below only sees
                     // read-outs started by this reply.
                     val startsBefore = speechStarts.value
@@ -741,11 +752,15 @@ class ChatViewModel(
                     // Wait for the reply to be read out before listening again, so the mic never
                     // records the speaker. If speech never starts (no TTS), just carry on.
                     val started = withTimeoutOrNull(TALK_SPEECH_START_TIMEOUT) { speechStarts.first { it > startsBefore } } != null
-                    if (started) awaitSpeechFinished()
+                    if (started) {
+                        // Keep the mic open while the voice talks so the user can say "stop" to
+                        // barge in; after an explicit stop only the playback tail has to settle.
+                        if (listenForStop()) delay(TALK_PLAYBACK_TAIL) else awaitSpeechFinished()
+                    }
                 }
             } finally {
                 TalkModeMic.setActive(false)
-                _state.update { it.copy(talkMode = TalkMode.Off, voiceState = VoiceState.Idle) }
+                _state.update { it.copy(talkMode = TalkMode.Off, voiceState = VoiceState.Idle, speechSuppressed = false) }
             }
         }
     }
@@ -762,6 +777,51 @@ class ChatViewModel(
             if (!restarted) break
         }
         delay(TALK_PLAYBACK_TAIL)
+    }
+
+    /**
+     * Keeps the mic open while the reply is read out so the user can say "stop" to interrupt.
+     * Each utterance is transcribed: "stop" cancels the read-out and suppresses the rest of
+     * this reply's read-outs; anything else is noise and discarded — the next prompt is taken
+     * fresh once listening resumes. Returns true when the user barged in.
+     */
+    private suspend fun listenForStop(): Boolean {
+        while (activeSpeech.value > 0 && (currentCoroutineContext()[Job]?.isActive ?: true)) {
+            val heardStop = if (dataRepository.isSystemSttEnabled()) {
+                when (val result = systemStt.transcribe(maxDurationMs = BARGE_IN_TIMEOUT_MS)) {
+                    is SystemSttResult.Success -> isStopCommand(result.text)
+                    else -> false
+                }
+            } else if (dataRepository.hasSpeechToTextModel()) {
+                when (val take = voiceRecorder.record(
+                    VadConfig(BARGE_IN_SILENCE_MS, BARGE_IN_TIMEOUT_MS),
+                    maxDurationMs = BARGE_IN_MAX_MS,
+                )) {
+                    is RecordingResult.Recorded -> {
+                        val transcript = runCatching { dataRepository.transcribeAudio(take.file) }.getOrNull().orEmpty()
+                        isStopCommand(transcript)
+                    }
+
+                    else -> false
+                }
+            } else {
+                return false
+            }
+            if (heardStop) {
+                _state.update { it.copy(speechSuppressed = true) }
+                requestStopSpeech()
+                return true
+            }
+        }
+        return false
+    }
+
+    /** The spoken interrupt word: "stop" as a word, any casing. */
+    private fun isStopCommand(text: String): Boolean =
+        text.lowercase().split(Regex("\\W+")).contains("stop")
+
+    private fun requestStopSpeech() {
+        _stopSpeech.tryEmit(Unit)
     }
 
     private fun stopTalkMode() {
