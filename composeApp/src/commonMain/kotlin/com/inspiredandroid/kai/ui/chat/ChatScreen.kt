@@ -125,6 +125,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import nl.marc_apps.tts.errors.TextToSpeechSynthesisInterruptedError
@@ -692,6 +693,11 @@ private fun ChatModeScreen(
                             // state flow keeps emitting in the background (talk mode relies on this).
                             LaunchedEffect(Unit) {
                                 viewModel.state
+                                    // A cold start restores the conversation asynchronously, so the
+                                    // first real history arrives one emission after the empty one;
+                                    // without this gate drop(1) would let the restore through and
+                                    // re-speak the last answer whenever the process was killed.
+                                    .filter { !it.isRestoring }
                                     .map { it.history }
                                     .distinctUntilChanged { a, b -> a.size == b.size }
                                     .drop(1) // skip the history already visible at composition
