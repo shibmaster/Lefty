@@ -64,6 +64,8 @@ class FakeSandboxController(installed: Boolean = true) : SandboxController {
 
     override suspend fun openFile(path: String): Result<Unit> = Result.success(Unit)
 
+    override suspend fun shareFile(path: String): Result<Unit> = Result.success(Unit)
+
     override suspend fun deleteEntry(path: String, recursive: Boolean): Boolean {
         val prefix = "$path/"
         val toRemove = files.keys.filter { it == path || (recursive && it.startsWith(prefix)) }

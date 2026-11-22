@@ -85,6 +85,8 @@ class SandboxFileBrowserViewModelTest {
         }
         override suspend fun openFile(path: String): Result<Unit> = Result.success(Unit)
 
+        override suspend fun shareFile(path: String): Result<Unit> = Result.success(Unit)
+
         // PlatformFile is an expect class with no common constructor, so the import path
         // is not reachable from commonTest.
         override suspend fun importFile(directoryPath: String, source: PlatformFile): Result<String> = Result.failure(UnsupportedOperationException("Not reachable from commonTest"))
@@ -209,6 +211,34 @@ class SandboxFileBrowserViewModelTest {
 
         assertNull(vm.state.value.editor)
         assertEquals(Res.string.sandbox_files_editor_closed_after_delete, vm.state.value.snackbarMessage)
+    }
+
+    @Test
+    fun `shareEntry on a file calls shareFile and shows no snackbar`() = runTest {
+        val entry = fileEntry("a.txt")
+        seedDir("/root", entry)
+        val vm = SandboxFileBrowserViewModel(controller)
+        vm.start("/root")
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        vm.shareEntry(entry)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertNull(vm.state.value.snackbarMessage)
+    }
+
+    @Test
+    fun `shareEntry on a directory is a no-op`() = runTest {
+        val entry = dirEntry("subdir")
+        seedDir("/root", entry)
+        val vm = SandboxFileBrowserViewModel(controller)
+        vm.start("/root")
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        vm.shareEntry(entry)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertNull(vm.state.value.snackbarMessage)
     }
 
     @Test

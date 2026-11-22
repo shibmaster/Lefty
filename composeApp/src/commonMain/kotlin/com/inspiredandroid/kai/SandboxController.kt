@@ -198,6 +198,7 @@ class NoOpSandboxController : SandboxController {
     override suspend fun readTextFile(path: String, maxBytes: Int, force: Boolean): TextFileResult = TextFileResult.Unreadable
     override suspend fun writeTextFile(path: String, content: String): Boolean = false
     override suspend fun openFile(path: String): Result<Unit> = Result.failure(UnsupportedOperationException("Sandbox file browser is Android-only"))
+    override suspend fun shareFile(path: String): Result<Unit> = Result.failure(UnsupportedOperationException("Sandbox file browser is Android-only"))
     override suspend fun deleteEntry(path: String, recursive: Boolean): Boolean = false
     override suspend fun renameEntry(path: String, newName: String): Result<String> = Result.failure(UnsupportedOperationException("Sandbox file browser is Android-only"))
     override suspend fun importFile(directoryPath: String, source: PlatformFile): Result<String> = Result.failure(UnsupportedOperationException("Sandbox file browser is Android-only"))
