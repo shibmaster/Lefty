@@ -1,5 +1,6 @@
 package com.inspiredandroid.kai.audio
 
+import io.github.vinceglb.filekit.PlatformFile
 import kotlinx.coroutines.flow.StateFlow
 
 /**
@@ -34,12 +35,23 @@ interface SystemStt {
      */
     suspend fun transcribe(maxDurationMs: Long = DEFAULT_MAX_DURATION_MS): SystemSttResult
 
+    /**
+     * Transcribes a recorded audio file. The live recognizer only hears the microphone, so the
+     * file is played back through the speaker while a mic-source recognizer (no echo cancellation)
+     * listens. Talk mode uses this after its own VAD capture, so the take is ended by the
+     * configurable silence pause — not by the system's short built-in one.
+     */
+    suspend fun transcribe(file: PlatformFile): SystemSttResult
+
     /** Ends the running session and discards it. */
     fun cancel()
 
     companion object {
         /** The system recognizer caps utterances well below the recorder's two minutes. */
         const val DEFAULT_MAX_DURATION_MS = 60_000L
+
+        /** A talk-mode take is a sentence or two; cap the play-back transcription well under a minute. */
+        const val FILE_TRANSCRIBE_TIMEOUT_MS = 8_000L
     }
 }
 
@@ -50,6 +62,8 @@ internal class UnsupportedSystemStt : SystemStt {
     override fun isSupported(): Boolean = false
     override val level: StateFlow<Float> = kotlinx.coroutines.flow.MutableStateFlow(0f)
     override suspend fun transcribe(maxDurationMs: Long): SystemSttResult =
+        SystemSttResult.Failed(UnsupportedOperationException("System speech recognition is not supported on this platform"))
+    override suspend fun transcribe(file: PlatformFile): SystemSttResult =
         SystemSttResult.Failed(UnsupportedOperationException("System speech recognition is not supported on this platform"))
     override fun cancel() = Unit
 }

@@ -704,37 +704,41 @@ class ChatViewModel(
                     // read-outs started by this reply.
                     val startsBefore = speechStarts.value
                     var sent = false
-                    if (dataRepository.isSystemSttEnabled()) {
-                        // One recognition session per turn; the system ends it when you stop talking.
-                        val transcript = when (val result = systemStt.transcribe()) {
-                            is SystemSttResult.Success -> result.text
+                    // Always capture with our own VAD: the take ends on the user's configurable
+                    // silence pause, never on the system recognizer's short built-in one.
+                    val take = voiceRecorder.record(VadConfig(silenceMs = dataRepository.getTalkSilenceMs()))
+                    when (take) {
+                        is RecordingResult.Recorded -> {
+                            _state.update { it.copy(talkMode = TalkMode.Thinking) }
+                            if (dataRepository.isSystemSttEnabled()) {
+                                // No STT model configured: play the clip back through the system
+                                // voice-typing recognizer. The session is over by the time the
+                                // reply is read out, so it can't steal audio focus from the TTS.
+                                sent = when (val result = systemStt.transcribe(take.file)) {
+                                    is SystemSttResult.Success -> handleTranscript(result.text, inTalkMode = true)
 
-                            is SystemSttResult.Failed -> {
-                                _state.update { it.copy(snackbarMessage = Res.string.error_recording_failed) }
-                                null
-                            }
+                                    is SystemSttResult.Failed -> {
+                                        _state.update { it.copy(snackbarMessage = Res.string.error_recording_failed) }
+                                        false
+                                    }
 
-                            SystemSttResult.NoSpeech, SystemSttResult.Cancelled -> null
-                        }
-                        if (transcript == null) break
-                        _state.update { it.copy(talkMode = TalkMode.Thinking) }
-                        sent = handleTranscript(transcript, inTalkMode = true)
-                    } else {
-                        val take = voiceRecorder.record(VadConfig(silenceMs = dataRepository.getTalkSilenceMs()))
-                        when (take) {
-                            is RecordingResult.Recorded -> {
-                                _state.update { it.copy(talkMode = TalkMode.Thinking) }
+                                    SystemSttResult.NoSpeech, SystemSttResult.Cancelled -> {
+                                        _state.update { it.copy(snackbarMessage = Res.string.voice_no_speech) }
+                                        false
+                                    }
+                                }
+                            } else {
                                 sent = sendVoice(take.file, inTalkMode = true)
                             }
-
-                            is RecordingResult.Failed -> {
-                                _state.update { it.copy(snackbarMessage = Res.string.error_recording_failed) }
-                                break
-                            }
-
-                            // Nobody spoke within the timeout, or the user left talk mode.
-                            RecordingResult.NoSpeech, RecordingResult.Cancelled -> break
                         }
+
+                        is RecordingResult.Failed -> {
+                            _state.update { it.copy(snackbarMessage = Res.string.error_recording_failed) }
+                            break
+                        }
+
+                        // Nobody spoke within the timeout, or the user left talk mode.
+                        RecordingResult.NoSpeech, RecordingResult.Cancelled -> break
                     }
                     if (!sent) break
                     _state.update { it.copy(talkMode = TalkMode.Speaking) }
