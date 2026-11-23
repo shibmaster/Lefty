@@ -506,6 +506,8 @@
     <string name="sandbox_files_save_success">Saved</string>
     <string name="sandbox_files_save_failed">Save failed</string>
     <string name="sandbox_files_open_failed">Could not open externally</string>
+    <string name="sandbox_files_share_failed">Could not share file</string>
+    <string name="sandbox_files_action_share">Share</string>
     <string name="sandbox_files_action_open_external">Open with app</string>
     <string name="sandbox_files_action_open_as_text">Open as text</string>
     <string name="sandbox_files_action_rename">Rename</string>

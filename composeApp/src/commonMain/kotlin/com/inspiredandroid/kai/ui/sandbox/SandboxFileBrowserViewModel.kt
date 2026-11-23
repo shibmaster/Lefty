@@ -20,6 +20,7 @@ import kai.composeapp.generated.resources.sandbox_files_rename_failed
 import kai.composeapp.generated.resources.sandbox_files_rename_success
 import kai.composeapp.generated.resources.sandbox_files_save_failed
 import kai.composeapp.generated.resources.sandbox_files_save_success
+import kai.composeapp.generated.resources.sandbox_files_share_failed
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -214,6 +215,17 @@ class SandboxFileBrowserViewModel(
             val result = files.openFile(path)
             if (result.isFailure) {
                 _state.update { it.copy(snackbarMessage = Res.string.sandbox_files_open_failed) }
+            }
+        }
+    }
+
+    /** Hands the file to the platform share sheet. Files only. */
+    fun shareEntry(entry: SandboxFileEntry) {
+        if (entry.isDirectory) return
+        viewModelScope.launch {
+            val result = files.shareFile(entry.path)
+            if (result.isFailure) {
+                _state.update { it.copy(snackbarMessage = Res.string.sandbox_files_share_failed) }
             }
         }
     }

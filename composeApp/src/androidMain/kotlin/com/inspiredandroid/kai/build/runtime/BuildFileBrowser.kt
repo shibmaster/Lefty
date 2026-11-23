@@ -8,6 +8,7 @@ import com.inspiredandroid.kai.linux.GuestFileMap
 import com.inspiredandroid.kai.linux.LinuxPaths
 import com.inspiredandroid.kai.sandbox.importFileInto
 import com.inspiredandroid.kai.sandbox.openFileWithIntent
+import com.inspiredandroid.kai.sandbox.shareFileWithIntent
 import com.inspiredandroid.kai.sandbox.readFileAsText
 import com.inspiredandroid.kai.sandbox.toFileEntry
 import io.github.vinceglb.filekit.PlatformFile
@@ -95,6 +96,18 @@ class BuildFileBrowser(
             Result.success(Unit)
         } else {
             Result.failure(IllegalStateException(result.error ?: "Open failed"))
+        }
+    }
+
+    override suspend fun shareFile(path: String): Result<Unit> = withContext(Dispatchers.IO) {
+        val file = resolve(path)
+            ?: return@withContext Result.failure(IllegalArgumentException("Invalid path: $path"))
+        if (!file.isFile) return@withContext Result.failure(IllegalArgumentException("Not a file: $path"))
+        val result = shareFileWithIntent(context, file)
+        if (result.success) {
+            Result.success(Unit)
+        } else {
+            Result.failure(IllegalStateException(result.error ?: "Share failed"))
         }
     }
 

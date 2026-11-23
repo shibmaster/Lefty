@@ -55,6 +55,9 @@ interface FileBrowserSource {
     /** Hands the file to another app on the device. */
     suspend fun openFile(path: String): Result<Unit>
 
+    /** Offers the file to the platform's share sheet. Files only. */
+    suspend fun shareFile(path: String): Result<Unit>
+
     suspend fun deleteEntry(path: String, recursive: Boolean): Boolean
 
     /** Renames within the same directory; returns the new path. Fails with `"collision"` if taken. */
@@ -73,6 +76,8 @@ object NoOpFileBrowserSource : FileBrowserSource {
     override suspend fun readTextFile(path: String, maxBytes: Int, force: Boolean): TextFileResult = TextFileResult.Unreadable
     override suspend fun writeTextFile(path: String, content: String): Boolean = false
     override suspend fun openFile(path: String): Result<Unit> = Result.failure(UnsupportedOperationException("File browsing is Android-only"))
+
+    override suspend fun shareFile(path: String): Result<Unit> = Result.failure(UnsupportedOperationException("File browsing is Android-only"))
 
     override suspend fun deleteEntry(path: String, recursive: Boolean): Boolean = false
     override suspend fun renameEntry(path: String, newName: String): Result<String> = Result.failure(UnsupportedOperationException("File browsing is Android-only"))

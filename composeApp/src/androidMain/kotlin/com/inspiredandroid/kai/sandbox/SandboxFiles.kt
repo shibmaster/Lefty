@@ -186,3 +186,33 @@ internal fun openFileWithIntent(context: Context, file: File): FileOpenResult {
         FileOpenResult(false, mime, error = e.message ?: "Failed to open file")
     }
 }
+
+/**
+ * Hands the file to the system share sheet (WhatsApp, e-mail, …) via the same
+ * FileProvider URI as [openFileWithIntent].
+ */
+internal fun shareFileWithIntent(context: Context, file: File): FileOpenResult {
+    val mime = guessMimeType(file.name)
+    val authority = "${context.packageName}.fileprovider"
+
+    val uri = try {
+        FileProvider.getUriForFile(context, authority, file)
+    } catch (e: IllegalArgumentException) {
+        return FileOpenResult(false, mime, error = "FileProvider can't expose this path: ${e.message}")
+    }
+
+    val intent = Intent(Intent.ACTION_SEND).apply {
+        type = mime
+        putExtra(Intent.EXTRA_STREAM, uri)
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+
+    return try {
+        context.startActivity(Intent.createChooser(intent, null).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        FileOpenResult(true, mime, contentUri = uri.toString())
+    } catch (e: ActivityNotFoundException) {
+        FileOpenResult(false, mime, error = "No app available to share files")
+    } catch (e: Exception) {
+        FileOpenResult(false, mime, error = e.message ?: "Failed to share file")
+    }
+}
