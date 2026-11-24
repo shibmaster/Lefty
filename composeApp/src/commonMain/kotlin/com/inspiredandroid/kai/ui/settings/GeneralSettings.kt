@@ -247,8 +247,8 @@ private fun VoiceInputSection(
             value = sliderValue,
             onValueChange = { sliderValue = it },
             onValueChangeFinished = { onChangeTalkSilenceMs((sliderValue * 1000).roundToInt().toLong()) },
-            valueRange = 0.5f..3.0f,
-            steps = 24,
+            valueRange = 0.5f..10.0f,
+            steps = 95,
         )
         Text(
             text = stringResource(Res.string.settings_talk_silence_description),
