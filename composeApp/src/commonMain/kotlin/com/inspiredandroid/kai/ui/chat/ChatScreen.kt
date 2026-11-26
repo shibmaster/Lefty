@@ -704,8 +704,15 @@ private fun ChatModeScreen(
                                     .collect { history ->
                                         if (history.isEmpty()) return@collect
                                         val lastMessage = history.last()
+                                        // Guard against re-speaking the same message. The effect
+                                        // restarts on every (re)composition — cold start, activity
+                                        // recreation, or a screen-wake — and the history re-emits;
+                                        // without this the last answer would be spoken again. Only a
+                                        // genuinely new message id is spoken.
+                                        if (lastMessage.id == viewModel.lastAutoSpokenId) return@collect
                                         if (uiState.isSpeechOutputEnabled && lastMessage.isAutoSpoken()) {
                                             componentScope.launch(getBackgroundDispatcher()) {
+                                                viewModel.lastAutoSpokenId = lastMessage.id
                                                 textToSpeech?.stop()
                                                 uiState.actions.setIsSpeaking(true, lastMessage.id)
                                                 try {
