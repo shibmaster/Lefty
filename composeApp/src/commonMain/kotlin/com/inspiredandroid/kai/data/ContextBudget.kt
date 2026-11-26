@@ -103,7 +103,10 @@ internal fun trimHistoryToBudget(
         kept.add(0, msg)
         usedChars += msgChars
     }
-    return kept
+
+    // Dropping from the front can cut a tool round in half; a tool result whose assistant
+    // tool call was trimmed away is an orphan that strict providers reject.
+    return kept.dropWhile { it.role == History.Role.TOOL }
 }
 
 /**
